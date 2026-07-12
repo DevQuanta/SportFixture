@@ -1,0 +1,279 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+body {
+  background-color: #0b0f19;
+  margin: 0px;
+  font-family: "Poppins", sans-serif;
+  color: #f8fafc;
+}
+
+.navbar {
+  background-color: #4f46e5;
+  height: 90px; /* Increased slightly to give elements vertical breathing room */
+  display: flex;
+  flex-direction: row;
+  padding: 0 40px; /* Pushes the logo and button safely away from the browser edges */
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo Sizing */
+.navbar img {
+  height: 40px;
+  width: auto;
+}
+
+/* Navigation Links Container */
+.nav-links {
+  display: flex;
+  flex-direction: row;
+  gap: 40px; /* Slightly tightened from 80px to match target layout scaling */
+}
+
+/* Base Link Styling */
+a {
+  font-size: 18px;
+  color: #f8fafc;
+  text-decoration: none;
+  font-weight: 400;
+}
+
+#knockouts-page .nav-knockouts::after,
+#results-page .nav-results::after {
+  content: "";
+  display: block;
+  width: 15px;
+  height: 2px;
+  background-color: #ffffff;
+  border-radius: 2px;
+  opacity: 60%;
+}
+
+/* Professional Login Button Styling */
+.admin-btn {
+  font-family: inherit; /* Forces the button to use Poppins */
+  font-size: 16px;
+  font-weight: 500;
+  color: #f8fafc;
+  background-color: transparent;
+
+  border: 1px solid #ffffff;
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  padding: 8px 18px;
+  gap: 8px; /* Breathing room between lock icon and text */
+  cursor: pointer;
+}
+
+/* Crisp Lock Icon Sizing */
+.admin-btn img {
+  height: 16px;
+  width: auto;
+}
+
+.bracket-container {
+  display: flex;
+  flex-direction: row;
+
+  gap: 40px;
+  align-items: stretch;
+}
+
+/* The New Pillar Wrapper */
+.bracket-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers the header pill horizontally over the column */
+  gap: 20px; /* Creates a clean, uniform 20px gap below the headers across the entire board */
+}
+
+.player {
+  border: 1px solid;
+  margin: 15px;
+  text-align: center;
+  border-radius: 3px;
+  padding: 8px 15px;
+}
+
+.match {
+  display: flex;
+  flex-direction: column;
+
+  flex-grow: 1;
+  /* 2. Push Player 1 to the very top, and Player 2 to the very bottom 
+        of this newly expanded match container */
+  justify-content: space-around;
+  position: relative;
+}
+
+/* 2. ADD THIS NEW BLOCK BELOW IT */
+.match::after {
+  content: "";
+  position: absolute;
+
+  /* Positioning: Pull the line to the right side of the match box */
+  left: calc(
+    100% - 15px
+  ); /* Adjust this number to move the line closer or further */
+  width: 20px; /* How far out the horizontal lines extend */
+
+  /* Vertical alignment: stretching from the middle of player 1 to player 2 */
+  top: 25%;
+  bottom: 25%;
+
+  /* The Bracket Shape: Draw lines on the top, right, and bottom only */
+  border-top: 3px solid #334155;
+  border-right: 3px solid #334155;
+  border-bottom: 3px solid #334155;
+
+  /* Keep the left side open to create the "]" shape */
+  border-left: none;
+}
+
+.round-1 {
+  border-color: #f59e0b;
+}
+
+.round-2 {
+  border-color: #ea580c;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 0 40px;
+}
+
+.matches-feed {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  flex-grow: 1;
+  align-items: center;
+  gap: 20px;
+}
+
+.round-3 {
+  border-color: #f43f5e;
+}
+
+.winner {
+  border-color: #4f46e5;
+}
+
+.header-prefix {
+  font-family: inherit;
+  font-size: 20px;
+  opacity: 60%;
+}
+
+h1 {
+  font-family: inherit;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+main {
+  padding-left: 150px;
+  padding-right: 150px;
+  padding-top: 50px;
+}
+
+.status-line {
+  font-family: inherit;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+
+.status-code {
+  width: 10px;
+  height: 10px;
+  background-color: #34c759;
+  border-radius: 100%;
+}
+
+#results-page .status-link {
+  font-size: inherit;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: #00c0e8;
+}
+
+#intro {
+  font-size: 17px;
+  font-weight: 100;
+  line-height: 124%;
+  letter-spacing: 0.06em;
+}
+
+.round-header-bg {
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+
+.round-header {
+  padding: 5px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  color: #0b0f19;
+}
+
+#round-1-header {
+  background-color: #f99d0066;
+}
+
+#round-2-header {
+  background-color: #ea580c66;
+}
+
+#round-3-header {
+  background-color: #f90c0066;
+}
+
+#winner-header {
+  background-color: #6155f566;
+}
+
+.player.round-1::after {
+  content: "";
+  display: block;
+  background-color: #ffffff;
+  width: 130px;
+  height: 3px;
+  left: calc(100% + 5px);
+
+  top: 50%;
+  position: absolute;
+}
+
+.player.round-2::after {
+  content: "";
+  display: block;
+  background-color: #ffffff;
+  width: 130px;
+  height: 3px;
+  left: calc(100% + 5px);
+
+  top: 50%;
+  position: absolute;
+}
+
+.player.round-3::after {
+  content: "";
+  display: block;
+  background-color: #ffffff;
+  width: 130px;
+  height: 3px;
+  left: calc(100% + 5px);
+
+  top: 50%;
+  position: absolute;
+}
