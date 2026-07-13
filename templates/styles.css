@@ -8,7 +8,8 @@ body {
 }
 
 .navbar {
-  background-color: #4f46e5;
+  background-color: transparent;
+  border-bottom: 1px solid #959595;
   height: 90px; /* Increased slightly to give elements vertical breathing room */
   display: flex;
   flex-direction: row;
@@ -75,28 +76,52 @@ a {
 }
 
 .bracket-container {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto repeat(9, 1fr);
 
   gap: 40px;
-  align-items: stretch;
-}
-
-/* The New Pillar Wrapper */
-.bracket-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centers the header pill horizontally over the column */
-  gap: 20px; /* Creates a clean, uniform 20px gap below the headers across the entire board */
 }
 
 .player {
-  border: 1px solid;
-  margin: 15px;
+  /* 1. Use a full white border all around */
+  border: 1px solid #ffffff;
+  border-left: none;
   text-align: center;
   border-radius: 3px;
   padding: 8px 15px;
+  position: relative;
 }
+
+.player::before {
+  position: absolute;
+  content: "";
+
+  /* 3. Offset by 1px so it sits beautifully INSIDE the border */
+  left: 0;
+  top: -1px;
+  bottom: 1px;
+
+  /* 4. Control your width here */
+  width: 20px;
+  height: calc(100% + 2px);
+
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+}
+
+.player.round-1::before {
+  background-color: #f59e0b;
+} /* Yellow/Orange */
+.player.round-2::before {
+  background-color: #34c759;
+} /* Green */
+.player.round-3::before {
+  background-color: #ff2d55;
+} /* Pink/Red */
+.player.win-m::before {
+  background-color: #4f46e5;
+} /* Purple/Blue */
 
 .match {
   display: flex;
@@ -106,70 +131,47 @@ a {
   /* 2. Push Player 1 to the very top, and Player 2 to the very bottom 
         of this newly expanded match container */
   justify-content: space-around;
+
+  /* Use a consistent gap between players instead of margins */
+  gap: 10px;
+
+  /* Crucial: Center the match container within its allocated Grid track area */
   position: relative;
-}
-
-/* 2. ADD THIS NEW BLOCK BELOW IT */
-.match::after {
-  content: "";
-  position: absolute;
-
-  /* Positioning: Pull the line to the right side of the match box */
-  left: calc(
-    100% - 15px
-  ); /* Adjust this number to move the line closer or further */
-  width: 20px; /* How far out the horizontal lines extend */
-
-  /* Vertical alignment: stretching from the middle of player 1 to player 2 */
-  top: 25%;
-  bottom: 25%;
-
-  /* The Bracket Shape: Draw lines on the top, right, and bottom only */
-  border-top: 3px solid #334155;
-  border-right: 3px solid #334155;
-  border-bottom: 3px solid #334155;
-
-  /* Keep the left side open to create the "]" shape */
-  border-left: none;
-}
-
-.round-1 {
-  border-color: #f59e0b;
-}
-
-.round-2 {
-  border-color: #ea580c;
-}
-
-.round {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  padding: 0 40px;
-}
-
-.matches-feed {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  flex-grow: 1;
-  align-items: center;
-  gap: 20px;
-}
-
-.round-3 {
-  border-color: #f43f5e;
-}
-
-.winner {
-  border-color: #4f46e5;
+  height: 100%;
 }
 
 .header-prefix {
   font-family: inherit;
   font-size: 20px;
   opacity: 60%;
+}
+/* One block that handles the vertical bracket connector line perfectly */
+/* Draws the perfect connecting bracket using dynamic positioning context */
+/* 2. THE TOP PLAYER LINE (Player 1) */
+/* 1. Give every player a perfect horizontal tail coming out of their exact center */
+.match .player::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -25px; /* Length of the horizontal line */
+  width: 25px;
+  height: 2px;
+  background-color: #00c0e8;
+}
+
+/* 2. Put a single vertical connecting bar on the right side of the match */
+.match::before {
+  content: "";
+  position: absolute;
+
+  /* Instead of top/bottom percentages, lock it to the exact centers of both players */
+  top: calc(25% - 3px); /* Spans from the center line of Player 1 */
+  bottom: calc(25% - 3px); /* Down to the center line of Player 2 */
+  right: -10px; /* Aligns flawlessly with the tips of the player tails */
+
+  width: 2px;
+  background-color: #00c0e8;
 }
 
 h1 {
@@ -215,6 +217,7 @@ main {
 }
 
 .round-header-bg {
+  grid-row: 1;
   background-color: #ffffff;
   border-radius: 10px;
 }
@@ -242,38 +245,43 @@ main {
   background-color: #6155f566;
 }
 
-.player.round-1::after {
-  content: "";
-  display: block;
-  background-color: #ffffff;
-  width: 130px;
-  height: 3px;
-  left: calc(100% + 5px);
-
-  top: 50%;
-  position: absolute;
+.r1-m1 {
+  grid-column: 1;
+  grid-row: 2 / 4;
 }
 
-.player.round-2::after {
-  content: "";
-  display: block;
-  background-color: #ffffff;
-  width: 130px;
-  height: 3px;
-  left: calc(100% + 5px);
-
-  top: 50%;
-  position: absolute;
+.r1-m2 {
+  grid-column: 1;
+  grid-row: 4 / 6;
 }
 
-.player.round-3::after {
-  content: "";
-  display: block;
-  background-color: #ffffff;
-  width: 130px;
-  height: 3px;
-  left: calc(100% + 5px);
+.r1-m3 {
+  grid-column: 1;
+  grid-row: 6 / 8;
+}
 
-  top: 50%;
-  position: absolute;
+.r1-m4 {
+  grid-column: 1;
+  grid-row: 8 / 10;
+}
+
+.r2-m1 {
+  grid-column: 2;
+  grid-row: 2 / 6;
+}
+
+.r2-m2 {
+  grid-column: 2;
+  grid-row: 6 / 10;
+}
+
+.r3-m1 {
+  grid-column: 3;
+  grid-row: 2 / 10;
+}
+
+.win-m {
+  grid-column: 4;
+  grid-row: 2 / 10;
+  align-self: center;
 }
