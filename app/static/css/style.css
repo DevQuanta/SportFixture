@@ -322,12 +322,61 @@ main {
   background-color: #00c0e8;
 }
 
-.login-fields {
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
-  align-items: center;
+#login-page main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 100px;
+
+    border: 1px solid #FFFFFF;
+    background-color: #121620;
+    margin: 80px 300px;
+    padding-top: 40px;
+
+}
+
+/* Styling the overall page background */
+
+
+
+.login-header h1 {
+    margin-bottom: 0px;
+}
+
+.login-header p {
+    margin-top: 0px;
+    margin-bottom: 50px;
+}
+
+/* 4. Form and Input Layout */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;                 /* Creates an even gap between email, password, and button */
+}
+
+/* Stack the label on top of the input */
+.email-container,
+.password-container {
+    font-family: "Poppins", sans-serif;
+    font-size: 18px;
+    font-weight: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;                  /* Gap between the label and its input box */
 }
 
 .login-btn {
+    margin-top: 30px;
+    background-color: #FF383C;
+    color: #ffffff;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 18px;
+    padding: 4px 50px;
+}
+
+#user-email {
+    border: 1px #C6C6C6 solid;
 }
