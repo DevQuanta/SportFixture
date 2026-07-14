@@ -2,22 +2,25 @@
 
 <html>
   <head>
-    <link rel="stylesheet" href="templates/styles.css" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css')}}"
+    />
   </head>
 
   <body id="results-page">
     <header class="navbar">
-      <img src="logo.png" />
+      <img src="{{ url_for('static', filename='images/logo.png')}}"" />
 
       <div class="nav-links">
-        <a href="main.html" class="nav-results">Results</a>
-        <a href="knockouts.html" class="nav-knockouts">Knockouts</a>
+        <a href="/" class="nav-results">Results</a>
+        <a href="knockouts" class="nav-knockouts">Knockouts</a>
       </div>
 
-      <button class="admin-btn">
-        <img src="Vector.png" />
+      <a class="admin-btn" href="login">
+        <img src="{{ url_for('static', filename='images/Vector.png')}}" />
         Admin
-      </button>
+      </a>
     </header>
 
     <main>

@@ -1,20 +1,23 @@
 <!doctype html>
 <html>
   <head>
-    <link rel="stylesheet" href="templates/styles.css" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css')}}"
+    />
   </head>
 
   <body id="knockouts-page">
     <header class="navbar">
-      <img src="logo.png" />
+      <img src="{{ url_for('static', filename='images/logo.png')}}"" />
 
       <div class="nav-links">
-        <a href="main.html" class="nav-results">Results</a>
-        <a href="knockouts.html" class="nav-knockouts">Knockouts</a>
+        <a href="/" class="nav-results">Results</a>
+        <a href="knockouts" class="nav-knockouts">Knockouts</a>
       </div>
 
       <button class="admin-btn">
-        <img src="Vector.png" />
+        <img src="{{ url_for('static', filename='images/Vector.png')}}"" />
         Admin
       </button>
     </header>
@@ -45,7 +48,9 @@
           <div class="player round-1">Xu Y.</div>
         </div>
         <div class="match r1-m3">
-          <div class="player round-1">Jimmy W.</div>
+          <div class="player round-1">
+            <span class="name">Jimmy N.</span>
+          </div>
           <div class="player round-1">Betty A.</div>
         </div>
         <div class="match r1-m4">

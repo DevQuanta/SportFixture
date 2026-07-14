@@ -1,5 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   background-color: #0b0f19;
   margin: 0px;
@@ -77,10 +83,12 @@ a {
 
 .bracket-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: auto repeat(9, 1fr);
+  grid-template-columns: repeat(4, 300px);
+  grid-template-rows: auto repeat(8, 80px);
+  --connector-length: 25px;
 
-  gap: 40px;
+  column-gap: 40px;
+  row-gap: 0;
 }
 
 .player {
@@ -124,20 +132,36 @@ a {
 } /* Purple/Blue */
 
 .match {
-  display: flex;
-  flex-direction: column;
-
-  flex-grow: 1;
-  /* 2. Push Player 1 to the very top, and Player 2 to the very bottom 
-        of this newly expanded match container */
-  justify-content: space-around;
-
-  /* Use a consistent gap between players instead of margins */
-  gap: 10px;
-
   /* Crucial: Center the match container within its allocated Grid track area */
   position: relative;
   height: 100%;
+}
+
+.match > .player {
+  position: absolute;
+  left: 75px;
+  width: 150px;
+  transform: translateY(-50%);
+}
+
+.match::before {
+  content: "";
+  position: absolute;
+
+  top: 25%;
+  bottom: 25%;
+  right: 0;
+
+  width: 2px;
+  background-color: #00c0e8;
+}
+
+.match > .player:first-child {
+  top: 25%;
+}
+
+.match > .player:last-child {
+  top: 75%;
 }
 
 .header-prefix {
@@ -154,23 +178,9 @@ a {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  right: -25px; /* Length of the horizontal line */
-  width: 25px;
+  left: 100%; /* Length of the horizontal line */
+  width: 75px;
   height: 2px;
-  background-color: #00c0e8;
-}
-
-/* 2. Put a single vertical connecting bar on the right side of the match */
-.match::before {
-  content: "";
-  position: absolute;
-
-  /* Instead of top/bottom percentages, lock it to the exact centers of both players */
-  top: calc(25% - 3px); /* Spans from the center line of Player 1 */
-  bottom: calc(25% - 3px); /* Down to the center line of Player 2 */
-  right: -10px; /* Aligns flawlessly with the tips of the player tails */
-
-  width: 2px;
   background-color: #00c0e8;
 }
 
@@ -181,8 +191,8 @@ h1 {
 }
 
 main {
-  padding-left: 150px;
-  padding-right: 150px;
+  padding-left: 120px;
+  padding-right: 120px;
   padding-top: 50px;
 }
 
@@ -220,6 +230,13 @@ main {
   grid-row: 1;
   background-color: #ffffff;
   border-radius: 10px;
+
+  display: flex;
+
+  width: fit-content;
+  justify-self: center;
+
+  margin-bottom: 30px;
 }
 
 .round-header {
@@ -227,6 +244,7 @@ main {
   border-radius: 10px;
   font-weight: 500;
   color: #0b0f19;
+  width: fit-content;
 }
 
 #round-1-header {
@@ -283,5 +301,33 @@ main {
 .win-m {
   grid-column: 4;
   grid-row: 2 / 10;
+  justify-self: center;
   align-self: center;
+
+  width: 150px;
+}
+
+/* vertical line */
+.match::after {
+  content: "";
+  position: absolute;
+
+  top: 50%;
+  left: 100%;
+
+  width: 115px;
+  height: 2px;
+
+  transform: translateY(-50%);
+  background-color: #00c0e8;
+}
+
+.login-fields {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  align-items: center;
+}
+
+.login-btn {
 }
