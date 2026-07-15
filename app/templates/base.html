@@ -1,33 +1,32 @@
 <!doctype html>
 <html>
-  <head>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css')}}"
-    />
+    <head>
+        <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='css/style.css')}}"
+        />
 
-    {% block head %}{% endblock %}
-  </head>
+        {% block head %}{% endblock %}
+    </head>
 
-  <body id="{% block body_id %}default_page{% endblock %}">
-    <header class="navbar">
-      <img src="{{ url_for('static', filename='images/logo.png')}}" />
+    <body id="{% block body_id %}default-page{% endblock %}">
+        <header class="navbar">
+            <img src="{{ url_for('static', filename='images/logo.png')}}" />
 
-      <div class="nav-links">
-        <a href="/" class="nav-results">Results</a>
-        <a href="knockouts" class="nav-knockouts">Knockouts</a>
-      </div>
+            <div class="nav-links">
+                <a href="/" class="nav-results">Results</a>
+                <a href="knockouts" class="nav-knockouts">Knockouts</a>
+            </div>
 
-      <button class="admin-btn">
-        <img src="{{ url_for('static', filename='images/Vector.png')}}" />
-        Admin
-      </button>
-    </header>
+            <button class="admin-btn">
+                <img
+                    src="{{ url_for('static', filename='images/Vector.png')}}"
+                />
+                Admin
+            </button>
+        </header>
 
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
-
+        <main>{% block content %} {% endblock %}</main>
     </body>
-    </html>
+</html>

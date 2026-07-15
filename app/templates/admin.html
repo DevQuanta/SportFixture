@@ -1,133 +1,109 @@
-<!doctype html>
-<html>
-    <head>
-        <link
-            rel="stylesheet"
-            href="{{ url_for('static', filename='css/style.css')}}"
-        />
-    </head>
+{% extends "base.html" %}
 
-    <body id="admin-page">
-        <header class="navbar">
-            <img src="{{ url_for('static', filename='images/logo.png')}}" />
+{% block body_id %}admin-page{% endblock %}
 
-            <div class="nav-links">
-                <a href="/" class="nav-results">Results</a>
-                <a href="knockouts" class="nav-knockouts">Knockouts</a>
-            </div>
+{% block content %}
 
-            <button class="admin-btn">
-                <img
-                    src="{{ url_for('static', filename='images/Vector.png')}}"
+<h1><span class="header-prefix">//</span> Knockout League</h1>
+
+<div class="admin-steps">
+    <div class="admin-step step-1">
+        <div class="step-circle">1</div>
+        <div class="step-name">Register Player</div>
+    </div>
+    <div class="admin-step step-2">
+        <div class="step-circle">2</div>
+        <div class="step-name">Seed Draws</div>
+    </div>
+    <div class="admin-step step-3">
+        <div class="step-circle">3</div>
+        <div class="step-name">Preview & Publish</div>
+    </div>
+</div>
+
+<div class="admin-horizontal-container">
+    <div class="admin-player-register-container">
+        <form class="admin-player-register-form">
+            <div class="player-name-container">
+                <label for="player-name">Player name</label>
+                <input
+                    type="text"
+                    id="player-name"
+                    name="player-name"
+                    required
                 />
-                Admin
-            </button>
-        </header>
-
-        <main>
-            <h1><span class="header-prefix">//</span> Knockout League</h1>
-
-            <div class="admin-steps">
-                <div class="admin-step step-1">
-                    <div class="step-circle">1</div>
-                    <div class="step-name">Register Player</div>
-                </div>
-                <div class="admin-step step-2">
-                    <div class="step-circle">2</div>
-                    <div class="step-name">Seed Draws</div>
-                </div>
-                <div class="admin-step step-3">
-                    <div class="step-circle">3</div>
-                    <div class="step-name">Preview & Publish</div>
-                </div>
+            </div>
+            <div class="player-diff-container">
+                <label for="player-diff">Player difficulty</label>
+                <input
+                    type="text"
+                    id="player-diff"
+                    name="player-diff"
+                    required
+                />
             </div>
 
-            <div class="admin-horizontal-container">
-                <div class="admin-player-register-container">
-                    <form class="admin-player-register-form">
-                        <div class="player-name-container">
-                            <label for="player-name">Player name</label>
-                            <input
-                                type="text"
-                                id="player-name"
-                                name="player-name"
-                                required
-                            />
-                        </div>
-                        <div class="player-diff-container">
-                            <label for="player-diff">Player difficulty</label>
-                            <input
-                                type="text"
-                                id="player-diff"
-                                name="player-diff"
-                                required
-                            />
-                        </div>
+            <button class="add-player-btn" href="#">Add Player</button>
+        </form>
+    </div>
 
-                        <button class="add-player-btn" href="#">
-                            Add Player
+    <table class="admin-tbl">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Difficulty</th>
+                <th class="actions-col">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>Aryan A.</td>
+                <td class="rank beginner">Beginner</td>
+                <td class="actions-col">
+                    <div class="actions-group">
+                        <button class="edit-btn">
+                            <img
+                                src="{{ url_for('static', filename='images/edit.svg') }}"
+                                width="22.49"
+                                height="22.49"
+                            />
                         </button>
-                    </form>
-                </div>
+                        <button class="delete-btn">
+                            <img
+                                src="{{ url_for('static', filename='images/remove.svg') }}"
+                                width="15.8"
+                                height="18"
+                            />
+                        </button>
+                    </div>
+                </td>
+            </tr>
 
-                <table class="admin-tbl">
-                    <thead>
-                        <tr>
-                        <th>Name</th>
-                        <th>Difficulty</th>
-                        <th class="actions-col">Actions</th>
-                        </tr>
-                    </thead>
+            <tr>
+                <td>Kimmy J.</td>
+                <td class="rank intermediate">Intermediate</td>
+                <td class="actions-col">
+                    <div class="actions-group">
+                        <button class="edit-btn">
+                            <img
+                                src="{{ url_for('static', filename='images/edit.svg') }}"
+                                width="22.49"
+                                height="22.49"
+                            />
+                        </button>
+                        <button class="delete-btn">
+                            <img
+                                src="{{ url_for('static', filename='images/remove.svg') }}"
+                                width="15.8"
+                                height="18"
+                            />
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
-                    <tbody>
-                        <tr>
-                            <td>Aryan A.</td>
-                            <td class="rank beginner">Beginner</td>
-                            <td class="actions-col">
-                                <div class="actions-group">
-                                <button class="edit-btn">
-                                    <img
-                                        src="{{ url_for('static', filename='images/edit.svg') }}"
-                                        width="22.49"
-                                        height="22.49"
-                                    />
-                                </button>
-                                <button class="delete-btn">
-                                    <img
-                                        src="{{ url_for('static', filename='images/remove.svg') }}"
-                                        width="15.8"
-                                        height="18"
-                                    />
-                                </button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Kimmy J.</td>
-                            <td class="rank intermediate">Intermediate</td>
-                            <td class="actions-col">
-                                <div class="actions-group">
-                                <button class="edit-btn">
-                                    <img
-                                        src="{{ url_for('static', filename='images/edit.svg') }}"
-                                        width="22.49"
-                                        height="22.49"
-                                    />
-                                </button>
-                                <button class="delete-btn">
-                                    <img
-                                        src="{{ url_for('static', filename='images/remove.svg') }}"
-                                        width="15.8"
-                                        height="18"
-                                    />
-                                </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </main>
-    </body>
-</html>
+{% endblock %}

@@ -386,8 +386,13 @@ main {
     background-color: transparent;
     border-radius: 6px;
     height: 22px;
+    color: #ffffff;
 }
 
+
+#error-container {
+    color: #ffffff;
+}
 
 
 .admin-steps {

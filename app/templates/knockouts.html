@@ -1,28 +1,8 @@
-<!doctype html>
-<html>
-  <head>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css')}}"
-    />
-  </head>
+{% extends "base.html" %}
 
-  <body id="knockouts-page">
-    <header class="navbar">
-      <img src="{{ url_for('static', filename='images/logo.png')}}"" />
+{% block body_id %}knockouts-page{% endblock %}
 
-      <div class="nav-links">
-        <a href="/" class="nav-results">Results</a>
-        <a href="knockouts" class="nav-knockouts">Knockouts</a>
-      </div>
-
-      <button class="admin-btn">
-        <img src="{{ url_for('static', filename='images/Vector.png')}}"" />
-        Admin
-      </button>
-    </header>
-
-    <main>
+{% block content %}
       <h1><span class="header-prefix">//</span> Knockout League</h1>
 
       <div class="bracket-container">
@@ -74,6 +54,5 @@
 
         <div class="player win-m">Michel B.</div>
       </div>
-    </main>
-  </body>
-</html>
+
+{% endblock %}

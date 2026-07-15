@@ -15,6 +15,7 @@ def create_app() -> Flask:
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Prevents memory overhead
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
     app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config['SECRET_KEY'] = "423065c1c9051794762810b2cf8ffec2"
 
 
     # Connect DB to App
@@ -40,7 +41,7 @@ def create_app() -> Flask:
     @login_manager.user_loader
     def load_user(user_id):
         stmt = select(Admin).where(Admin.id == user_id)
-        return db.session.execute(stmt).scalar_one_or_none
+        return db.session.execute(stmt).scalar_one_or_none()
 
     from .auth import auth_bp
     from .views import main_bp

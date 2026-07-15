@@ -1,36 +1,15 @@
-<!doctype html>
-<html>
-  <head>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css')}}"
-    />
-  </head>
+{% extends "base.html" %}
 
-  <body id="login-page">
-    <header class="navbar">
-      <img src="{{ url_for('static', filename='images/logo.png')}}" />
+{% block body_id %}login-page{% endblock %}
 
-      <div class="nav-links">
-        <a href="/" class="nav-results">Results</a>
-        <a href="knockouts" class="nav-knockouts">Knockouts</a>
-      </div>
-
-      <button class="admin-btn">
-        <img src="{{ url_for('static', filename='images/Vector.png')}}" />
-        Admin
-      </button>
-    </header>
-
-    <main>
-
+{% block content %}
         <div class="login-card">
 
             <div class="login-header">
                 <h1>Welcome Back!</h1>
                 <p>Enter your details to authenticate</p>
             </div>
-            <form hx-post="/login" hx-target="#error-container" class="login-form">
+            <form hx-post="/login" hx-target="#error-container" class="login-form" method="post">
                 <div class="email-container">
                     <label for="user-email">Email</label>
                     <input type="email" id="user-email" name="email" required>
@@ -44,9 +23,8 @@
                 <button class="login-btn">Login</button>
             </form>
 
+            <div id="error-container"></div>
+
         </div>
 
-    </main>
-
-    </body>
-    </html>
+{% endblock %}

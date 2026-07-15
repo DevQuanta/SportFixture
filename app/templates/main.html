@@ -1,29 +1,8 @@
-<!doctype html>
+{% extends "base.html" %}
 
-<html>
-  <head>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css')}}"
-    />
-  </head>
+{% block body_id %}results-page{% endblock %}
 
-  <body id="results-page">
-    <header class="navbar">
-      <img src="{{ url_for('static', filename='images/logo.png')}}"" />
-
-      <div class="nav-links">
-        <a href="/" class="nav-results">Results</a>
-        <a href="knockouts" class="nav-knockouts">Knockouts</a>
-      </div>
-
-      <a class="admin-btn" href="login">
-        <img src="{{ url_for('static', filename='images/Vector.png')}}" />
-        Admin
-      </a>
-    </header>
-
-    <main>
+{% block content %}
       <h1><span class="header-prefix">#</span> Internal Match Tracker</h1>
 
       <p id="intro">
@@ -40,6 +19,5 @@
           <a href="#" class="status-link">here</a>.</span
         >
       </div>
-    </main>
-  </body>
-</html>
+
+{% endblock %}
