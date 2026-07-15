@@ -364,10 +364,11 @@ main {
     font-weight: 100;
     display: flex;
     flex-direction: column;
-    gap: 6px;                  /* Gap between the label and its input box */
+    gap: 3px;                  /* Gap between the label and its input box */
 }
 
-.login-btn {
+.login-btn,
+.add-player-btn {
     margin-top: 30px;
     background-color: #FF383C;
     color: #ffffff;
@@ -377,6 +378,139 @@ main {
     padding: 4px 50px;
 }
 
-#user-email {
+#user-email,
+#user-password,
+#player-name,
+#player-diff {
     border: 1px #C6C6C6 solid;
+    background-color: transparent;
+    border-radius: 6px;
+    height: 22px;
+}
+
+
+
+.admin-steps {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 80px;
+}
+
+.admin-step {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+}
+
+.step-circle {
+    font-size: 18px;
+    width: 30px;
+    height: 30px;
+
+    background-color: #FF2D55;
+    padding: 8px;
+    border: 0px transparent;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+}
+
+
+.step-2,
+.step-3 {
+    opacity: 60%;
+}
+
+.step-2 .step-circle,
+.step-3 .step-circle {
+    background-color: #8D8D8D;
+}
+
+
+.admin-player-register-container {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}
+
+.player-name-container {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+    margin-bottom: 40px;
+}
+
+.player-diff-container {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+    margin-top: 40px;
+}
+
+
+.admin-horizontal-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+
+.admin-tbl button {
+   background-color: transparent;
+   border: none;
+}
+
+
+.actions-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+tbody tr {
+    border-bottom: 1px #F8FAFC80 solid;
+}
+
+
+th {
+    padding-bottom: 20px;
+}
+
+th,
+td {
+    text-align: center;
+}
+
+td {
+    padding-top: 8px;
+        padding-bottom: 8px;
+}
+
+th {
+    font-weight: 100;
+}
+
+
+table {
+    width: 720px;
+    border-collapse: collapse;
+}
+
+
+.beginner {
+    color: #34C759;
+}
+
+.intermediate {
+    color: #F59E0B;
 }

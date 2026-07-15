@@ -1,3 +1,4 @@
 .venv/
-app/static/images/logo.png
-app/static/images/Vector.png
+app/static/images/*
+
+instance/

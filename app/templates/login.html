@@ -30,7 +30,7 @@
                 <h1>Welcome Back!</h1>
                 <p>Enter your details to authenticate</p>
             </div>
-            <form class="login-form">
+            <form hx-post="/login" hx-target="#error-container" class="login-form">
                 <div class="email-container">
                     <label for="user-email">Email</label>
                     <input type="email" id="user-email" name="email" required>

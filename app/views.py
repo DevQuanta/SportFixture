@@ -10,3 +10,7 @@ def home_page():
 @main_bp.route('/knockouts')
 def knockouts_page():
     return render_template('knockouts.html')
+
+@main_bp.route('/admin')
+def admin_page():
+    return render_template('admin.html')

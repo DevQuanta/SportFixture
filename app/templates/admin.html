@@ -1,123 +1,133 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css')}}"
-    />
-  </head>
+<html>
+    <head>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='css/style.css')}}"
+        />
+    </head>
 
-  <body id="results-page">
-    <header class="navbar">
-      <img src="logo.png" />
+    <body id="admin-page">
+        <header class="navbar">
+            <img src="{{ url_for('static', filename='images/logo.png')}}" />
 
-      <div class="nav-links">
-        <a href="/" class="nav-results">Results</a>
-        <a href="knockouts" class="nav-knockouts">Knockouts</a>
-      </div>
-
-      <button class="admin-btn">
-        <img src="Vector.png" />
-        Admin
-      </button>
-    </header>
-
-    <main>
-      <div class="page-header">
-        <h1><span class="hash">#</span>Tournament Setup</h1>
-      </div>
-
-      <div class="frame">
-        <div class="wizard-header">
-          <div class="step-indicator active">
-            <div class="step-number">1</div>
-            <span>Roster &amp; ratings</span>
-          </div>
-          <div class="step-indicator">
-            <div class="step-number">2</div>
-            <span>Generate draw</span>
-          </div>
-          <div class="step-indicator">
-            <div class="step-number">3</div>
-            <span>Publish</span>
-          </div>
-        </div>
-
-        <div class="admin-panel">
-          <h2 class="section-title">Add players</h2>
-          <p
-            class="intro-text"
-            style="margin: 10px 0 24px; font-size: 13.5px; max-width: 60ch"
-          >
-            Add each player and set a starting rating. Stronger players are
-            seeded apart so the top of the draw doesn't collide in the first
-            round.
-          </p>
-
-          <div class="input-group">
-            <div class="field">
-              <label class="field-label" for="player-name">Player name</label>
-              <input
-                type="text"
-                id="player-name"
-                class="input-field"
-                placeholder="e.g. Jane D."
-              />
+            <div class="nav-links">
+                <a href="/" class="nav-results">Results</a>
+                <a href="knockouts" class="nav-knockouts">Knockouts</a>
             </div>
-            <div class="field field-tier">
-              <label class="field-label" for="player-tier"
-                >Starting rating</label
-              >
-              <select id="player-tier" class="input-field">
-                <option value="pro">Pro (90+)</option>
-                <option value="int">Intermediate (50–89)</option>
-                <option value="beg">Beginner (&lt;50)</option>
-              </select>
-            </div>
-            <div class="field field-action">
-              <button class="btn-primary">Add player</button>
-            </div>
-          </div>
 
-          <div class="leaderboard-card">
-            <div
-              class="leaderboard-header"
-              style="grid-template-columns: 40px 1fr 110px 80px"
-            >
-              <span class="col-rank">#</span>
-              <span class="col-name">Name</span>
-              <span class="col-name">Rating tier</span>
-              <span class="col-name" style="text-align: right">Action</span>
-            </div>
-            <div
-              class="leaderboard-row"
-              style="grid-template-columns: 40px 1fr 110px 80px"
-            >
-              <span class="col-rank">1</span>
-              <span class="col-name">Michel B.</span>
-              <span class="col-name" style="color: var(--text-dim)">Pro</span>
-              <span class="roster-remove" style="text-align: right"
-                >Remove</span
-              >
-            </div>
-            <p class="roster-hint">
-              One player in so far. Add the rest of the roster, then move on to
-              the draw.
-            </p>
-          </div>
+            <button class="admin-btn">
+                <img
+                    src="{{ url_for('static', filename='images/Vector.png')}}"
+                />
+                Admin
+            </button>
+        </header>
 
-          <div class="admin-actions">
-            <button class="btn-primary btn-ghost">Save draft</button>
-            <button class="btn-primary">Next: generate draw &rarr;</button>
-          </div>
-        </div>
-      </div>
-    </main>
+        <main>
+            <h1><span class="header-prefix">//</span> Knockout League</h1>
 
-    <footer class="site-footer">
-      <span>TournamentPro — admin</span>
-      <span class="sep">·</span>
-      <span>Changes stay a draft until you publish</span>
-    </footer>
-  </body>
+            <div class="admin-steps">
+                <div class="admin-step step-1">
+                    <div class="step-circle">1</div>
+                    <div class="step-name">Register Player</div>
+                </div>
+                <div class="admin-step step-2">
+                    <div class="step-circle">2</div>
+                    <div class="step-name">Seed Draws</div>
+                </div>
+                <div class="admin-step step-3">
+                    <div class="step-circle">3</div>
+                    <div class="step-name">Preview & Publish</div>
+                </div>
+            </div>
+
+            <div class="admin-horizontal-container">
+                <div class="admin-player-register-container">
+                    <form class="admin-player-register-form">
+                        <div class="player-name-container">
+                            <label for="player-name">Player name</label>
+                            <input
+                                type="text"
+                                id="player-name"
+                                name="player-name"
+                                required
+                            />
+                        </div>
+                        <div class="player-diff-container">
+                            <label for="player-diff">Player difficulty</label>
+                            <input
+                                type="text"
+                                id="player-diff"
+                                name="player-diff"
+                                required
+                            />
+                        </div>
+
+                        <button class="add-player-btn" href="#">
+                            Add Player
+                        </button>
+                    </form>
+                </div>
+
+                <table class="admin-tbl">
+                    <thead>
+                        <tr>
+                        <th>Name</th>
+                        <th>Difficulty</th>
+                        <th class="actions-col">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Aryan A.</td>
+                            <td class="rank beginner">Beginner</td>
+                            <td class="actions-col">
+                                <div class="actions-group">
+                                <button class="edit-btn">
+                                    <img
+                                        src="{{ url_for('static', filename='images/edit.svg') }}"
+                                        width="22.49"
+                                        height="22.49"
+                                    />
+                                </button>
+                                <button class="delete-btn">
+                                    <img
+                                        src="{{ url_for('static', filename='images/remove.svg') }}"
+                                        width="15.8"
+                                        height="18"
+                                    />
+                                </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Kimmy J.</td>
+                            <td class="rank intermediate">Intermediate</td>
+                            <td class="actions-col">
+                                <div class="actions-group">
+                                <button class="edit-btn">
+                                    <img
+                                        src="{{ url_for('static', filename='images/edit.svg') }}"
+                                        width="22.49"
+                                        height="22.49"
+                                    />
+                                </button>
+                                <button class="delete-btn">
+                                    <img
+                                        src="{{ url_for('static', filename='images/remove.svg') }}"
+                                        width="15.8"
+                                        height="18"
+                                    />
+                                </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </body>
 </html>
