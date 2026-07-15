@@ -1,109 +1,50 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block head %}
+<link
+    href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css"
+    rel="stylesheet"
+/>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
-{% block body_id %}admin-page{% endblock %}
+{% endblock %} {% block body_id %}admin-page{% endblock %} {% block content %}
 
-{% block content %}
+<h1><span class="header-prefix">//</span>Admin view</h1>
+<p>Select a tournament or press ‘New’ to process</p>
 
-<h1><span class="header-prefix">//</span> Knockout League</h1>
 
-<div class="admin-steps">
-    <div class="admin-step step-1">
-        <div class="step-circle">1</div>
-        <div class="step-name">Register Player</div>
-    </div>
-    <div class="admin-step step-2">
-        <div class="step-circle">2</div>
-        <div class="step-name">Seed Draws</div>
-    </div>
-    <div class="admin-step step-3">
-        <div class="step-circle">3</div>
-        <div class="step-name">Preview & Publish</div>
-    </div>
+<div
+    data-bs-theme="dark"
+    class="p-4 rounded-3"
+    style="background-color: #0f172a"
+>
+    <select hx-post="/select-tournament"
+            hx-trigger="change"
+            hx-target="#tournament-editor"
+            name="tournaments" id="tournament-select" placeholder="Search for tournament or type to create">
+    {% for t in tournaments %}
+        <option value="{{ t.id }}">{{ t.name }}</option>
+    {% endfor %}
+    </select>
 </div>
 
-<div class="admin-horizontal-container">
-    <div class="admin-player-register-container">
-        <form class="admin-player-register-form">
-            <div class="player-name-container">
-                <label for="player-name">Player name</label>
-                <input
-                    type="text"
-                    id="player-name"
-                    name="player-name"
-                    required
-                />
-            </div>
-            <div class="player-diff-container">
-                <label for="player-diff">Player difficulty</label>
-                <input
-                    type="text"
-                    id="player-diff"
-                    name="player-diff"
-                    required
-                />
-            </div>
+<div id="tournament-editor"></div>
 
-            <button class="add-player-btn" href="#">Add Player</button>
-        </form>
-    </div>
-
-    <table class="admin-tbl">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Difficulty</th>
-                <th class="actions-col">Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <tr>
-                <td>Aryan A.</td>
-                <td class="rank beginner">Beginner</td>
-                <td class="actions-col">
-                    <div class="actions-group">
-                        <button class="edit-btn">
-                            <img
-                                src="{{ url_for('static', filename='images/edit.svg') }}"
-                                width="22.49"
-                                height="22.49"
-                            />
-                        </button>
-                        <button class="delete-btn">
-                            <img
-                                src="{{ url_for('static', filename='images/remove.svg') }}"
-                                width="15.8"
-                                height="18"
-                            />
-                        </button>
-                    </div>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Kimmy J.</td>
-                <td class="rank intermediate">Intermediate</td>
-                <td class="actions-col">
-                    <div class="actions-group">
-                        <button class="edit-btn">
-                            <img
-                                src="{{ url_for('static', filename='images/edit.svg') }}"
-                                width="22.49"
-                                height="22.49"
-                            />
-                        </button>
-                        <button class="delete-btn">
-                            <img
-                                src="{{ url_for('static', filename='images/remove.svg') }}"
-                                width="15.8"
-                                height="18"
-                            />
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<script>
+    new TomSelect("#tournament-select", {
+        create: true,
+        createOnBlur: true,
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        render: {
+                    option_create: function(data, escape) {
+                        return '<div class="create">+ Create new tournament: <strong>' + escape(data.input) + '</strong>...</div>';
+                    },
+                    no_results: function(data, escape) {
+                        return '<div class="no-results p-2">No matching tournaments found</div>';
+                    }
+                }
+    });
+</script>
 
 {% endblock %}

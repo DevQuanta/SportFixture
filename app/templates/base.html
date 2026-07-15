@@ -19,12 +19,21 @@
                 <a href="knockouts" class="nav-knockouts">Knockouts</a>
             </div>
 
-            <button class="admin-btn">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('auth.logout') }}" class="auth-btn logout-btn">
+                <img
+                    src="{{ url_for('static', filename='images/Vector.png')}}"
+                />
+                Logout
+            </a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="auth-btn admin-btn">
                 <img
                     src="{{ url_for('static', filename='images/Vector.png')}}"
                 />
                 Admin
-            </button>
+            </a>
+            {% endif %}
         </header>
 
         <main>{% block content %} {% endblock %}</main>

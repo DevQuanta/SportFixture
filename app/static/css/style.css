@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
 
+
+
 *,
 *::before,
 *::after {
@@ -57,7 +59,7 @@ a {
 }
 
 /* Professional Login Button Styling */
-.admin-btn {
+.auth-btn {
   font-family: inherit; /* Forces the button to use Poppins */
   font-size: 16px;
   font-weight: 500;
@@ -76,7 +78,7 @@ a {
 }
 
 /* Crisp Lock Icon Sizing */
-.admin-btn img {
+.auth-btn img {
   height: 16px;
   width: auto;
 }
@@ -518,4 +520,63 @@ table {
 
 .intermediate {
     color: #F59E0B;
+}
+
+
+
+/*.admin-comp-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    margin-bottom: 40px;
+    margin-top: 50px;
+}
+.new-tournament-btn,
+.edit-tournament-btn {
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 500;
+  color: #f8fafc;
+  background-color: transparent;
+
+  border-color: transparent;
+  border-radius: 6px;
+
+  padding: 3px 30px;
+
+  cursor: pointer;
+  font-weight: 300;
+  font-family: "Poppins", sans-serif;
+
+}
+
+.new-tournament-btn {
+  background-color: #F43F5E;
+}
+
+.edit-tournament-btn {
+  background-color: #868081;
+  opacity: 60%;
+}*/
+
+#admin-page p {
+    margin-top: 0px;
+    font-size: 20px;
+}
+
+#admin-page h1 {
+    margin-bottom: 5px;
+}
+
+.ts-control, .ts-control input, .ts-dropdown {
+    background: #1e293b !important;
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
+
+}
+
+/* highlight the hovered/selected item in modern blue */
+.ts-dropdown .active {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
 }

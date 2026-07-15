@@ -1,0 +1,65 @@
+<h1><span class="header-prefix">//</span> Knockout League</h1>
+
+<div class="step-editor-container">
+    <div class="admin-steps">
+        <div class="admin-step step-1">
+            <div class="step-circle">1</div>
+            <div class="step-name">Register Player</div>
+        </div>
+        <div class="admin-step step-2">
+            <div class="step-circle">2</div>
+            <div class="step-name">Seed Draws</div>
+        </div>
+        <div class="admin-step step-3">
+            <div class="step-circle">3</div>
+            <div class="step-name">Preview & Publish</div>
+        </div>
+    </div>
+    <div class="admin-horizontal-container">
+        <div class="admin-player-register-container">
+            <form
+                hx-post="/register-player"
+                hx-swap="innerHTML"
+                hx-target="#player-rows-container"
+                method="post"
+                class="admin-player-register-form"
+            >
+                <div class="player-name-container">
+                    <input type="hidden" name="tournament_id" value="{{tournament.id}}"
+                    <label for="player-name">Player name</label>
+                    <input
+                        type="text"
+                        id="player-name"
+                        name="player-name"
+                        required
+                    />
+                </div>
+                <div class="player-diff-container">
+                    <label for="player-diff">Player difficulty</label>
+                    <input
+                        type="text"
+                        id="player-diff"
+                        name="player-diff"
+                        required
+                    />
+                </div>
+
+                <button class="add-player-btn" href="#">Add Player</button>
+            </form>
+        </div>
+
+        <table id="admin-tbl-view" class="admin-tbl">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Difficulty</th>
+                    <th class="actions-col">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="player-rows-container">
+                {% include "partials/player_rows.html" %}
+            </tbody>
+        </table>
+    </div>
+</div>

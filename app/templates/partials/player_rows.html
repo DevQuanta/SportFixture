@@ -1,0 +1,33 @@
+{% if tournament.players %} {% for player in tournament.players
+%}
+<tr>
+    <td>{{ player.name }}</td>
+    <td class="rank {{player.difficulty}}">
+        {{ player.difficulty }}
+    </td>
+    <td class="actions-col">
+        <div class="actions-group">
+            <button class="edit-btn">
+                <img
+                    src="{{ url_for('static', filename='images/edit.svg') }}"
+                    width="22.49"
+                    height="22.49"
+                />
+            </button>
+            <button class="delete-btn">
+                <img
+                    src="{{ url_for('static', filename='images/remove.svg') }}"
+                    width="15.8"
+                    height="18"
+                />
+            </button>
+        </div>
+    </td>
+</tr>
+{% endfor %} {% else %}
+<tr id="no-players-row">
+    <td colspan="3" class="text-center">
+        No players registered yet. Add one to get started!
+    </td>
+</tr>
+{% endif %}
