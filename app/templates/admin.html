@@ -20,6 +20,7 @@
             hx-trigger="change"
             hx-target="#tournament-editor"
             name="tournaments" id="tournament-select" placeholder="Search for tournament or type to create">
+    <option value=""></option>
     {% for t in tournaments %}
         <option value="{{ t.id }}">{{ t.name }}</option>
     {% endfor %}

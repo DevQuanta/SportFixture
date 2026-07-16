@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from flask_login import UserMixin
-from sqlalchemy import DateTime, String, Table, Column
+from sqlalchemy import DateTime, String, Table, Column, Integer
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm.properties import ForeignKey
@@ -63,3 +63,29 @@ class Tournament(db.Model):
             secondary=tournament_players,
             back_populates="tournaments"
         )
+
+
+class Match(db.Model):
+
+    __tablename__ = "match"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    player_1_id: Mapped[int] = mapped_column(ForeignKey("player.id"), nullable=False)
+    player_2_id: Mapped[int] = mapped_column(ForeignKey("player.id"), nullable=False)
+
+    player_1: Mapped["Player"] = relationship(foreign_keys=[player_1_id])
+    player_2: Mapped["Player"] = relationship(foreign_keys=[player_2_id])
+
+class Set(db.Model):
+    __tablename__ = "set"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    match_id: Mapped[int] = mapped_column(ForeignKey("match.id"), nullable=False)
+
+    match: Mapped["Match"] = relationship()
+
+    set_number: Mapped[int] = mapped_column(Integer(), nullable=False)
+
+    player_1_score: Mapped[int] = mapped_column(Integer(), nullable=False)
+    player_2_score: Mapped[int] = mapped_column(Integer(), nullable=False)

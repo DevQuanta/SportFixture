@@ -1,23 +1,97 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block body_id %}results-page{% endblock %} {% block
+content %}
+<h1 class="text-[30px] font-medium border-l-2 border-[#00C3D0] pl-[10px] mb-0">
+    Internal Match Tracker
+</h1>
 
-{% block body_id %}results-page{% endblock %}
+<p id="intro" class="mt-[5px] text-[17px] font-thin tracking-[0.06em]">
+    Stay up-to-date with the latest matches at our club.
+</p>
 
-{% block content %}
-      <h1><span class="header-prefix">#</span> Internal Match Tracker</h1>
+<div class="mt-5 bg-[#D9D9D91A] rounded-md p-4 w-full flex flex-row justify-between items-center mb-10">
 
-      <p id="intro">
-        On this page, you will find past results along with current tournaments
-        held at Stanmore Table Tennis Club. Use the monthly filters to track
-        player match histories, view updated ladder standings, and follow live
-        knockout brackets as they unfold.
-      </p>
+  <div class="flex flex-row gap-3 items-center text-[16px]">
+    <div class="w-2.5 h-2.5 bg-[#34c759] rounded-full"></div>
+    <span>Knockouts for <span class="text-[#00c0e8]">February</span> are now live.</span>
+  </div>
 
-      <div class="status-line">
-        <div class="status-code"></div>
-        <span
-          >Knockouts for February are now live. View them
-          <a href="#" class="status-link">here</a>.</span
-        >
-      </div>
+  <a href="" class="bg-[#ff383c] text-white rounded-md py-1.5 px-5 text-[15px] cursor-pointer inline-block no-underline hover:bg-[#e02e32] transition-colors">
+    Go to bracket
+  </a>
+
+</div>
+
+<h2 class="text-[30px] font-medium border-l-2 border-[#00C3D0] pl-2.5">
+    Results
+</h2>
+
+<div class="flex flex-row gap-5 p-5 pl-0 w-full">
+    <div class="flex flex-col border border-white/80 w-full h-full rounded-md gap-3.5">
+        <div class="flex flex-row w-full gap-3 p-4 h-15 items-center">
+            <input
+                class="pl-2.5 bg-[#121620] border border-slate-500 w-full h-full rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
+            ></input>
+            <div
+                class="border border-white/60 bg-transparent w-40 h-full rounded-md flex flex-row justify-center items-center gap-1.5 py-1"
+            >
+                January
+                <img
+                    src="{{ url_for('static', filename='images/dropdown.svg') }}"
+                    width="10px"
+                    height="10px"
+                />
+            </div>
+    </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Matches</th>
+                <th>Win Rate</th>
+
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>#1</td>
+                    <td>Jake M.</td>
+                    <td>11</td>
+                    <td>89.09%</td>
+                </tr>
+
+                <tr>
+                    <td>#2</td>
+                    <td>Michael S.</td>
+                    <td>8</td>
+                    <td>70%</td>
+                </tr>
+
+                <tr>
+                    <td>#3</td>
+                    <td>Maria A.</td>
+                    <td>5</td>
+                    <td>40%</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+    <div
+        class="flex flex-col border border-white/80 w-70 h-100% rounded-md items-center gap-5"
+    >
+        <div class="flex flex-row items-center gap-3 justify-center mt-5 font-semibold text-[20px]">
+            <img src="{{ url_for('static', filename='images/trophy.svg') }}" height="100%" width="40px">Winner of<br>the month</div>
+
+        <div class="flex flex-col">
+        <h2 class="text-4xl font-medium bg-linear-to-r from-[#34C759] to-[#00C3D0] bg-clip-text text-transparent">Jake M. </h2>
+        <span class="italic">Won 15 matches</span>
+        </div>
+    </div>
+
+
+</div>
 
 {% endblock %}
