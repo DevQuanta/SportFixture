@@ -1,45 +1,44 @@
-<h1><span class="header-prefix">//</span> Knockout League</h1>
-
 <div class="step-editor-container">
-    <div class="admin-steps">
-        <div class="admin-step step-1">
-            <div class="step-circle">1</div>
-            <div class="step-name">Register Player</div>
+    <div class="flex flex-row mt-12.5 mb-20 justify-between">
+        <div class="flex flex-row gap-3 items-center">
+            <div class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#ff2d55] text-[18px]">1</div>
+            <div class="text-[18px]">Register Player</div>
         </div>
-        <div class="admin-step step-2">
-            <div class="step-circle">2</div>
-            <div class="step-name">Seed Draws</div>
+        <div class="flex flex-row gap-3 items-center  opacity-60">
+            <div class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#8d8d8d] text-[18px]">2</div>
+            <div class="text-[18px]">Seed Draws</div>
         </div>
-        <div class="admin-step step-3">
-            <div class="step-circle">3</div>
-            <div class="step-name">Preview & Publish</div>
+        <div class="flex flex-row gap-3 items-center opacity-60">
+            <div class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#8d8d8d] text-[18px]">3</div>
+            <div class="text[18px]">Preview & Publish</div>
         </div>
     </div>
-    <div class="admin-horizontal-container">
-        <div class="admin-player-register-container">
+    <div class="flex flex-row justify-between items-start gap-10">
+        <div class="flex flex-col w-75 shrink-0">
             <form
                 hx-post="/register-player"
                 hx-swap="innerHTML"
                 hx-target="#player-rows-container"
                 method="post"
-                class="admin-player-register-form"
             >
-                <div class="player-name-container">
+                <div class="flex flex-col gap-0.75 mb-10">
                     <input type="hidden" name="tournament_id" value="{{tournament.id}}"
                     <label for="player-name">Player name</label>
                     <input
                         type="text"
                         id="player-name"
                         name="player-name"
+                        class="inp"
                         required
                     />
                 </div>
-                <div class="player-diff-container">
+                <div class="flex flex-col gap-0.75 mb-10">
                     <label for="player-diff">Player difficulty</label>
                     <input
                         type="text"
                         id="player-diff"
                         name="player-diff"
+                        class="inp"
                         required
                     />
                 </div>

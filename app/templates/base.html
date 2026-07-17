@@ -12,13 +12,17 @@
         {% block head %}{% endblock %}
     </head>
 
-    <body id="{% block body_id %}default-page{% endblock %}">
-        <header class="navbar">
-            <img src="{{ url_for('static', filename='images/logo.png')}}" />
+    <body class="bg-[#0b0f19] m-0 text-[#f8fafc] font-display" id="{% block body_id %}default-page{% endblock %}">
+        <header class="flex flex-row px-10 items-center justify-between h-22.5 bg-transparent border-b border-b-[#959595]">
+            <img class="h-10 w-auto" src="{{ url_for('static', filename='images/logo.png')}}" />
 
-            <div class="nav-links">
-                <a href="/" class="nav-results">Results</a>
+            <div class="flex flex-row gap-10 [&_a]:text-[18px] [&_a]:font-normal [&_a]:text-[#f8fafc] [&_a]:no-underline">
+                <a href="/" class="relative pb-1 text-[18px] text-white/60 hover:text-white transition-col">Results</a>
                 <a href="knockouts" class="nav-knockouts">Knockouts</a>
+
+                {% if current_user.is_authenticated %}
+                <a href="admin" class="nav-admin">Admin</a>
+                {% endif %}
             </div>
 
             {% if current_user.is_authenticated %}
@@ -33,7 +37,7 @@
                 <img
                     src="{{ url_for('static', filename='images/Vector.png')}}"
                 />
-                Admin
+                Login
             </a>
             {% endif %}
         </header>

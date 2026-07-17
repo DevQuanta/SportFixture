@@ -7,15 +7,12 @@
 
 {% endblock %} {% block body_id %}admin-page{% endblock %} {% block content %}
 
-<h1><span class="header-prefix">//</span>Admin view</h1>
+<h1 class="h1-b-l">Admin view</h1>
 <p>Select a tournament or press ‘New’ to process</p>
 
 
 <div
-    data-bs-theme="dark"
-    class="p-4 rounded-3"
-    style="background-color: #0f172a"
->
+    class="p-4 rounded-3">
     <select hx-post="/select-tournament"
             hx-trigger="change"
             hx-target="#tournament-editor"

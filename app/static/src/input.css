@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+@utility h1-b-l {
+    @apply text-[30px] font-medium border-l-2 border-l-[#00C3D0] mb-0 pl-1.75
+}
+
+@utility h2-b-l {
+    @apply text-[28px] font-medium border-l-2 border-l-[#00C3D0] mb-0 pl-1.75
+}
+
+@utility inp {
+    @apply border rounded-md bg-transparent text-[18px]  text-white h-7
+}
+
+@utility admin-step {
+    @apply flex flex-row items-center gap-2 text-[20px]
+}
+
+@theme {
+  --font-display: "Poppins", sans-serif;
+}
