@@ -7,12 +7,17 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-blue-950: oklch(28.2% 0.091 267.935);
     --color-slate-500: oklch(55.4% 0.046 257.417);
+    --color-slate-600: oklch(44.6% 0.043 257.281);
+    --color-slate-800: oklch(27.9% 0.041 260.031);
+    --color-slate-900: oklch(20.8% 0.042 265.755);
     --color-white: #fff;
     --spacing: 0.25rem;
     --text-4xl: 2.25rem;
     --text-4xl--line-height: calc(2.5 / 2.25);
     --font-weight-thin: 100;
+    --font-weight-light: 300;
     --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
@@ -179,17 +184,32 @@
   .static {
     position: static;
   }
+  .col-span-full {
+    grid-column: 1 / -1;
+  }
   .m-0 {
     margin: 0;
+  }
+  .my-1 {
+    margin-block: var(--spacing);
   }
   .mt-5 {
     margin-top: calc(var(--spacing) * 5);
   }
+  .mt-6 {
+    margin-top: calc(var(--spacing) * 6);
+  }
   .mt-12\.5 {
     margin-top: calc(var(--spacing) * 12.5);
   }
+  .mt-15 {
+    margin-top: calc(var(--spacing) * 15);
+  }
   .mt-\[5px\] {
     margin-top: 5px;
+  }
+  .mr-2 {
+    margin-right: calc(var(--spacing) * 2);
   }
   .h1-b-l {
     margin-bottom: 0;
@@ -211,6 +231,12 @@
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
   }
+  .mb-5 {
+    margin-bottom: calc(var(--spacing) * 5);
+  }
+  .mb-8 {
+    margin-bottom: calc(var(--spacing) * 8);
+  }
   .mb-10 {
     margin-bottom: calc(var(--spacing) * 10);
   }
@@ -225,6 +251,9 @@
   }
   .flex {
     display: flex;
+  }
+  .grid {
+    display: grid;
   }
   .hidden {
     display: none;
@@ -244,6 +273,12 @@
   .h-2\.5 {
     height: calc(var(--spacing) * 2.5);
   }
+  .h-3 {
+    height: calc(var(--spacing) * 3);
+  }
+  .h-5 {
+    height: calc(var(--spacing) * 5);
+  }
   .h-7\.5 {
     height: calc(var(--spacing) * 7.5);
   }
@@ -259,14 +294,29 @@
   .h-full {
     height: 100%;
   }
+  .h-px {
+    height: 1px;
+  }
   .w-2\.5 {
     width: calc(var(--spacing) * 2.5);
+  }
+  .w-3 {
+    width: calc(var(--spacing) * 3);
+  }
+  .w-5 {
+    width: calc(var(--spacing) * 5);
   }
   .w-7\.5 {
     width: calc(var(--spacing) * 7.5);
   }
+  .w-10 {
+    width: calc(var(--spacing) * 10);
+  }
   .w-40 {
     width: calc(var(--spacing) * 40);
+  }
+  .w-50 {
+    width: calc(var(--spacing) * 50);
   }
   .w-70 {
     width: calc(var(--spacing) * 70);
@@ -274,8 +324,17 @@
   .w-75 {
     width: calc(var(--spacing) * 75);
   }
+  .w-80 {
+    width: calc(var(--spacing) * 80);
+  }
+  .w-100 {
+    width: calc(var(--spacing) * 100);
+  }
   .w-auto {
     width: auto;
+  }
+  .w-fit {
+    width: fit-content;
   }
   .w-full {
     width: 100%;
@@ -285,6 +344,33 @@
   }
   .cursor-pointer {
     cursor: pointer;
+  }
+  .grid-cols-\[1fr_repeat\(3\,2rem\)\] {
+    grid-template-columns: 1fr repeat(3,2rem);
+  }
+  .grid-cols-\[1fr_repeat\(3\,3rem\)\] {
+    grid-template-columns: 1fr repeat(3,3rem);
+  }
+  .grid-cols-\[1fr_repeat\(3\,4rem\)\] {
+    grid-template-columns: 1fr repeat(3,4rem);
+  }
+  .grid-cols-\[1fr_repeat\(3\,40px\)\] {
+    grid-template-columns: 1fr repeat(3,40px);
+  }
+  .grid-cols-\[1fr_repeat\(3\,auto\)\] {
+    grid-template-columns: 1fr repeat(3,auto);
+  }
+  .grid-cols-\[1fr_repeat\(5\,40px\)\] {
+    grid-template-columns: 1fr repeat(5,40px);
+  }
+  .grid-cols-\[30px_repeat\(3\,40px\)\] {
+    grid-template-columns: 30px repeat(3,40px);
+  }
+  .grid-cols-\[40px_repeat\(3\,40px\)\] {
+    grid-template-columns: 40px repeat(3,40px);
+  }
+  .grid-cols-\[90px_repeat\(3\,40px\)\] {
+    grid-template-columns: 90px repeat(3,40px);
   }
   .flex-col {
     flex-direction: column;
@@ -310,6 +396,9 @@
   .gap-1\.5 {
     gap: calc(var(--spacing) * 1.5);
   }
+  .gap-2 {
+    gap: calc(var(--spacing) * 2);
+  }
   .gap-3 {
     gap: calc(var(--spacing) * 3);
   }
@@ -325,11 +414,38 @@
   .gap-10 {
     gap: calc(var(--spacing) * 10);
   }
+  .gap-x-2 {
+    column-gap: calc(var(--spacing) * 2);
+  }
+  .gap-x-3 {
+    column-gap: calc(var(--spacing) * 3);
+  }
+  .gap-x-4 {
+    column-gap: calc(var(--spacing) * 4);
+  }
+  .gap-y-1\.5 {
+    row-gap: calc(var(--spacing) * 1.5);
+  }
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .overflow-clip {
+    overflow: clip;
+  }
+  .overflow-hidden {
+    overflow: hidden;
+  }
   .rounded-full {
     border-radius: calc(infinity * 1px);
   }
   .rounded-md {
     border-radius: var(--radius-md);
+  }
+  .rounded-l-md {
+    border-top-left-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-md);
   }
   .border {
     border-style: var(--tw-border-style);
@@ -338,6 +454,13 @@
   .border-b {
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
+  }
+  .border-l {
+    border-left-style: var(--tw-border-style);
+    border-left-width: 1px;
+  }
+  .border-\[\#F8FAFC\]\/50 {
+    border-color: color-mix(in oklab, #F8FAFC 50%, transparent);
   }
   .border-slate-500 {
     border-color: var(--color-slate-500);
@@ -348,14 +471,11 @@
       border-color: color-mix(in oklab, var(--color-white) 60%, transparent);
     }
   }
-  .border-white\/80 {
-    border-color: color-mix(in srgb, #fff 80%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      border-color: color-mix(in oklab, var(--color-white) 80%, transparent);
-    }
-  }
   .border-b-\[\#959595\] {
     border-bottom-color: #959595;
+  }
+  .border-l-\[\#F59E0B\] {
+    border-left-color: #F59E0B;
   }
   .bg-\[\#0b0f19\] {
     background-color: #0b0f19;
@@ -363,14 +483,29 @@
   .bg-\[\#8d8d8d\] {
     background-color: #8d8d8d;
   }
+  .bg-\[\#34C759\] {
+    background-color: #34C759;
+  }
   .bg-\[\#34c759\] {
     background-color: #34c759;
+  }
+  .bg-\[\#121A2E\] {
+    background-color: #121A2E;
+  }
+  .bg-\[\#6155F5\]\/30 {
+    background-color: color-mix(in oklab, #6155F5 30%, transparent);
   }
   .bg-\[\#121620\] {
     background-color: #121620;
   }
+  .bg-\[\#515151\]\/50 {
+    background-color: color-mix(in oklab, #515151 50%, transparent);
+  }
   .bg-\[\#D9D9D91A\] {
     background-color: #D9D9D91A;
+  }
+  .bg-\[\#F59E0B\] {
+    background-color: #F59E0B;
   }
   .bg-\[\#ff2d55\] {
     background-color: #ff2d55;
@@ -380,6 +515,18 @@
   }
   .bg-transparent {
     background-color: transparent;
+  }
+  .bg-white\/10 {
+    background-color: color-mix(in srgb, #fff 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
+    }
+  }
+  .bg-white\/50 {
+    background-color: color-mix(in srgb, #fff 50%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-white) 50%, transparent);
+    }
   }
   .bg-linear-to-r {
     --tw-gradient-position: to right;
@@ -420,8 +567,17 @@
   .py-1\.5 {
     padding-block: calc(var(--spacing) * 1.5);
   }
+  .py-2 {
+    padding-block: calc(var(--spacing) * 2);
+  }
+  .py-5 {
+    padding-block: calc(var(--spacing) * 5);
+  }
   .pb-1 {
     padding-bottom: var(--spacing);
+  }
+  .pb-3 {
+    padding-bottom: calc(var(--spacing) * 3);
   }
   .pl-0 {
     padding-left: 0;
@@ -431,6 +587,9 @@
   }
   .text-center {
     text-align: center;
+  }
+  .text-start {
+    text-align: start;
   }
   .font-display {
     font-family: var(--font-display);
@@ -457,6 +616,10 @@
   .text-\[30px\] {
     font-size: 30px;
   }
+  .font-light {
+    --tw-font-weight: var(--font-weight-light);
+    font-weight: var(--font-weight-light);
+  }
   .font-medium {
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
@@ -476,6 +639,12 @@
   .text-\[\#00c0e8\] {
     color: #00c0e8;
   }
+  .text-\[\#E7E7E7\] {
+    color: #E7E7E7;
+  }
+  .text-\[\#E7E7E7\]\/80 {
+    color: color-mix(in oklab, #E7E7E7 80%, transparent);
+  }
   .text-\[\#f8fafc\] {
     color: #f8fafc;
   }
@@ -484,6 +653,12 @@
   }
   .text-white {
     color: var(--color-white);
+  }
+  .text-white\/30 {
+    color: color-mix(in srgb, #fff 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-white) 30%, transparent);
+    }
   }
   .text-white\/60 {
     color: color-mix(in srgb, #fff 60%, transparent);
