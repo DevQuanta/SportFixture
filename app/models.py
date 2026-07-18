@@ -51,17 +51,33 @@ class Player(db.Model):
             back_populates="player"
         )
 
+    @hybrid_property
+    def colour(self):
+        """Checks the difficulty column and returns the exact hex code."""
+        # Mapping rules centralized in one place
+        mapping = {
+            "beginner": "#22c55e",      # Green
+            "intermediate": "#eab308",  # Yellow
+            "advanced": "#ef4444"         # Red
+        }
+        # fallback (like gray) if difficulty is missing/mismatched
+        return mapping.get(self.difficulty, "#9ca3af") # type: ignore
+
 class Tournament(db.Model):
     __tablename__ = "tournament"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[String] = mapped_column(String(100), nullable=False)
 
-    max_groups: Mapped[int] = mapped_column(nullable=False)
+    max_groups: Mapped[int] = mapped_column(default=4, nullable=False)
+    max_rounds: Mapped[int] = mapped_column(default=3, nullable=False)
+
     player_associations: Mapped[list["TournamentPlayer"]] = relationship(
             back_populates="tournament"
         )
 
+
+    matches: Mapped[list["Match"]] = relationship(back_populates="tournament")
 
 
 class Match(db.Model):
@@ -79,18 +95,26 @@ class Match(db.Model):
     player_2: Mapped["Player"] = relationship(foreign_keys=[player_2_id])
     tournament: Mapped["Tournament"] = relationship(foreign_keys=[tournament_id])
 
-class Set(db.Model):
-    __tablename__ = "set"
+    # needs round and group
+    round_number: Mapped[int] = mapped_column(nullable=False)
+    group_id: Mapped[int] = mapped_column(nullable=False)
+
+    is_placement_match: Mapped[bool] = mapped_column(default=False)
+
+    games: Mapped[list["GameScore"]] = relationship("GameScore", order_by="GameScore.game_number", back_populates="match")
+
+class GameScore(db.Model):
+    __tablename__ = "gamescore"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     match_id: Mapped[int] = mapped_column(ForeignKey("match.id"), nullable=False)
 
-    match: Mapped["Match"] = relationship()
+    match: Mapped["Match"] = relationship("Match", back_populates="games")
 
-    set_number: Mapped[int] = mapped_column(Integer(), nullable=False)
+    game_number: Mapped[int] = mapped_column(nullable=False)
 
-    player_1_score: Mapped[int] = mapped_column(Integer(), nullable=False)
-    player_2_score: Mapped[int] = mapped_column(Integer(), nullable=False)
+    p1_score: Mapped[int | None] = mapped_column(nullable=True)
+    p2_score: Mapped[int | None] = mapped_column( nullable=True)
 
 class TournamentPlayer(db.Model):
 

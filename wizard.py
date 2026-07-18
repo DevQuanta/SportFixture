@@ -28,6 +28,20 @@ def admin_register():
 
         console.print("[green]Admin creation success![/green]")
 
+def destroy_db():
+    console.print("[red bold]Destroy DB[/red bold]")
+    console.print(":: Use this application to destroy DB contents\n")
+
+    confirm = questionary.confirm("Really delete?").ask()
+
+    if confirm:
+        with app.app_context():
+
+            db.drop_all()
+            db.create_all()
+
+            console.print("[green]Deletion success![/green]")
+
 def new_tournament():
     console.print("[red bold]Tournament creation[/red bold]")
     console.print(":: Use this application to create tournaments\n")
@@ -47,12 +61,14 @@ def new_tournament():
         console.print("[green]Tournament creation success![/green]")
 
 
-option = questionary.select("Manage: ", choices = ["admins", "tournaments", "players"]).ask()
+option = questionary.select("Manage: ", choices = ["admins", "tournaments", "players", "delete"]).ask()
 
 match option:
     case "admins":
         admin_register()
     case "tournaments":
         new_tournament()
+    case "delete":
+        destroy_db()
     case _:
         console.log("[error]Invalid option[/error]")

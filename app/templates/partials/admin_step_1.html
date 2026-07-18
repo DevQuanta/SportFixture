@@ -63,6 +63,7 @@
             </thead>
 
             <tbody id="player-rows-container">
+                {% set players = tournament.player_associations %}
                 {% include "partials/player_rows.html" %}
             </tbody>
         </table>

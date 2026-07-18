@@ -1,4 +1,5 @@
-{% if tournament.players %} {% for player in tournament.players %}
+{% if players %} {% for tp in players %}
+{% set player = tp.player %}
 {% include "partials/single_player_row.html" %}
 {% endfor %} {% else %}
 <tr id="no-players-row">
