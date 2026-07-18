@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from flask_login import UserMixin
-from sqlalchemy import DateTime, String, Table, Column, Integer
+from sqlalchemy import DateTime, String, Index, Integer
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm.properties import ForeignKey
@@ -9,12 +9,12 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.database import db
 
-tournament_players = Table(
-    "tournament_players",
-    db.metadata,
-    Column("player_id", ForeignKey("player.id"), primary_key=True), # type: ignore
-    Column("tournament_id", ForeignKey("tournament.id"), primary_key=True) # type: ignore
-)
+# tournament_players = Table(
+#     "tournament_players",
+#     db.metadata,
+#     Column("player_id", ForeignKey("player.id"), primary_key=True), # type: ignore
+#     Column("tournament_id", ForeignKey("tournament.id"), primary_key=True) # type: ignore
+# )
 
 class Admin(db.Model, UserMixin):
     __tablename__ = "admins"
@@ -47,10 +47,9 @@ class Player(db.Model):
     name: Mapped[String] = mapped_column(String(100), nullable=False)
     difficulty: Mapped[String] = mapped_column(String(100), nullable=False)
 
-    tournaments: Mapped[list["Tournament"]] = relationship(
-        secondary=tournament_players,
-        back_populates="players"
-    )
+    tournament_associations: Mapped[list["TournamentPlayer"]] = relationship(
+            back_populates="player"
+        )
 
 class Tournament(db.Model):
     __tablename__ = "tournament"
@@ -58,11 +57,11 @@ class Tournament(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[String] = mapped_column(String(100), nullable=False)
 
-
-    players: Mapped[list["Player"]] = relationship(
-            secondary=tournament_players,
-            back_populates="tournaments"
+    max_groups: Mapped[int] = mapped_column(nullable=False)
+    player_associations: Mapped[list["TournamentPlayer"]] = relationship(
+            back_populates="tournament"
         )
+
 
 
 class Match(db.Model):
@@ -71,11 +70,14 @@ class Match(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
+    tournament_id: Mapped[int] = mapped_column(ForeignKey("tournament.id"), nullable=False)
+
     player_1_id: Mapped[int] = mapped_column(ForeignKey("player.id"), nullable=False)
     player_2_id: Mapped[int] = mapped_column(ForeignKey("player.id"), nullable=False)
 
     player_1: Mapped["Player"] = relationship(foreign_keys=[player_1_id])
     player_2: Mapped["Player"] = relationship(foreign_keys=[player_2_id])
+    tournament: Mapped["Tournament"] = relationship(foreign_keys=[tournament_id])
 
 class Set(db.Model):
     __tablename__ = "set"
@@ -89,3 +91,19 @@ class Set(db.Model):
 
     player_1_score: Mapped[int] = mapped_column(Integer(), nullable=False)
     player_2_score: Mapped[int] = mapped_column(Integer(), nullable=False)
+
+class TournamentPlayer(db.Model):
+
+    __tablename__ = "tournament_player"
+
+    player_id: Mapped[int] = mapped_column(ForeignKey("player.id"), primary_key=True)
+    tournament_id: Mapped[int] = mapped_column(ForeignKey("tournament.id"), primary_key=True)
+
+    group_id: Mapped[int | None] = mapped_column(nullable=True)
+
+    player: Mapped["Player"] = relationship(back_populates="tournament_associations")
+    tournament: Mapped["Tournament"] = relationship(back_populates="player_associations")
+
+    __table_args__ = (
+            Index("idx_tournament_group", "tournament_id", "group_id"),
+        )

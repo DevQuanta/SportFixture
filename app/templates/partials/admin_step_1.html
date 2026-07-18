@@ -1,4 +1,4 @@
-<div class="step-editor-container">
+<div id="step-editor-container">
     <div class="flex flex-row mt-12.5 mb-20 justify-between">
         <div class="flex flex-row gap-3 items-center">
             <div class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#ff2d55] text-[18px]">1</div>
@@ -43,7 +43,13 @@
                     />
                 </div>
 
-                <button class="add-player-btn" href="#">Add Player</button>
+                <div class="flex flex-row gap-4 justify-between">
+                <button class="rounded-md bg-[#ff383c] text-[18px] text-white px-2 py-2 cursor-pointer" href="#">Add Player</button>
+                <button type="button" class="rounded-md bg-transparent text-[18px] text-cyan-500 px-2 py-2 cursor-pointer"
+                    hx-get="/admin/{{tournament.id}}/step-2"
+                    hx-swap="outerHTML"
+                    hx-target="#step-editor-container">Next Page</button>
+                </div>
             </form>
         </div>
 

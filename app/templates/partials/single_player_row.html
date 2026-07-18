@@ -1,0 +1,31 @@
+<tr id="player-row-{{player.id}}">
+    <td>{{ player.name }}</td>
+    <td class="rank {{player.difficulty}}">{{ player.difficulty }}</td>
+
+    <td class="actions-col">
+        <div class="actions-group">
+            <button
+                hx-get="/edit-player/{{ player.id }}"
+                hx-target="#player-row-{{ player.id }}"
+                hx-swap="outerHTML"
+                class="edit-btn"
+            >
+                <img
+                    src="{{ url_for('static', filename='images/edit.svg') }}"
+                    width="22.49"
+                    height="22.49"
+                />
+            </button>
+            <button class="delete-btn">
+                <img
+                    src="{{ url_for('static', filename='images/remove.svg') }}"
+                    width="15.8"
+                    height="18"
+                    hx-delete="/delete-player/{{ player.id }}"
+                    hx-target="#player-row-{{ player.id }}"
+                    hx-confirm="Are you sure you want to remove {{ player.name }}"
+                />
+            </button>
+        </div>
+    </td>
+</tr>
