@@ -322,11 +322,6 @@ td {
   margin-bottom: 5px;
 }
 
-#admin-page p {
-  margin-top: 0;
-  font-size: 20px;
-}
-
 /* tom select overrides */
 .ts-control, .ts-control input, .ts-dropdown {
   background: #1e293b !important;

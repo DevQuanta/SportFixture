@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, current_app
+from flask import Blueprint, render_template, request, current_app, make_response
 from flask_login.utils import login_required
 from sqlalchemy import select, and_
 from collections import defaultdict
@@ -26,8 +26,20 @@ def admin_page():
     stmt = select(Tournament)
     tournaments = db.session.execute(stmt).scalars().all()
 
+    selected_id = request.args.get("tournaments")
 
-    return render_template("admin.html", tournaments=tournaments)
+    selected_tournament = None
+    if selected_id:
+        # 3. Fetch the actual tournament object from the DB
+        selected_tournament = db.session.get(Tournament, selected_id)
+
+
+    return render_template(
+            "admin.html",
+            tournaments=tournaments,
+            tournament=selected_tournament,
+            selected_tournament_id=int(selected_id) if selected_id and selected_id.isdigit() else None
+        )
 
 
 @main_bp.route("/register-player", methods=["POST"])  # type: ignore
@@ -82,7 +94,16 @@ def select_tournament():
             db.session.add(tournament)
             db.session.commit()  # Commit   ting generates the tournament.id automatically
 
-    return step_1(tournament.id)
+    # 1. Generate your normal step HTML block
+    response_html = step_1(tournament.id)
+
+    # 2. Wrap it in a Flask response object
+    response = make_response(response_html)
+
+    # 3. Inject the HTMX header with the actual dynamic ID
+    response.headers["HX-Push-Url"] = f"/admin?tournaments={tournament.id}"
+
+    return response
 
 @main_bp.route("/admin/<int:tournament_id>/step-1")
 def step_1(tournament_id):
@@ -102,6 +123,9 @@ def step_2(tournament_id):
 def step_3(tournament_id):
     stmt = select(Tournament).where(Tournament.id == tournament_id)
     tournament = db.session.execute(stmt).scalar_one_or_none()
+
+    current_app.logger.info(generate_round(tournament_id, 1))
+
     return render_template("partials/admin_step_3.html", tournament=tournament)
 
 @main_bp.route("/edit-player/<int:player_id>") # type: ignore
@@ -180,25 +204,23 @@ def assign_player(tournament_id, player_id):
 
     return view_tournament_seeding(tournament_id)
 
-@main_bp.route("/tournaments/<int:tournament_id>/rounds/<int:round_number>/generate")
 def generate_round(tournament_id, round_id):
-    group_ids = defaultdict(list)
     tournament = db.session.get(Tournament, tournament_id) # type: ignore
+
+    num_groups = tournament.max_groups # type: ignore
+    groups = [[] for _ in range(num_groups)]
+
     tournament_players = tournament.player_associations # type: ignore
 
     if round_id == 1:
         for tp in tournament_players:
-            group_ids[tp.group_id].append(tp.player)
+            groups[tp.group_id - 1].append(tp.player) # type: ignore
 
-        for group_id in group_ids:
-            pass
+        return groups
 
     else:
         group_index = 0
         direction = 1
-        num_groups = tournament.max_groups # type: ignore
-
-        groups = [[] for _ in range(num_groups)]
 
         players_list = [tp.player for tp in tournament.player_associations] # type: ignore
 
@@ -218,8 +240,8 @@ def generate_round(tournament_id, round_id):
                 direction = 1
                 group_index = 0
 
-        for i in range(1, num_groups + 1):
-            create_matches_for_group(groups[i], tournament_id, round_id) # type: ignore
+    for i in range(1, num_groups + 1):
+        create_matches_for_group(groups[i], tournament_id, round_id) # type: ignore
 
 def create_matches_for_group(player_ids, tournament_id, round_number, group_id, is_placement=False):
     if is_placement:
@@ -254,7 +276,7 @@ def get_ratio(won, lost):
         return float('inf') + won
     return won / lost
 
-def calculate_standings(tournament_id, players_list, group_id = None, round_id = None):
+def calculate_standings(tournament_id, players_list, round_id = None):
     stats = {
         player.id: {
             "player_name": player.player.name,

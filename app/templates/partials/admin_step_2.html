@@ -1,31 +1,47 @@
 <div id="step-group-container">
-    <div class="flex flex-row mt-12.5 mb-20 justify-between">
-        <div class="flex flex-row gap-3 items-center opacity-60">
-            <div
-                class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#8d8d8d] text-[18px]"
-            >
-                1
+    <div class="flex flex-col gap-4 mb-10">
+    <div class="flex flex-row mt-12.5 justify-between">
+            <div class="flex flex-row gap-3 items-center">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-green-500 text-[16px] opacity-90"
+                >
+                    1
+                </div>
+                <div class="text-[18px] text-green-500">Register Player</div>
             </div>
-            <div class="text-[18px]">Register Player</div>
-        </div>
-        <div class="flex flex-row gap-3 items-center">
-            <div
-                class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#ff2d55] text-[18px]"
-            >
-                2
+            <div class="flex flex-row gap-3 items-center">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#ff2d55] text-[16px]"
+                >
+                    2
+                </div>
+                <div class="text-[18px]">Seed Draws</div>
             </div>
-            <div class="text-[18px]">Seed Draws</div>
-        </div>
-        <div class="flex flex-row gap-3 items-center opacity-60">
-            <div
-                class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#8d8d8d] text-[18px]"
-            >
-                3
+            <div class="flex flex-row gap-3 items-center opacity-60">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#8d8d8d] text-[16px]"
+                >
+                    3
+                </div>
+                <div class="text[18px]">Preview & Publish</div>
             </div>
-            <div class="text[18px]">Preview & Publish</div>
-        </div>
+    </div>
+    <div class="flex flex-row justify-between">
+
+        <a class="rounded-md bg-transparent text-cyan-500 px-2 py-2 cursor-pointer"
+            hx-get="/admin/{{tournament.id}}/step-1"
+            hx-swap="outerHTML"
+            hx-target="#step-group-container">← Previous Step</a>
+
+        <a class=" text-cyan-500 px-2 py-2 cursor-pointer"
+            hx-get="/admin/{{tournament.id}}/step-3"
+            hx-swap="outerHTML"
+            hx-target="#step-group-container">Next Step →</a>
+    </div>
+
     </div>
     <div class="flex flex-row justify-between items-start gap-10 w-full">
+
 
     {% for n in grouped_players.keys()|sort %}
 

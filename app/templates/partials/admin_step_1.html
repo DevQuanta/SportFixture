@@ -1,19 +1,41 @@
 <div id="step-editor-container">
-    <div class="flex flex-row mt-12.5 mb-20 justify-between">
-        <div class="flex flex-row gap-3 items-center">
-            <div class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#ff2d55] text-[18px]">1</div>
-            <div class="text-[18px]">Register Player</div>
-        </div>
-        <div class="flex flex-row gap-3 items-center  opacity-60">
-            <div class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#8d8d8d] text-[18px]">2</div>
-            <div class="text-[18px]">Seed Draws</div>
-        </div>
-        <div class="flex flex-row gap-3 items-center opacity-60">
-            <div class="flex flex-col rounded-full items-center justify-center text-center w-7.5 h-7.5 bg-[#8d8d8d] text-[18px]">3</div>
-            <div class="text[18px]">Preview & Publish</div>
-        </div>
+    <div class="flex flex-col gap-4 mb-10">
+    <div class="flex flex-row mt-12.5 justify-between">
+            <div class="flex flex-row gap-3 items-center">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#ff2d55] text-[16px]"
+                >
+                    1
+                </div>
+                <div class="text-[18px]">Register Player</div>
+            </div>
+            <div class="flex flex-row gap-3 items-center opacity-60">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center bg-[#8d8d8d] w-6 h-6 text-[16px]"
+                >
+                    2
+                </div>
+                <div class="text-[18px]">Seed Draws</div>
+            </div>
+            <div class="flex flex-row gap-3 items-center opacity-60">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#8d8d8d] text-[16px]"
+                >
+                    3
+                </div>
+                <div class="text[18px]">Preview & Publish</div>
+            </div>
     </div>
-    <div class="flex flex-row justify-between items-start gap-10">
+    <div class="flex flex-row justify-end">
+
+        <a class=" text-cyan-500 px-2 py-2 cursor-pointer"
+            hx-get="/admin/{{tournament.id}}/step-2"
+            hx-swap="outerHTML"
+            hx-target="#step-editor-container">Next Step →</a>
+    </div>
+
+    </div>
+    <div class="flex flex-row justify-between items-center gap-20">
         <div class="flex flex-col w-75 shrink-0">
             <form
                 hx-post="/register-player"
@@ -21,6 +43,7 @@
                 hx-target="#player-rows-container"
                 method="post"
             >
+                <div class="font-semibold text-[30px] mb-5">Player Details</div>
                 <div class="flex flex-col gap-0.75 mb-10">
                     <input type="hidden" name="tournament_id" value="{{tournament.id}}"
                     <label for="player-name">Player name</label>
@@ -43,12 +66,9 @@
                     />
                 </div>
 
-                <div class="flex flex-row gap-4 justify-between">
-                <button class="rounded-md bg-[#ff383c] text-[18px] text-white px-2 py-2 cursor-pointer" href="#">Add Player</button>
-                <button type="button" class="rounded-md bg-transparent text-[18px] text-cyan-500 px-2 py-2 cursor-pointer"
-                    hx-get="/admin/{{tournament.id}}/step-2"
-                    hx-swap="outerHTML"
-                    hx-target="#step-editor-container">Next Page</button>
+                <div class="flex flex-row gap-4 justify-center">
+                <button class="rounded-md bg-[#ff383c] text-[18px] text-white px-9 py-2 cursor-pointer w-fit" href="#">Add Player</button>
+
                 </div>
             </form>
         </div>

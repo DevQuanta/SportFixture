@@ -8,36 +8,46 @@
 {% endblock %} {% block body_id %}admin-page{% endblock %} {% block content %}
 
 <h1 class="h1-b-l">Admin view</h1>
-<p>Select a tournament or press ‘New’ to process</p>
 
+
+<div class="flex flex-row items-center w-full">
 
 <div
-    class="p-4 rounded-3">
+    class="p-4 rounded-3 w-full">
     <select hx-post="/select-tournament"
             hx-trigger="change"
             hx-target="#tournament-editor"
             name="tournaments" id="tournament-select" placeholder="Search for tournament or type to create">
     <option value=""></option>
     {% for t in tournaments %}
-        <option value="{{ t.id }}">{{ t.name }}</option>
+    <option value="{{ t.id }}" {% if t.id|string == selected_tournament_id|string %}selected{% endif %}>
+                {{ t.name }}
+            </option>
     {% endfor %}
     </select>
 </div>
+</div>
 
-<div id="tournament-editor"></div>
+<div id="tournament-editor">
+    {% if tournament %}
+    {% include "partials/admin_step_1.html" %}
+
+
+    {% else %}
+    <p>Select a tournament or press ‘New’ to process</p>
+    {% endif %}
+</div>
 
 <script>
     new TomSelect("#tournament-select", {
-        create: true,
         createOnBlur: true,
+        create: true,
+
         sortField: {
             field: "text",
             direction: "asc"
         },
         render: {
-                    option_create: function(data, escape) {
-                        return '<div class="create">+ Create new tournament: <strong>' + escape(data.input) + '</strong>...</div>';
-                    },
                     no_results: function(data, escape) {
                         return '<div class="no-results p-2">No matching tournaments found</div>';
                     }

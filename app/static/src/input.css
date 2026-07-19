@@ -10,7 +10,7 @@
 }
 
 @utility inp {
-    @apply border rounded-md bg-transparent text-[18px]  text-white h-7;
+    @apply border rounded-md bg-transparent text-[14px]  text-white/90 h-7 pl-3 focus:outline-none focus:border-blue-300/80;
 }
 
 @utility admin-step {
