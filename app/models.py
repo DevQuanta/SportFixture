@@ -8,6 +8,8 @@ from sqlalchemy.orm.properties import ForeignKey
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.database import db
+from enum import Enum as PyEnum
+from sqlalchemy import Enum as SQLEnum
 
 # tournament_players = Table(
 #     "tournament_players",
@@ -63,6 +65,14 @@ class Player(db.Model):
         # fallback (like gray) if difficulty is missing/mismatched
         return mapping.get(self.difficulty, "#9ca3af") # type: ignore
 
+class TournamentStatus(PyEnum):
+    SETUP = "setup"
+    REGISTRATION = "registration"
+    ASSIGNMENT = "assignment"
+    PREVIEW = "preview"
+    LIVE = "live"
+    COMPLETED = "completed"
+
 class Tournament(db.Model):
     __tablename__ = "tournament"
 
@@ -71,6 +81,8 @@ class Tournament(db.Model):
 
     max_groups: Mapped[int] = mapped_column(default=4, nullable=False)
     max_rounds: Mapped[int] = mapped_column(default=3, nullable=False)
+
+    status: Mapped[TournamentStatus] = mapped_column(SQLEnum(TournamentStatus), default=TournamentStatus.SETUP, nullable = False)
 
     player_associations: Mapped[list["TournamentPlayer"]] = relationship(
             back_populates="tournament"

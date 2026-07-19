@@ -1,6 +1,6 @@
 <div id="step-editor-container">
     <div class="flex flex-col gap-4 mb-10">
-    <div class="flex flex-row mt-12.5 justify-between">
+        <div class="flex flex-row mt-12.5 justify-between">
             <div class="flex flex-row gap-3 items-center">
                 <div
                     class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-green-500 text-[16px] opacity-90"
@@ -25,70 +25,26 @@
                 </div>
                 <div class="text[18px]">Preview & Publish</div>
             </div>
-    </div>
-    <div class="flex flex-row justify-between">
-        <a class=" text-cyan-500 px-2 py-2 cursor-pointer"
-            hx-get="/admin/{{tournament.id}}/step-2"
-            hx-swap="outerHTML"
-            hx-target="#step-editor-container">← Previous Step</a>
-
-        <a class=" text-cyan-500 px-2 py-2 cursor-pointer"
-            hx-get="/admin/{{tournament.id}}/step-2"
-            hx-swap="outerHTML"
-            hx-target="#step-editor-container">Next Step →</a>
-    </div>
-    <div class="flex flex-row justify-between items-start gap-10">
-        <div class="flex flex-col w-75 shrink-0">
-            <form
-                hx-post="/register-player"
-                hx-swap="innerHTML"
-                hx-target="#player-rows-container"
-                method="post"
-            >
-                <div class="flex flex-col gap-0.75 mb-10">
-                    <input type="hidden" name="tournament_id" value="{{tournament.id}}"
-                    <label for="player-name">Player name</label>
-                    <input
-                        type="text"
-                        id="player-name"
-                        name="player-name"
-                        class="inp"
-                        required
-                    />
-                </div>
-                <div class="flex flex-col gap-0.75 mb-10">
-                    <label for="player-diff">Player difficulty</label>
-                    <input
-                        type="text"
-                        id="player-diff"
-                        name="player-diff"
-                        class="inp"
-                        required
-                    />
-                </div>
-
-                <div class="flex flex-row gap-4 justify-between">
-                <button class="rounded-md bg-[#ff383c] text-[18px] text-white px-2 py-2 cursor-pointer" href="#">Add Player</button>
-                <button type="button" class="rounded-md bg-transparent text-[18px] text-cyan-500 px-2 py-2 cursor-pointer"
-                    hx-get="/admin/{{tournament.id}}/step-3"
-                    hx-swap="outerHTML"
-                    hx-target="#step-editor-container">Next Page</button>
-                </div>
-            </form>
         </div>
+        <div class="flex flex-row justify-between">
+            <a
+                class="text-cyan-500 px-2 py-2 cursor-pointer"
+                hx-post="/admin/{{tournament.id}}/previous/{{current_step}}"
+                hx-swap="outerHTML"
+                hx-target="#step-editor-container"
+                >← Previous Step</a
+            >
 
-        <table id="admin-tbl-view" class="admin-tbl">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Difficulty</th>
-                    <th class="actions-col">Actions</th>
-                </tr>
-            </thead>
-
-            <tbody id="player-rows-container">
-                {% include "partials/player_rows.html" %}
-            </tbody>
-        </table>
+            <a
+                class="text-cyan-500 px-2 py-2 cursor-pointer"
+                hx-post="/admin/{{tournament.id}}/advance"
+                hx-swap="outerHTML"
+                hx-target="#step-editor-container"
+                >Next Step →</a
+            >
+        </div>
     </div>
+
+    {% include "partials/knockouts_preview.html" %}
+
 </div>

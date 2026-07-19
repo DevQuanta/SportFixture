@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, request, current_app, make_response
+from flask import Blueprint, render_template, request, current_app, make_response, abort
 from flask_login.utils import login_required
 from sqlalchemy import select, and_
 from collections import defaultdict
 
 from app.database import db
-from app.models import Player, Tournament, TournamentPlayer, Match
+from app.models import Player, Tournament, TournamentPlayer, Match, TournamentStatus
 
 main_bp = Blueprint("main", __name__)
 
@@ -92,32 +92,99 @@ def select_tournament():
         if not tournament:
             tournament = Tournament(name=tournament_input) # type: ignore
             db.session.add(tournament)
-            db.session.commit()  # Commit   ting generates the tournament.id automatically
+            db.session.commit()  # Committing generates the tournament.id automatically
 
-    # 1. Generate your normal step HTML block
-    response_html = step_1(tournament.id)
+    current_status = tournament.status
 
-    # 2. Wrap it in a Flask response object
+    if current_status == TournamentStatus.SETUP:
+        response_html = step_1(tournament.id)
+        tournament.status = TournamentStatus.REGISTRATION
+        db.session.commit()
+    elif current_status == TournamentStatus.REGISTRATION:
+        response_html = step_1(tournament.id)
+
+    elif current_status == TournamentStatus.ASSIGNMENT:
+        response_html = step_2(tournament.id)
+    elif current_status == TournamentStatus.PREVIEW:
+        response_html = step_3(tournament.id)
+    else:
+        response_html = step_1(tournament.id)
+
     response = make_response(response_html)
-
-    # 3. Inject the HTMX header with the actual dynamic ID
     response.headers["HX-Push-Url"] = f"/admin?tournaments={tournament.id}"
 
     return response
+
+
+@main_bp.route("/admin/<int:tournament_id>/advance/<string:current_step>", methods=["POST"])
+def advance_tournament(tournament_id, current_step):
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        abort(404, description="Tournament not found")
+
+    current_app.logger.info(f"ADVANCE TRIGGERED. CURRENT STATUS IN DB: {tournament.status} ---")
+
+    if tournament.status != current_step:
+        tournament.status = TournamentStatus.REGISTRATION
+        db.session.commit()
+        return step_1(tournament_id)
+
+    if tournament.status == TournamentStatus.SETUP:
+        tournament.status = TournamentStatus.REGISTRATION
+        db.session.commit()
+        return step_1(tournament_id)
+    elif tournament.status == TournamentStatus.REGISTRATION:
+        tournament.status = TournamentStatus.ASSIGNMENT
+        db.session.commit()
+        return step_2(tournament_id)
+    elif tournament.status == TournamentStatus.ASSIGNMENT:
+        tournament.status = TournamentStatus.PREVIEW
+        db.session.commit()
+        return step_3(tournament_id)
+    elif tournament.status == TournamentStatus.PREVIEW:
+        tournament.status = TournamentStatus.LIVE
+        db.session.commit()
+
+    return step_1(tournament_id)
+
+
+@main_bp.route("/admin/<int:tournament_id>/previous/<string:current_step>", methods=["POST"])
+def previous_tournament(tournament_id, current_step):
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        abort(404, description="Tournament not found")
+
+    if tournament.status != current_step:
+        tournament.status = TournamentStatus.REGISTRATION
+        db.session.commit()
+        return step_1(tournament_id)
+
+    elif tournament.status == TournamentStatus.ASSIGNMENT:
+        tournament.status = TournamentStatus.REGISTRATION
+        db.session.commit()
+        return step_1(tournament_id)
+    elif tournament.status == TournamentStatus.PREVIEW:
+        tournament.status = TournamentStatus.ASSIGNMENT
+        db.session.commit()
+        return step_2(tournament_id)
+
+    return step_1(tournament_id)
 
 @main_bp.route("/admin/<int:tournament_id>/step-1")
 def step_1(tournament_id):
     stmt = select(Tournament).where(Tournament.id == tournament_id)
     tournament = db.session.execute(stmt).scalar_one_or_none()
 
-    return render_template("partials/admin_step_1.html", tournament=tournament)
+    return render_template("partials/admin_step_1.html", tournament=tournament, current_step=TournamentStatus.REGISTRATION)
 
 @main_bp.route("/admin/<int:tournament_id>/step-2")
 def step_2(tournament_id):
     stmt = select(Tournament).where(Tournament.id == tournament_id)
     tournament = db.session.execute(stmt).scalar_one_or_none()
 
-    return view_tournament_seeding(tournament.id) # type: ignore
+    return view_tournament_seeding(tournament.id, current_step=TournamentStatus.ASSIGNMENT) # type: ignore
 
 @main_bp.route("/admin/<int:tournament_id>/step-3")
 def step_3(tournament_id):
@@ -126,7 +193,9 @@ def step_3(tournament_id):
 
     current_app.logger.info(generate_round(tournament_id, 1))
 
-    return render_template("partials/admin_step_3.html", tournament=tournament)
+
+
+    return render_template("partials/admin_step_3.html", tournament=tournament, current_step=TournamentStatus.PREVIEW)
 
 @main_bp.route("/edit-player/<int:player_id>") # type: ignore
 def edit_player(player_id):
@@ -208,6 +277,8 @@ def generate_round(tournament_id, round_id):
     tournament = db.session.get(Tournament, tournament_id) # type: ignore
 
     num_groups = tournament.max_groups # type: ignore
+    current_app.logger.info(f"num groups is {num_groups}")
+
     groups = [[] for _ in range(num_groups)]
 
     tournament_players = tournament.player_associations # type: ignore
@@ -215,8 +286,6 @@ def generate_round(tournament_id, round_id):
     if round_id == 1:
         for tp in tournament_players:
             groups[tp.group_id - 1].append(tp.player) # type: ignore
-
-        return groups
 
     else:
         group_index = 0
@@ -240,10 +309,15 @@ def generate_round(tournament_id, round_id):
                 direction = 1
                 group_index = 0
 
-    for i in range(1, num_groups + 1):
+    for i in range(0, num_groups):
+        current_app.logger.info(f"i is {i}")
         create_matches_for_group(groups[i], tournament_id, round_id) # type: ignore
 
-def create_matches_for_group(player_ids, tournament_id, round_number, group_id, is_placement=False):
+    return groups
+
+
+def create_matches_for_group(player_ids, tournament_id, round_number, is_placement=False):
+
     if is_placement:
         pass
 
