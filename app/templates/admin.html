@@ -30,7 +30,7 @@
 
 <div id="tournament-editor">
     {% if tournament %}
-    {% include "partials/admin_step_1.html" %}
+    {{ step_html|safe }}
 
 
     {% else %}
