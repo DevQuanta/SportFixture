@@ -137,13 +137,13 @@ class TournamentPlayer(Base):
 
     __tablename__ = "tournament_player"
 
-    player_id: Mapped[int] = mapped_column(ForeignKey("player.id"), primary_key=True)
-    tournament_id: Mapped[int] = mapped_column(ForeignKey("tournament.id"), primary_key=True)
+    player_id: Mapped[int] = mapped_column(ForeignKey("player.id"), primary_key=True, init = False)
+    tournament_id: Mapped[int] = mapped_column(ForeignKey("tournament.id"), primary_key=True, init = False)
 
     group_id: Mapped[int | None] = mapped_column(nullable=True)
 
-    player: Mapped["Player"] = relationship(back_populates="tournament_associations", init = False)
-    tournament: Mapped["Tournament"] = relationship(back_populates="player_associations", init = False)
+    player: Mapped["Player"] = relationship(back_populates="tournament_associations")
+    tournament: Mapped["Tournament"] = relationship(back_populates="player_associations")
 
     __table_args__ = (
             Index("idx_tournament_group", "tournament_id", "group_id"),

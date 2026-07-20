@@ -1,101 +1,38 @@
 <div>
 
-     <div class="flex flex-row w-full justify-between border-b border-[#F8FAFC]/50 pb-3 mt-6">
-         <div class="font-medium text-[#E7E7E7]">Group 1</div>
-         <div class="font-light text-[#E7E7E7]/80">Group 2</div>
-         <div class="font-light text-[#E7E7E7]/80">Group 3</div>
-         <div class="font-light text-[#E7E7E7]/80">Group 4</div>
-     </div>
+    <div class="flex flex-row w-full gap-12">
+        {% for group_num, group_matches in matches_data | groupby('group_id') %}
+        <div class="flex flex-col gap-3.5 bg-[#101622] py-3 px-5 w-[290px]">
+            <div class="flex flex-row items-center justify-between">
+                <div
+                    class="font-medium text-[#E7E7E7] border-l-2 border-l-amber-400 px-3"
+                >
+                    Group {{ group_num }}
+                </div>
+                <div class="text-white/75 text-[12px] font-light">
+                    4 players
+                </div>
+            </div>
+            {% for match in group_matches %}
 
-     <div class="mt-6 flex flex-col justify-between text-start w-50">
+            <div class="flex flex-col gap-y-1 px-5 py-1 w-full bg-[#172030] h-20 justify-center">
+                <div class="flex flex-row justify-between w-full items-center">
+                    <div class="text-white/90 text-[15px]">{{ players_map[match.player_1_id] }}</div>
+                    <div class="text-white/75 text-[12px] font-light">
+                        Seed #1
+                    </div>
+                </div>
+                <div class="h-px w-full bg-white/30 block"></div>
+                <div class="flex flex-row justify-between w-full items-center">
+                    <div class="text-white/90 text-[15px]">{{ players_map[match.player_2_id] }}</div>
+                    <div class="text-white/75 text-[12px] font-light">
+                        Seed #2
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
 
-         <div class="flex flex-col gap-10">
-             <div class="flex flex-row h-full w-100">
-                 <div class=" bg-[#F59E0B] w-3 rounded-l-md"></div>
-                 <div class="grid grid-cols-[1fr_repeat(5,40px)] gap-y-1.5 gap-x-3 justify-between bg-[#121A2E]  px-5 py-1 items-center w-full">
-                     <!-- Row 1: Player 1 (Naturally fills the 4 columns) -->
-
-                     <div class="font-thin text-white/30">Name</div>
-                     <div class="text-center font-thin text-white/30">G1</div> <!-- Set 1 -->
-                     <div class="text-center font-thin text-white/30">G2</div> <!-- Set 2 -->
-                     <div class="text-center font-thin text-white/30">G3</div> <!-- Set 3 -->
-                     <div class="text-center font-thin text-white/30">G4</div> <!-- Set 3 -->
-                     <div class="text-center font-thin text-white/30">G5</div> <!-- Set 3 -->
-
-
-                         <div class="truncate">Jake M.</div>
-                         <div class="text-center">11</div> <!-- Set 1 -->
-                         <div class="text-center">11</div> <!-- Set 2 -->
-                         <div class="text-center">8</div> <!-- Set 3 -->
-                         <div class="text-center">11</div> <!-- Set 3 -->
-                         <div class="text-center">-</div> <!-- Set 3 -->
-
-                         <!-- The Divider: Spans all 4 columns so it doesn't break the grid alignment -->
-                         <div class="col-span-full h-px bg-white/10 my-1"></div>
-
-                         <!-- Row 2: Player 2 (Naturally fills the next 4 columns) -->
-                         <div>Michel S.</div>
-                         <div class="text-center">10</div> <!-- Set 1 -->
-                         <div class="text-center">9</div> <!-- Set 2 -->
-                         <div class="text-center">11</div> <!-- Set 3 -->
-                         <div class="text-center">5</div> <!-- Set 3 -->
-                         <div class="text-center">-</div> <!-- Set 3 -->
-                 </div>
-             </div>
-
-             <div class="flex flex-row h-full w-80">
-                 <div class=" bg-[#F59E0B] w-3 rounded-l-md"></div>
-                 <div class="grid grid-cols-[1fr_repeat(3,40px)] gap-y-1.5 gap-x-3 justify-between bg-[#121A2E]  px-5 py-1 items-center w-full">
-                     <!-- Row 1: Player 1 (Naturally fills the 4 columns) -->
-
-                     <div class="font-thin text-white/30">Name</div>
-                     <div class="text-center font-thin text-white/30">Set</div> <!-- Set 1 -->
-                     <div class="text-center font-thin text-white/30">Game</div> <!-- Set 2 -->
-                     <div class="text-center font-thin text-white/30">Diff</div> <!-- Set 3 -->
-
-
-                         <div class="truncate">Shreya B.</div>
-                         <div class="text-center">4</div> <!-- Set 1 -->
-                         <div class="text-center">2</div> <!-- Set 2 -->
-                         <div class="text-center">10</div> <!-- Set 3 -->
-
-                         <!-- The Divider: Spans all 4 columns so it doesn't break the grid alignment -->
-                         <div class="col-span-full h-px bg-white/10 my-1"></div>
-
-                         <!-- Row 2: Player 2 (Naturally fills the next 4 columns) -->
-                         <div>Nathan Y.</div>
-                         <div class="text-center">4</div> <!-- Set 1 -->
-                         <div class="text-center">6</div> <!-- Set 2 -->
-                         <div class="text-center">10</div> <!-- Set 3 -->
-                 </div>
-             </div>
-
-             <div class="flex flex-row h-full w-80">
-                 <div class=" bg-[#F59E0B] w-3 rounded-l-md"></div>
-                 <div class="grid grid-cols-[1fr_repeat(3,40px)] gap-y-1.5 gap-x-3 justify-between bg-[#121A2E]  px-5 py-1 items-center w-full">
-                     <!-- Row 1: Player 1 (Naturally fills the 4 columns) -->
-
-                     <div class="font-thin text-white/30">Name</div>
-                     <div class="text-center font-thin text-white/30">Set</div> <!-- Set 1 -->
-                     <div class="text-center font-thin text-white/30">Game</div> <!-- Set 2 -->
-                     <div class="text-center font-thin text-white/30">Diff</div> <!-- Set 3 -->
-
-
-                         <div class="truncate">John A.</div>
-                         <div class="text-center">1</div> <!-- Set 1 -->
-                         <div class="text-center">3</div> <!-- Set 2 -->
-                         <div class="text-center">8</div> <!-- Set 3 -->
-
-                         <!-- The Divider: Spans all 4 columns so it doesn't break the grid alignment -->
-                         <div class="col-span-full h-px bg-white/10 my-1"></div>
-
-                         <!-- Row 2: Player 2 (Naturally fills the next 4 columns) -->
-                         <div>Kim D.</div>
-                         <div class="text-center">4</div> <!-- Set 1 -->
-                         <div class="text-center">7</div> <!-- Set 2 -->
-                         <div class="text-center">9</div> <!-- Set 3 -->
-                 </div>
-             </div>
-         </div>
-     </div>
+    </div>
 </div>

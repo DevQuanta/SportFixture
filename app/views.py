@@ -56,8 +56,6 @@ def register_player():
     stmt = select(Tournament).where(Tournament.id == int(tournament_id))  # type: ignore
     tournament = db.session.execute(stmt).scalar_one_or_none()
 
-    player = Player()
-
     stmt = select(Player).where(Player.name == name)
     player = db.session.execute(stmt).scalar_one_or_none()
 
@@ -85,6 +83,7 @@ def select_tournament():
 
     if not tournament_input:
         return "<p class='error-msg'>Please select or type a tournament name.</p>"
+
 
     if tournament_input.isdigit():
         # Fetch existing tournament by ID
@@ -190,12 +189,31 @@ def step_2(tournament_id):
 
 @main_bp.route("/admin/<int:tournament_id>/step-3")
 def step_3(tournament_id):
-    stmt = select(Tournament).where(Tournament.id == tournament_id)
-    tournament = db.session.execute(stmt).scalar_one_or_none()
+    tournament = db.session.get(Tournament, tournament_id)
 
-    generate_round(tournament_id, 1)
+    if not tournament:
+        abort(404, "Tournament not found")
 
-    return render_template("partials/admin_step_3.html", tournament=tournament)
+    matches_data = generate_round(tournament_id, 1)
+    players = tournament.player_associations
+    players_map = {p.player.id: p.player.name for p in players}
+
+
+    """ eg
+    [
+        {
+            "id": match.id,
+            "player_1_id": match.player_1_id,
+            "player_2_id": match.player_2_id,
+            "group_id": match.group_id,
+            "round_number": match.round_number,
+            "tournament_id": match.tournament_id,
+        }
+    ]"""
+
+    current_app.logger.error(f"Logs: {matches_data}")
+
+    return render_template("partials/admin_step_3.html", tournament = tournament, matches_data=matches_data, players_map = players_map)
 
 
 @main_bp.route("/edit-player/<int:player_id>")  # type: ignore
@@ -279,7 +297,7 @@ def assign_player(tournament_id, player_id):
     return view_tournament_seeding(tournament_id)
 
 
-def group_pairings(round_id, tournament_id):
+def group_pairings(tournament_id, round_id):
     tournament = db.session.get(Tournament, tournament_id)  # type: ignore
     num_groups = tournament.max_groups  # type: ignore
     current_app.logger.info(f"num groups is {num_groups}")
@@ -289,7 +307,7 @@ def group_pairings(round_id, tournament_id):
 
     if round_id == 1:
         for tp in tournament_players:
-            if tp.group_id is not None:
+            if tp.group_id is not None and tp.group_id > 0:
                 groups[tp.group_id - 1].append(tp.player)  # type: ignore
 
     else:
