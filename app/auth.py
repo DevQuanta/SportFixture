@@ -9,7 +9,7 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/login", methods = ["GET", "POST"]) # type: ignore
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.admin_page'))
+        return redirect(url_for('admin.admin_page'))
 
     if request.method == "POST":
         current_app.logger.info("post request")
@@ -23,7 +23,7 @@ def login():
             login_user(admin)
 
             response = make_response("", 200)
-            response.headers["HX-Redirect"] = url_for('main.admin_page')
+            response.headers["HX-Redirect"] = url_for('admin.admin_page')
 
             return response
 

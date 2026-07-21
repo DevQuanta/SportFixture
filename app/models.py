@@ -86,7 +86,7 @@ class Tournament(Base):
 
     status: Mapped[TournamentStatus] = mapped_column(SQLEnum(TournamentStatus, values_callable=lambda x: [e.value for e in x]), default=TournamentStatus.SETUP, nullable = False)
 
-    round_number: Mapped[int] = mapped_column(default = 1, nullable=False, init = False)
+    round_number: Mapped[int] = mapped_column(default = 1, server_default="1", nullable=False, init = False)
 
     player_associations: Mapped[list["TournamentPlayer"]] = relationship(
             back_populates="tournament",

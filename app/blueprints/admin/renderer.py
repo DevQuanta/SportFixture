@@ -1,0 +1,39 @@
+from app.services.workflow_service import TournamentStatus
+from flask import render_template, current_app
+
+from app.services.context_service import get_step_3_context, get_live_context
+from app.services.draft_service import fetch_grouped_players
+
+from app.database import db
+from app.models import Tournament
+
+def render_admin_step(tournament_id):
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        raise ValueError(f"Tournament {tournament_id} not found")
+
+    tournament_status = tournament.status
+
+    match tournament_status:
+        case TournamentStatus.SETUP:
+            return render_template("partials/admin_step_1.html", tournament=tournament)
+        case TournamentStatus.REGISTRATION:
+            return render_template("partials/admin_step_1.html", tournament = tournament)
+        case TournamentStatus.ASSIGNMENT:
+            grouped_players = fetch_grouped_players(tournament)
+
+            return render_template(
+                "partials/admin_step_2.html",
+                grouped_players=grouped_players,
+                tournament=tournament,
+            )
+
+        case TournamentStatus.PREVIEW:
+            context = get_step_3_context(tournament)
+            current_app.logger.info(context)
+            return render_template("partials/admin_step_3.html", **context)
+
+        case TournamentStatus.LIVE:
+            context = get_live_context(tournament_id, 1)
+            return render_template("partials/knockouts_live.html", **context)
