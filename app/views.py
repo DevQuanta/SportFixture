@@ -37,7 +37,12 @@ def home_page():
 @main_bp.route("/knockouts")
 def knockouts_page(tournament_id):
     tournament = db.session.get(Tournament, tournament_id)
-    return render_template("knockouts.html", tournament=tournament)
+    if not tournament:
+        abort(404, "Tournament not found")
+
+    current_round = tournament.round_number
+    return view_live_tournament(tournament_id, current_round)
+
 
 
 @main_bp.route("/admin")
@@ -268,11 +273,13 @@ def publish_tournament(tournament_id):
 
         session.pop(f"draft_{tournament.id}", None)
 
-    return view_live_tournament(tournament_id)
+    current_round = tournament.round_number
+    return view_live_tournament(tournament_id, current_round)
 
 
-@main_bp.route("/tournaments/<int:tournament_id>/live", methods=["GET"])
-def view_live_tournament(tournament_id):
+@main_bp.route("/tournaments/<int:tournament_id>/<int:round_number>/live", methods=["GET"])
+def view_live_tournament(tournament_id, round_number):
+    tournament = db.session.get(Tournament, tournament_id)
     stmt = (
         select(Match)
         .where(
@@ -337,12 +344,27 @@ def view_live_tournament(tournament_id):
             {"number": round_number, "label": f"Round {round_number}", "groups": groups}
         )
 
-    import json
+    players_list = [tp.player for tp in tournament.player_associations]  # type: ignore
 
-    current_app.logger.warning(json.dumps(rounds, indent=2, default=str))
+    standings = calculate_standings(tournament_id, players_list, 1)
+
+    summary = [
+        {
+            "name": s["player_name"],
+            "matches_won": s["matches_won"],
+            "matches_lost": s["matches_lost"],
+            "games_won": s["games_won"],
+            "games_lost": s["games_lost"],
+            "points_won": s["points_won"],
+            "points_lost": s["points_lost"]
+        }
+        for _, s in standings
+    ]
+    current_app.logger.warning(summary)
+
 
     return render_template(
-        "partials/knockouts_live.html", tournament_data=rounds
+        "partials/knockouts_live.html", tournament_data=rounds[round_number - 1], standings = summary
     )
 
 @main_bp.route("/matches/<int:match_id>/save", methods = ["POST"])
@@ -360,7 +382,7 @@ def save_match(match_id):
         if p1_key in payload:
             val = payload[p1_key]
             game.p1_score = int(val) if val != "" else None
-        elif p2_key in payload:
+        if p2_key in payload:
             val = payload[p2_key]
             game.p2_score = int(val) if val != "" else None
 
@@ -404,7 +426,10 @@ def save_player(player_id):
 @main_bp.route("/delete-player/<int:player_id>", methods=["DELETE"])
 def delete_player(player_id):
 
-    player = Player.query.get_or_404(player_id)
+    player = db.session.get(Player, player_id)
+
+    if not player:
+        abort(404, "Player not found")
 
     db.session.delete(player)
 
@@ -609,7 +634,7 @@ def commit_matches_for_group(
 
 def get_ratio(won, lost):
     if lost == 0:
-        return float("inf") + won
+        return float('inf') if won > 0 else 0.0
     return won / lost
 
 
@@ -631,7 +656,7 @@ def calculate_standings(tournament_id, players_list, round_id=None):
     stmt = select(Match).where(Match.tournament_id == tournament_id)
 
     if round_id:
-        stmt = stmt.where(Match.round_number < round_id)
+        stmt = stmt.where(Match.round_number <= round_id)
 
     matches = db.session.execute(stmt).scalars()
 
@@ -676,7 +701,8 @@ def calculate_standings(tournament_id, players_list, round_id=None):
             get_ratio(item["points_won"], item["points_lost"]),
             item["player_name"],
         ),
-        reverse=True,
+        reverse=True
+
     )
 
     standings = [(s["player"], s) for s in sorted_stats]

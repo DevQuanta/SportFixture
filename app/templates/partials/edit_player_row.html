@@ -1,17 +1,20 @@
 
-    <tr id="player-row-{{ player.id }}">
-        <td>
-            <input class="inp" name="player-name" value="{{ player.name }}"></td>
-        <td class="rank {{player.difficulty}}"><input class="inp" name="player-diff" value="{{ player.difficulty }}"></td>
+    <tr id="player-row-{{ player.id }}" class="border-b border-b-[#f8fafc80]">
+        <td class="text-center py-3">
+                <input class="text-white border rounded-md border-slate-500 w-40 text-center mx-auto px-4 py-0.75" name="player-name" value="{{ player.name }}">
+        </td>
+        <td class="rank {{player.difficulty}} text-center py-3">
+                <input class="text-white border rounded-md border-slate-500  w-40 text-center mx-auto px-4 py-0.75" name="player-diff" value="{{ player.difficulty }}">
+        </td>
 
-        <td class="actions-col">
+        <td class="actions-col text-center py-3">
             <div class="flex flex-row justify-center gap-3">
                 <button
                     hx-post="/save-player/{{ player.id }}"
                     hx-target="#player-row-{{ player.id }}"
                     hx-include="closest tr"
                     hx-swap="outerHTML"
-                    class="edit-btn"
+                    class="hover:cursor-pointer"
                 >
                     <img
                         src="{{ url_for('static', filename='images/done.svg') }}"

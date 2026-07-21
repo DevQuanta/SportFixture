@@ -2,7 +2,7 @@
 from flask import Flask
 from sqlalchemy import event, select
 from sqlalchemy.engine import Engine
-from .database import db
+from .database import db, migrate
 from flask_login import LoginManager
 from .models import Admin
 
@@ -20,6 +20,7 @@ def create_app() -> Flask:
 
     # Connect DB to App
     db.init_app(app)
+    migrate.init_app(app, db)
 
     login_manager.init_app(app)
 
@@ -34,7 +35,6 @@ def create_app() -> Flask:
     # automatically construct tables inside SQLite for fast deployment
     with app.app_context():
         from . import models
-        db.create_all()
 
     login_manager.login_view = "auth.login" # type: ignore
 

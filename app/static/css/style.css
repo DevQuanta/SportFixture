@@ -36,7 +36,6 @@ main {
     padding: 50px 120px 80px 120px;
 }
 
-
 #results-page .status-link {
     text-decoration: none;
     color: #00c0e8;
@@ -60,7 +59,6 @@ main {
     display: inline-block;
 }
 
-
 /* auth pages */
 #login-page main {
     display: flex;
@@ -73,47 +71,7 @@ main {
     margin: 80px 300px;
 }
 
-.login-btn,
-.add-player-btn {
-    background-color: #ff383c;
-    color: #ffffff;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    font-size: 18px;
-    padding: 8px 50px; /* slightly increased padding for touch */
-    cursor: pointer;
-}
 
-/* admin table */
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.admin-tbl button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-}
-
-
-tbody tr {
-    border-bottom: 1px solid #f8fafc80;
-}
-
-th,
-td {
-    text-align: center;
-}
-
-th {
-    padding-bottom: 20px;
-    font-weight: 100;
-}
-
-td {
-    padding: 12px 0; /* softened from 8px for better row height */
-}
 
 /* tom select overrides */
 .ts-control,

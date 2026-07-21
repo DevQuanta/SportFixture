@@ -1,16 +1,16 @@
-<tr id="player-row-{{player.id}}">
-    <td>{{ player.name }}</td>
-    <td class="rank text-(--player-clr)"
+<tr id="player-row-{{player.id}}" class="border-b border-b-[#f8fafc80]">
+    <td class="text-center py-3">{{ player.name }}</td>
+    <td class="rank text-(--player-clr) text-center py-3"
         style="--player-clr: {{ player.colour }};"
     >{{ player.difficulty }}</td>
 
-    <td class="actions-col">
+    <td>
         <div class="flex flex-row justify-center gap-3">
             <button
                 hx-get="/edit-player/{{ player.id }}"
                 hx-target="#player-row-{{ player.id }}"
                 hx-swap="outerHTML"
-                class="edit-btn"
+                class="hover:cursor-pointer"
             >
                 <img
                     src="{{ url_for('static', filename='images/edit.svg') }}"
@@ -18,14 +18,17 @@
                     height="22.49"
                 />
             </button>
-            <button class="delete-btn">
+            <button
+                hx-delete="/delete-player/{{ player.id }}"
+                hx-target="#player-row-{{ player.id }}"
+                hx-confirm="Are you sure you want to remove {{ player.name }}"
+                class="hover:cursor-pointer"
+            >
                 <img
                     src="{{ url_for('static', filename='images/remove.svg') }}"
                     width="15.8"
                     height="18"
-                    hx-delete="/delete-player/{{ player.id }}"
-                    hx-target="#player-row-{{ player.id }}"
-                    hx-confirm="Are you sure you want to remove {{ player.name }}"
+
                 />
             </button>
         </div>
