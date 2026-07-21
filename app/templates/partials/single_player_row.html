@@ -5,7 +5,7 @@
     >{{ player.difficulty }}</td>
 
     <td class="actions-col">
-        <div class="actions-group">
+        <div class="flex flex-row justify-center gap-3">
             <button
                 hx-get="/edit-player/{{ player.id }}"
                 hx-target="#player-row-{{ player.id }}"

@@ -4,8 +4,6 @@ from sqlalchemy import select
 from .models import Admin
 from .database import db
 
-import app
-
 auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/login", methods = ["GET", "POST"]) # type: ignore

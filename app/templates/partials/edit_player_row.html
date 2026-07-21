@@ -5,7 +5,7 @@
         <td class="rank {{player.difficulty}}"><input class="inp" name="player-diff" value="{{ player.difficulty }}"></td>
 
         <td class="actions-col">
-            <div class="actions-group">
+            <div class="flex flex-row justify-center gap-3">
                 <button
                     hx-post="/save-player/{{ player.id }}"
                     hx-target="#player-row-{{ player.id }}"

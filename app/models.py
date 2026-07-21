@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm.properties import ForeignKey
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.database import db, Base
+from app.database import Base
 from enum import Enum as PyEnum
 from sqlalchemy import Enum as SQLEnum
 
@@ -47,8 +47,8 @@ class Player(Base):
     __tablename__ = "player"
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    name: Mapped[String] = mapped_column(String(100), nullable=False)
-    difficulty: Mapped[String] = mapped_column(String(100), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    difficulty: Mapped[str] = mapped_column(String(100), nullable=False)
 
     tournament_associations: Mapped[list["TournamentPlayer"]] = relationship(
             back_populates="player",
@@ -79,7 +79,7 @@ class Tournament(Base):
     __tablename__ = "tournament"
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
-    name: Mapped[String] = mapped_column(String(100), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
 
     max_groups: Mapped[int] = mapped_column(default=4, nullable=False)
     max_rounds: Mapped[int] = mapped_column(default=3, nullable=False)

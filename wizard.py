@@ -18,8 +18,9 @@ def admin_register():
     console.print("[yellow]Creating new admin[/yellow]")
 
     with app.app_context():
-        admin = Admin()
-        admin.email = email
+        admin = Admin(
+            email = email,
+        )
         admin.password = password
 
         db.session.add(admin)

@@ -1,0 +1,58 @@
+
+
+<div
+    id="match-card-{{ match.id }}"
+    class="flex flex-row h-full w-100 cursor-pointer "
+>
+    <div class="bg-green-400 w-3 rounded-l-md"></div>
+    <form
+        hx-post="/matches/{{ match.id }}/save"
+        hx-target="#match-card-{{ match.id }}"
+        hx-swap="outerHTML"
+        hx-ext="json-enc"
+        class="w-full flex flex-col"
+    >
+        <div
+            class="grid grid-cols-[1fr_repeat(5,35px)] gap-y-1.5 gap-x-4 justify-between bg-[#121A2E] px-5 py-1 items-center w-full"
+        >
+            <!-- Row 1: Player 1 (Naturally fills the 4 columns) -->
+
+            <div class="font-thin text-white/30">Name</div>
+            <div class="text-center font-thin text-white/30">G1</div>
+            <!-- Set 1 -->
+            <div class="text-center font-thin text-white/30">G2</div>
+            <!-- Set 2 -->
+            <div class="text-center font-thin text-white/30">G3</div>
+            <!-- Set 3 -->
+            <div class="text-center font-thin text-white/30">G4</div>
+            <!-- Set 3 -->
+            <div class="text-center font-thin text-white/30">G5</div>
+            <!-- Set 3 -->
+
+            <div class="truncate">{{match.player_1.name}}</div>
+            {% for game in match.games %}
+            <input
+                class="text-center text-white border rounded-md border-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                name="game_{{game.id}}_p1"
+                value="{{ game.p1_score  | default('', true)}}"
+                type="number"
+            />
+            {% endfor %}
+
+            <!-- The Divider: Spans all 4 columns so it doesn't break the grid alignment -->
+            <div class="col-span-full h-px bg-white/10 my-1"></div>
+
+            <!-- Row 2: Player 2 (Naturally fills the next 4 columns) -->
+            <div>{{match.player_2.name}}</div>
+            {% for game in match.games %}
+            <input
+                class="text-center rounded-md text-white border border-slate-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                name="game_{{game.id}}_p2"
+                value="{{ game.p2_score  | default('', true)}}"
+                type="number"
+            />
+            {% endfor %}
+        <button type="submit" class="col-span-full mt-3 mb-2 bg-green-500/80 rounded-md px-3 hover:cursor-pointer">Save</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,22 @@
+{% for round in tournament_data %}
+<div class="flex flex-row w-full gap-10 items-center mt-5 mb-5">
+        <div class="bg-[#FF2D55] px-3 py-2 rounded-md hover:cursor-pointer">
+            Round {{round.number}}
+        </div>
+
+    <div class="text-cyan-400 font-medium hover:cursor-pointer">Proceed to Round {{round.number + 1}} →</div>
+</div>
+
+<div class="flex flex-row gap-20">
+    {% for group in round["groups"] %}
+    <div class="flex flex-col gap-4 mt-5">
+        <div class="font-medium text-[#E7E7E7] text-[20px]">
+            Group {{group.id}}
+        </div>
+
+        {% for match in group.matches %} {% include "partials/match_card.html"
+        %} {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}

@@ -9,11 +9,8 @@
 
 <h1 class="h1-b-l">Admin view</h1>
 
-
-<div class="flex flex-row items-center w-full">
-
 <div
-    class="p-4 rounded-3 w-full">
+    class="p-4 rounded-3 w-full m-0">
     <select hx-post="/select-tournament"
             hx-trigger="change"
             hx-target="#tournament-editor"
@@ -25,7 +22,6 @@
             </option>
     {% endfor %}
     </select>
-</div>
 </div>
 
 <div id="tournament-editor">

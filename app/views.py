@@ -1,12 +1,30 @@
 from collections import defaultdict
+from itertools import groupby
 
-from flask import Blueprint, abort, current_app, make_response, render_template, request
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_login.utils import login_required
-from jinja2.nodes import Stmt
-from sqlalchemy import and_, select
+from sqlalchemy import select
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.database import db
-from app.models import Match, Player, Tournament, TournamentPlayer, TournamentStatus
+from app.models import (
+    GameScore,
+    Match,
+    Player,
+    Tournament,
+    TournamentPlayer,
+    TournamentStatus,
+)
 
 main_bp = Blueprint("main", __name__)
 
@@ -17,8 +35,9 @@ def home_page():
 
 
 @main_bp.route("/knockouts")
-def knockouts_page():
-    return render_template("knockouts.html")
+def knockouts_page(tournament_id):
+    tournament = db.session.get(Tournament, tournament_id)
+    return render_template("knockouts.html", tournament=tournament)
 
 
 @main_bp.route("/admin")
@@ -84,7 +103,6 @@ def select_tournament():
     if not tournament_input:
         return "<p class='error-msg'>Please select or type a tournament name.</p>"
 
-
     if tournament_input.isdigit():
         # Fetch existing tournament by ID
         stmt = select(Tournament).where(Tournament.id == int(tournament_input))
@@ -98,6 +116,8 @@ def select_tournament():
             db.session.add(tournament)
             db.session.commit()  # Committing generates the tournament.id automatically
 
+    session.pop(f"draft_{tournament.id}", None)
+
     current_status = tournament.status
     response_html = template_router(current_status)(tournament.id)
 
@@ -110,8 +130,10 @@ def select_tournament():
 def template_router(tournament_status):
     TOURNAMENT_TEMPLATES = {
         TournamentStatus.SETUP: step_1,
-        TournamentStatus.REGISTRATION: step_2,
-        TournamentStatus.ASSIGNMENT: step_3,
+        TournamentStatus.REGISTRATION: step_1,
+        TournamentStatus.ASSIGNMENT: step_2,
+        TournamentStatus.PREVIEW: step_3,
+        TournamentStatus.LIVE: view_live_tournament,
     }
 
     handler = TOURNAMENT_TEMPLATES.get(tournament_status)
@@ -183,6 +205,7 @@ def step_1(tournament_id):
 @main_bp.route("/admin/<int:tournament_id>/step-2")
 def step_2(tournament_id):
     stmt = select(Tournament).where(Tournament.id == tournament_id)
+    session.pop(f"draft_{tournament_id}", None)
 
     return view_tournament_seeding(tournament_id)  # type: ignore
 
@@ -194,10 +217,15 @@ def step_3(tournament_id):
     if not tournament:
         abort(404, "Tournament not found")
 
-    matches_data = generate_round(tournament_id, 1)
+    session_key = f"draft_{tournament_id}"
+
+    if session_key not in session:
+        matches_data = generate_round(tournament_id, 1)
+        session[f"draft_{tournament_id}"] = matches_data
+
     players = tournament.player_associations
     players_map = {p.player.id: p.player.name for p in players}
-
+    matches_data = session[session_key]
 
     """ eg
     [
@@ -213,25 +241,160 @@ def step_3(tournament_id):
 
     current_app.logger.error(f"Logs: {matches_data}")
 
-    return render_template("partials/admin_step_3.html", tournament = tournament, matches_data=matches_data, players_map = players_map)
+    return render_template(
+        "partials/admin_step_3.html",
+        tournament=tournament,
+        matches_data=matches_data,
+        players_map=players_map,
+    )
+
+
+@main_bp.route("/admin/<int:tournament_id>/publish", methods=["POST"])
+def publish_tournament(tournament_id):
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        abort(404, "Tournament not found")
+
+    session_key = f"draft_{tournament_id}"
+    matches_draft = session.get(session_key)
+    if not matches_draft:
+        matches_draft = generate_round(tournament_id, 1)
+
+    if not tournament.matches:
+        commit_matches_for_group(matches_draft, tournament_id)
+        tournament.status = TournamentStatus.LIVE
+        db.session.commit()
+
+        session.pop(f"draft_{tournament.id}", None)
+
+    return view_live_tournament(tournament_id)
+
+
+@main_bp.route("/tournaments/<int:tournament_id>/live", methods=["GET"])
+def view_live_tournament(tournament_id):
+    stmt = (
+        select(Match)
+        .where(
+            Match.tournament_id == tournament_id,
+        )
+        .options(
+            joinedload(Match.player_1),
+            joinedload(Match.player_2),
+            selectinload(Match.games),
+        )
+        .order_by(Match.round_number, Match.group_id)
+    )
+
+    matches = db.session.execute(stmt).scalars().all()
+
+    rounds = []
+
+    for round_number, round_matches_iter in groupby(
+        matches, key=lambda m: m.round_number
+    ):
+        round_matches = list(round_matches_iter)
+        groups = []
+
+        for group_id, group_matches_iter in groupby(
+            round_matches, key=lambda m: m.group_id
+        ):
+            group_matches = []
+
+            for m in group_matches_iter:
+                match_dict = {
+                    "id": m.id,
+                    "player_1": {
+                        "id": m.player_1.id,
+                        "name": m.player_1.name,
+                    }
+                    if m.player_1
+                    else None,
+                    "player_2": {
+                        "id": m.player_2.id,
+                        "name": m.player_2.name,
+                    }
+                    if m.player_2
+                    else None,
+                    "games": [
+                        {
+                            "id": g.id,
+                            "game_number": g.game_number,
+                            "p1_score": g.p1_score,
+                            "p2_score": g.p2_score,
+                        }
+                        for g in m.games
+                    ],
+                }
+
+                group_matches.append(match_dict)
+
+            groups.append(
+                {"id": group_id, "label": f"Group {group_id}", "matches": group_matches}
+            )
+
+        rounds.append(
+            {"number": round_number, "label": f"Round {round_number}", "groups": groups}
+        )
+
+    import json
+
+    current_app.logger.warning(json.dumps(rounds, indent=2, default=str))
+
+    return render_template(
+        "partials/knockouts_live.html", tournament_data=rounds
+    )
+
+@main_bp.route("/matches/<int:match_id>/save", methods = ["POST"])
+def save_match(match_id):
+    match = db.session.get(Match, match_id)
+    payload = request.get_json()
+
+    if not match:
+        abort(404, "Match not found")
+
+    for game in match.games:
+        p1_key = f"game_{game.id}_p1"
+        p2_key = f"game_{game.id}_p2"
+
+        if p1_key in payload:
+            val = payload[p1_key]
+            game.p1_score = int(val) if val != "" else None
+        elif p2_key in payload:
+            val = payload[p2_key]
+            game.p2_score = int(val) if val != "" else None
+
+    db.session.commit()
+
+    return render_template("partials/match_card.html", match = match)
+
+@main_bp.route("/matches/<int:match_id>/edit")
+def edit_match(match_id):
+    match = db.session.get(Match, match_id)
+
+    return render_template("partials/edit_match_card.html", match = match)
 
 
 @main_bp.route("/edit-player/<int:player_id>")  # type: ignore
 def edit_player(player_id):
-    player = Player.query.get_or_404(player_id)
+    player = db.session.get(Player, player_id)
 
     return render_template("partials/edit_player_row.html", player=player)
 
 
 @main_bp.route("/save-player/<int:player_id>", methods=["POST"])  # type: ignore
 def save_player(player_id):
-    player = Player.query.get_or_404(player_id)
+    player = db.session.get(Player, player_id)
+
+    if not player:
+        abort(404, "Player not found")
 
     updated_name = request.form.get("player-name")
     updated_diff = request.form.get("player-diff")
 
-    player.name = updated_name
-    player.difficulty = updated_diff
+    if updated_name and updated_diff:
+        player.name = updated_name
+        player.difficulty = updated_diff
 
     db.session.commit()
 
@@ -344,10 +507,7 @@ def generate_round(tournament_id, round_id, preview=True):
     groups = group_pairings(tournament_id, round_id)
     matches_data = []
 
-    stmt = select(Match).filter_by(
-        tournament_id=tournament_id,
-        round_number=round_id
-    )
+    stmt = select(Match).filter_by(tournament_id=tournament_id, round_number=round_id)
     existing_matches = db.session.scalars(stmt).all()
 
     if existing_matches:
@@ -368,8 +528,10 @@ def generate_round(tournament_id, round_id, preview=True):
     else:
         for i in range(0, num_groups):
             current_app.logger.info(f"i is {i}")
-            group_matches = draft_matches_for_group(groups[i], i + 1, tournament_id, round_id)
-            matches_data.extend(group_matches) # type: ignore
+            group_matches = draft_matches_for_group(
+                groups[i], i + 1, tournament_id, round_id
+            )
+            matches_data.extend(group_matches)  # type: ignore
 
     return matches_data
 
@@ -414,7 +576,9 @@ def draft_matches_for_group(
     return matches
 
 
-def commit_matches_for_group(matches_draft, tournament_id, is_placement=False):
+def commit_matches_for_group(
+    matches_draft, tournament_id, games_per_match=5, is_placement=False
+):
     tournament = db.session.get(Tournament, tournament_id)
     if not tournament:
         abort(404, "Tournament not found")
@@ -423,10 +587,20 @@ def commit_matches_for_group(matches_draft, tournament_id, is_placement=False):
         match = Match(
             tournament_id=match_draft["tournament_id"],
             player_1_id=match_draft["player_1_id"],
-            player_2_id=match_draft["player_2_id"]  ,
+            player_2_id=match_draft["player_2_id"],
             round_number=match_draft["round_number"],
             group_id=match_draft["group_id"],
         )
+
+        for game_num in range(1, games_per_match + 1):
+            match.games.append(
+                GameScore(
+                    match_id=match.id,
+                    game_number=game_num,
+                    p1_score=0,
+                    p2_score=0,
+                )
+            )
 
         tournament.matches.append(match)
 

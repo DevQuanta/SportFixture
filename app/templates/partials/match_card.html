@@ -1,0 +1,40 @@
+<div
+    id="match-card-{{ match.id }}"
+      hx-get="/matches/{{ match.id }}/edit"
+      hx-target="#match-card-{{ match.id }}"
+      hx-swap="outerHTML"
+      class="flex flex-row h-full w-100 cursor-pointer hover:ring-1 hover:rounded-md hover:ring-amber-500/50 transition-all">
+    <div class="bg-[#F59E0B] w-3 rounded-l-md"></div>
+    <div
+        class="grid grid-cols-[1fr_repeat(5,40px)] gap-y-1.5 gap-x-3 justify-between bg-[#121A2E] px-5 py-1 items-center w-full"
+    >
+        <!-- Row 1: Player 1 (Naturally fills the 4 columns) -->
+
+        <div class="font-thin text-white/30">Name</div>
+        <div class="text-center font-thin text-white/30">G1</div>
+        <!-- Set 1 -->
+        <div class="text-center font-thin text-white/30">G2</div>
+        <!-- Set 2 -->
+        <div class="text-center font-thin text-white/30">G3</div>
+        <!-- Set 3 -->
+        <div class="text-center font-thin text-white/30">G4</div>
+        <!-- Set 3 -->
+        <div class="text-center font-thin text-white/30">G5</div>
+        <!-- Set 3 -->
+
+        <div class="truncate">{{match.player_1.name}}</div>
+        {% for game in match.games %}
+                        <div class="text-center text-white">{{ game.p1_score | default('-', true)  }}</div>
+        {% endfor %}
+
+
+        <!-- The Divider: Spans all 4 columns so it doesn't break the grid alignment -->
+        <div class="col-span-full h-px bg-white/10 my-1"></div>
+
+        <!-- Row 2: Player 2 (Naturally fills the next 4 columns) -->
+        <div>{{match.player_2.name}}</div>
+        {% for game in match.games %}
+                        <div class="text-center text-white">{{ game.p2_score | default('-', true) }}</div>
+        {% endfor %}
+    </div>
+</div>
