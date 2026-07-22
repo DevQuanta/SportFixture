@@ -1,8 +1,7 @@
 from app.database import db
-from app.models import Match, Tournament
+from app.models import Match, Tournament, MatchStatus
 
 from sqlalchemy import select
-
 from flask import session
 
 from app.services.workflow_service import TournamentStatus
@@ -120,6 +119,9 @@ def save_match_details(match_id, payload):
         if p2_key in payload:
             val = payload[p2_key]
             game.p2_score = int(val) if val != "" else None
+
+    if match.is_completed:
+        match.status = MatchStatus.COMPLETE
 
     db.session.commit()
 

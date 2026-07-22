@@ -1,12 +1,4 @@
 from flask import Blueprint, abort, render_template, current_app
-
-from app.database import db
-from app.models import Tournament
-
-from app.services.workflow_service import TournamentStatus
-
-from sqlalchemy import select
-
 from app.services.tournament_service import get_current_or_latest_event
 from app.services.context_service import get_live_context
 

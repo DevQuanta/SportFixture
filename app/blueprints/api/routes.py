@@ -1,13 +1,11 @@
-from flask import request, Blueprint, session, make_response, render_template, abort
-
-from sqlalchemy import select
+from flask import request, Blueprint, make_response, render_template
 
 from app.blueprints.admin.renderer import render_admin_step
 from app.database import db
-from app.models import Tournament, Player, Match
+from app.models import Player, Match
 
 from app.services.player_service import register_player_to_tournament, assign_player_to_group, save_player_details, delete_player_tournament
-from app.services.tournament_service import get_or_create_tournament, save_match_details
+from app.services.tournament_service import get_or_create_tournament, save_match_details, calculate_standings
 
 api = Blueprint("api", __name__)
 
@@ -63,8 +61,30 @@ def save_match(match_id):
     payload = request.get_json()
 
     match = save_match_details(match_id, payload)
-    return render_template("partials/match_card.html", match=match)
+    players_list = [tp.player for tp in match.tournament.player_associations]
+    standings = calculate_standings(match.tournament_id, players_list, match.round_number)
 
+    summary = [
+        {
+            "name": s["player_name"],
+            "matches_won": s["matches_won"],
+            "matches_lost": s["matches_lost"],
+            "games_won": s["games_won"],
+            "games_lost": s["games_lost"],
+            "points_won": s["points_won"],
+            "points_lost": s["points_lost"],
+        }
+        for _, s in standings
+    ]
+
+    context = {
+        "standings": summary,
+    }
+
+    match_card = render_template("partials/match_card.html", match=match)
+    leaderboard_card = render_template("partials/leaderboard.html", **context, oob=True)
+
+    return match_card + leaderboard_card
 
 @api.route("/<int:tournament_id>/players/<int:player_id>/assign", methods=["POST"])  # type:ignore
 def assign_player(tournament_id, player_id):

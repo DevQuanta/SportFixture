@@ -28,7 +28,7 @@ def get_step_3_context(tournament):
     }
 
 
-def get_live_context(tournament_id, round_number):
+def get_live_context(tournament_id, target_round):
     tournament = db.session.get(Tournament, tournament_id)
     stmt = (
         select(Match)
@@ -96,7 +96,7 @@ def get_live_context(tournament_id, round_number):
 
     players_list = [tp.player for tp in tournament.player_associations]  # type: ignore
 
-    standings = calculate_standings(tournament_id, players_list, 1)
+    standings = calculate_standings(tournament_id, players_list, target_round)
 
     summary = [
         {
@@ -112,7 +112,7 @@ def get_live_context(tournament_id, round_number):
     ]
 
     context = {
-        "tournament_data": rounds[round_number - 1],
+        "tournament_data": rounds[target_round - 1],
         "standings": summary,
     }
 

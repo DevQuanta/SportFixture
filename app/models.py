@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from flask_login import UserMixin
-from sqlalchemy import DateTime, String, Index
+from sqlalchemy import DateTime, String, Index, ColumnElement
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm.properties import ForeignKey
@@ -75,6 +75,11 @@ class TournamentStatus(PyEnum):
     LIVE = "live"
     COMPLETED = "completed"
 
+class MatchStatus(PyEnum):
+    CREATED = "created"
+    IN_PROGRESS = "in_progress"
+    COMPLETE = "complete"
+
 class Tournament(Base):
     __tablename__ = "tournament"
 
@@ -121,6 +126,22 @@ class Match(Base):
 
     is_placement_match: Mapped[bool] = mapped_column(default=False, nullable=False)
 
+    status: Mapped[MatchStatus] = mapped_column(SQLEnum(MatchStatus, values_callable = lambda x: [e.value for e in x]), default = MatchStatus.CREATED, server_default = MatchStatus.CREATED.value, nullable = False)
+
+    @hybrid_property
+    def is_completed(self) -> bool:
+        if self.status == MatchStatus.COMPLETE:
+            return True
+
+        p1_wins = sum(1 for g in self.games if g.winner == "p1")
+        p2_wins = sum(1 for g in self.games if g.winner == "p2")
+
+        return p1_wins >= 2 or p2_wins >= 2
+
+    @is_completed.inplace.expression
+    @classmethod
+    def _is_completed_expression(cls) -> ColumnElement[bool]:
+        return cls.status == MatchStatus.COMPLETE
 
 class GameScore(Base):
     __tablename__ = "gamescore"
@@ -134,6 +155,17 @@ class GameScore(Base):
 
     p1_score: Mapped[int | None] = mapped_column(nullable=True)
     p2_score: Mapped[int | None] = mapped_column( nullable=True)
+
+    @property
+    def winner(self) -> str | None:
+        """Returns 'p1', 'p2', or None if incomplete/tied."""
+        if self.p1_score is None or self.p2_score is None:
+            return None
+        if self.p1_score > self.p2_score and self.p1_score >= 11:
+            return "p1"
+        if self.p2_score > self.p1_score and self.p2_score >= 11:
+            return "p2"
+        return None
 
 class TournamentPlayer(Base):
 

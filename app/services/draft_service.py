@@ -1,7 +1,7 @@
 from app.database import db
 from app.models import Match, Tournament, GameScore
 
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from flask import current_app
 
 from app.services.tournament_service import calculate_standings
@@ -107,9 +107,9 @@ def generate_round(tournament_id, round_id, preview=True):
 
 
     else:
-        for i in range(0, num_groups):
+        for i, group_players in enumerate(groups, start=1):
             group_matches = draft_matches_for_group(
-                groups[i], i + 1, tournament_id, round_id
+                group_players, i, tournament_id, round_id
             )
             matches_data.extend(group_matches)  # type: ignore
 
@@ -118,22 +118,28 @@ def generate_round(tournament_id, round_id, preview=True):
 
 
 def group_pairings(tournament_id, round_id):
-    tournament = db.session.get(Tournament, tournament_id)  # type: ignore
-    num_groups = tournament.max_groups  # type: ignore
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        raise ValueError(f"Tournament {tournament_id} not found")
+
+    active_groups = {tp.group_id for tp in tournament.player_associations if tp.group_id}
+
+    num_groups = max(active_groups) if active_groups else tournament.max_groups
 
     groups = [[] for _ in range(num_groups)]
-    tournament_players = tournament.player_associations  # type: ignore
+    tournament_players = tournament.player_associations
 
     if round_id == 1:
         for tp in tournament_players:
             if tp.group_id is not None and tp.group_id > 0:
-                groups[tp.group_id - 1].append(tp.player)  # type: ignore
+                groups[tp.group_id - 1].append(tp.player)
 
     else:
         group_index = 0
         direction = 1
 
-        players_list = [tp.player for tp in tournament.player_associations]  # type: ignore
+        players_list = [tp.player for tp in tournament.player_associations]
 
         standings = calculate_standings(tournament_id, players_list, round_id - 1)
 
@@ -154,14 +160,14 @@ def group_pairings(tournament_id, round_id):
     return groups
 
 def fetch_grouped_players(tournament):
-    tournament_players = tournament.player_associations  # type:ignore
+    tournament_players = tournament.player_associations
     grouped_players = {0: []}
 
-    for group_num in range(1, tournament.max_groups + 1):  # type:ignore
+    for group_num in range(1, tournament.max_groups + 1):
         grouped_players[group_num] = []
 
     for ticket in tournament_players:
-        target_group = ticket.group_id  # type:ignore
+        target_group = ticket.group_id
 
         player_row = ticket.player
 
@@ -177,3 +183,37 @@ def fetch_grouped_players(tournament):
         grouped_players[target_group].append(player_card)
 
     return grouped_players
+
+
+def get_next_round(tournament_id):
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        raise ValueError(f"Tournament {tournament_id} not found")
+
+    current_round = tournament.round_number
+
+    has_incomplete = db.session.scalar(
+        select(
+            select(Match)
+            .where(
+                and_(
+                    Match.tournament_id == tournament_id,
+                    Match.round_number == current_round,
+                    ~Match.is_completed,
+                )
+            )
+            .exists()
+        )
+    )
+
+    if has_incomplete:
+        raise ValueError("Round has incomplete matches")
+
+    matches_draft = generate_round(tournament_id, current_round + 1)
+    commit_matches_for_group(matches_draft, tournament_id)
+
+    tournament.round_number += 1
+    db.session.commit()
+
+    return True

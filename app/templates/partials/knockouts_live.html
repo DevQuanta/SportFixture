@@ -1,61 +1,31 @@
-<div id="live-matches-container" class="flex flex-row w-full gap-10 items-center mt-5 mb-5">
-    <div class="bg-[#FF2D55] px-3 py-2 rounded-md hover:cursor-pointer">
-        Round {{tournament_data.number}}
-    </div>
-
-    <button
-        hx-post="/tournament/{{tournament_id}}/round/advance"
-        hx-target="live-matches-container"
-        hx-swap="outerHTML"
-        class="text-cyan-400 font-medium hover:cursor-pointer bg-transparent"
-    >
-        Proceed to Round {{tournament_data.number + 1}} →
-    </button>
-</div>
-
-<h2 class="mt-12 text-2xl mb-5">Leaderboard</h2>
-
-<table class="mb-10 w-full border-collapse">
-    <thead>
-        <tr>
-            <th class="text-center pb-5 font-thin">Rank</th>
-            <th class="text-center pb-5 font-thin">Name</th>
-            <!-- <th class="text-center pb-5 font-thin">Pl (Played)</th> -->
-            <th class="text-center pb-5 font-thin">W-L (Matches)</th>
-            <th class="text-center pb-5 font-thin">GW-GL (Games)</th>
-            <th class="text-center pb-5 font-thin">PW-PL (Points)</th>
-            <!-- <th class="text-center pb-5 font-thin">Pts</th> -->
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for player in standings %}
-        <tr class="border-b border-b-[#f8fafc80]">
-            <td class="text-center py-3">#{{ loop.index }}</td>
-            <td class="text-center py-3">{{player.name}}</td>
-            <td class="text-center py-3">
-                {{player.matches_won}}-{{player.matches_lost}}
-            </td>
-            <td class="text-center py-3">
-                {{player.games_won}}-{{player.games_lost}}
-            </td>
-            <td class="text-center py-3">
-                {{player.points_won}}-{{player.points_lost}}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<div id="match-groups" class="flex flex-row gap-20">
-    {% for group in tournament_data.groups %}
-    <div class="flex flex-col gap-4 mt-5">
-        <div class="font-medium text-[#E7E7E7] text-[20px]">
-            Group {{group.id}}
+<div id="live-stage-container">
+    <div class="flex flex-row w-full gap-10 items-center mt-5 mb-5">
+        <div class="bg-[#FF2D55] px-3 py-2 rounded-md hover:cursor-pointer">
+            Round {{tournament_data.number}}
         </div>
 
-        {% for match in group.matches %} {% include "partials/match_card.html"%}
+        <button
+            hx-post="/tournament/{{tournament_id}}/round/advance"
+            hx-target="#live-stage-container"
+            hx-swap="outerHTML"
+            class="text-cyan-400 font-medium hover:cursor-pointer bg-transparent"
+        >
+            Proceed to Round {{tournament_data.number + 1}} →
+        </button>
+    </div>
+
+    {% include "partials/leaderboard.html" %}
+
+    <div id="match-groups" class="flex flex-row gap-20">
+        {% for group in tournament_data.groups %}
+        <div class="flex flex-col gap-4 mt-5">
+            <div class="font-medium text-[#E7E7E7] text-[20px]">
+                Group {{group.id}}
+            </div>
+
+            {% for match in group.matches %} {% include
+            "partials/match_card.html"%} {% endfor %}
+        </div>
         {% endfor %}
     </div>
-    {% endfor %}
 </div>

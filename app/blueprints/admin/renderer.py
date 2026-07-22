@@ -1,5 +1,5 @@
 from app.services.workflow_service import TournamentStatus
-from flask import render_template, current_app
+from flask import render_template, current_app, abort
 
 from app.services.context_service import get_step_3_context, get_live_context
 from app.services.draft_service import fetch_grouped_players
@@ -14,6 +14,8 @@ def render_admin_step(tournament_id):
         raise ValueError(f"Tournament {tournament_id} not found")
 
     tournament_status = tournament.status
+
+    current_app.logger.info(f"Status -> {tournament_status}")
 
     match tournament_status:
         case TournamentStatus.SETUP:
@@ -35,5 +37,9 @@ def render_admin_step(tournament_id):
             return render_template("partials/admin_step_3.html", **context)
 
         case TournamentStatus.LIVE:
-            context = get_live_context(tournament_id, 1)
-            return render_template("partials/knockouts_live.html", **context)
+            current_round = tournament.round_number
+            context = get_live_context(tournament_id, current_round)
+            return render_template("partials/knockouts_live.html", tournament_id = tournament_id, **context)
+
+        case _:
+            abort(404, "Page not found")
