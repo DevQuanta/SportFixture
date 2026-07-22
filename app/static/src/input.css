@@ -13,6 +13,17 @@
     @apply border rounded-md bg-transparent text-[14px]  text-white/90 h-7 pl-3 focus:outline-none focus:border-blue-300/80;
 }
 
+@keyframes fadeToast {
+  0% { opacity: 0; transform: translateY(-8px); }
+  10% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); visibility: hidden; }
+}
+
+.animate-fade-toast {
+  animation: fadeToast 4s forwards;
+}
+
 @utility admin-step {
     @apply flex flex-row items-center gap-2 text-[20px];
 }

@@ -1,10 +1,12 @@
 # app/__init__.py
-from flask import Flask
+from flask import Flask, make_response
+import json
 from sqlalchemy import event, select
 from sqlalchemy.engine import Engine
 from .database import db, migrate
 from flask_login import LoginManager
 from .models import Admin
+from app.exceptions import DomainError
 
 login_manager = LoginManager()
 
@@ -48,5 +50,20 @@ def create_app() -> Flask:
     app.register_blueprint(main_bp)
     app.register_blueprint(api)
     app.register_blueprint(admin)
+
+    @app.errorhandler(DomainError)
+    def handle_domain_error(error):
+        """
+        Catches any DomainError
+        """
+        response = make_response(error.message, 422)
+
+        response.headers["HX-Trigger"] = json.dumps({
+            "toast": {
+                "message": error.message,
+                "type": "error"
+            }
+        })
+        return response
 
     return app

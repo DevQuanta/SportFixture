@@ -1,0 +1,16 @@
+<label for="player-diff">Player difficulty</label>
+<div class="flex flex-row gap-3 mt-2">
+  {% for rating in ratings %}
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input
+        type="radio"
+        name="player-diff"
+        value="{{ rating }}"
+        class="accent-[#ff383c]"
+        {% if loop.first %}checked{% endif %}
+      >
+      <input type="hidden" name="new_player_name" value="{{ new_name }}" />
+      <span class="capitalize">{{ rating }}</span>
+    </label>
+  {% endfor %}
+</div>

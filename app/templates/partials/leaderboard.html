@@ -1,5 +1,27 @@
 <div id="leaderboard-container" {% if oob %}hx-swap-oob="true"{% endif %}>
-    <h2 class="mt-12 text-2xl mb-5">Leaderboard</h2>
+    <h2 class="mt-12 text-2xl mb-2">Leaderboard</h2>
+    <div class="flex flex-col gap-8">
+    <div class="flex flex-row w-fit bg-slate-800 p-1 rounded-md text-xs">
+        <!-- Overall Tab -->
+          <button
+            hx-get="/tournament/{{ tournament_id }}/standings/overall"
+            hx-target="#leaderboard-container"
+            hx-swap="outerHTML"
+            class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {% if current_scope == 'overall' %} bg-slate-200 text-slate-900 shadow-sm {% else %} text-slate-400 hover:text-slate-200 {% endif %}"
+          >
+            Overall
+          </button>
+
+          <!-- Round-Specific Tab -->
+          <button
+            hx-get="/tournament/{{ tournament_id }}/standings/round?round={{ current_round }}"
+            hx-target="#leaderboard-container"
+            hx-swap="outerHTML"
+            class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {% if current_scope == 'round' %} bg-slate-200 text-slate-900 shadow-sm {% else %} text-slate-400 hover:text-slate-200 {% endif %}"
+          >
+            Round {{ current_round }}
+          </button>
+    </div>
     <table class="mb-10 w-full border-collapse">
         <thead>
             <tr>
@@ -22,4 +44,5 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 </div>

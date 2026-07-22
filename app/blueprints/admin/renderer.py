@@ -41,5 +41,11 @@ def render_admin_step(tournament_id):
             context = get_live_context(tournament_id, current_round)
             return render_template("partials/knockouts_live.html", tournament_id = tournament_id, **context)
 
+        case TournamentStatus.COMPLETED:
+            current_round = tournament.round_number
+            context = get_live_context(tournament_id, current_round)
+            return render_template("partials/tournament_completion.html", tournament_id = tournament_id, **context)
+
+
         case _:
             abort(404, "Page not found")

@@ -1,4 +1,5 @@
 from app.database import db
+from app.exceptions import RoundNotReadyError, TournamentNotFoundError
 from app.models import Match, Tournament, GameScore
 
 from sqlalchemy import select, and_
@@ -189,7 +190,7 @@ def get_next_round(tournament_id):
     tournament = db.session.get(Tournament, tournament_id)
 
     if not tournament:
-        raise ValueError(f"Tournament {tournament_id} not found")
+        raise TournamentNotFoundError("Tournament not found")
 
     current_round = tournament.round_number
 
@@ -208,7 +209,7 @@ def get_next_round(tournament_id):
     )
 
     if has_incomplete:
-        raise ValueError("Round has incomplete matches")
+        raise RoundNotReadyError("Current round has incomplete matches")
 
     matches_draft = generate_round(tournament_id, current_round + 1)
     commit_matches_for_group(matches_draft, tournament_id)

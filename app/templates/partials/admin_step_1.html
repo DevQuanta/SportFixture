@@ -1,6 +1,6 @@
 <div id="step-editor-container">
     <div class="flex flex-col gap-4 mb-10">
-    <div class="flex flex-row mt-12.5 justify-between">
+        <div class="flex flex-row mt-12.5 justify-between">
             <div class="flex flex-row gap-3 items-center">
                 <div
                     class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#ff2d55] text-[16px]"
@@ -25,15 +25,16 @@
                 </div>
                 <div class="text[18px]">Preview & Publish</div>
             </div>
-    </div>
-    <div class="flex flex-row justify-end">
-
-        <a class=" text-cyan-500 px-2 py-2 cursor-pointer"
-            hx-post="/admin/{{tournament.id}}/advance/"
-            hx-swap="outerHTML"
-            hx-target="#step-editor-container">Next Step →</a>
-    </div>
-
+        </div>
+        <div class="flex flex-row justify-end">
+            <a
+                class="text-cyan-500 px-2 py-2 cursor-pointer"
+                hx-post="/admin/{{tournament.id}}/advance/"
+                hx-swap="outerHTML"
+                hx-target="#step-editor-container"
+                >Next Step →</a
+            >
+        </div>
     </div>
     <div class="flex flex-row justify-between items-center gap-20">
         <div class="flex flex-col w-75 shrink-0">
@@ -42,38 +43,79 @@
                 hx-swap="innerHTML"
                 hx-target="#player-rows-container"
                 method="post"
+                x-data="{ open: false, query: '' }"
+                hx-on::after-request="if (event.detail.elt === this && event.detail.successful) { this.reset(); query = ''; open = false; }"
             >
                 <div class="font-semibold text-[30px] mb-5">Player Details</div>
-                <div class="flex flex-col gap-0.75 mb-10">
-                    <input type="hidden" name="tournament_id" value="{{tournament.id}}"
-                    <label for="player-name">Player name</label>
-                    <input
-                        type="text"
-                        id="player-name"
-                        name="player-name"
-                        class="inp"
-                        required
-                    />
+
+                <div
+                    @click.outside="open = false"
+                    @keydown.escape="open = false"
+                    class="relative"
+                >
+                    <!-- Search Row -->
+                    <div class="flex flex-col gap-0.75 mb-5 relative">
+                        <input
+                            type="hidden"
+                            name="tournament_id"
+                            value="{{tournament.id}}"
+                        />
+                        <label for="player-name">Player name</label>
+                        <input
+                            type="text"
+                            id="player-name"
+                            name="player-name"
+                            x-model="query"
+                            @input="open = true"
+                            @focus="open = true"
+                            class="inp"
+                            autocomplete="off"
+                            required
+                            hx-get="/search-players"
+                            hx-trigger="focus,input changed delay:300ms"
+                            hx-target="#search-results"
+                        />
+
+                        <!-- Dropdown container floats directly over the form -->
+                        <div
+                            id="search-results"
+                            class="absolute left-0 top-full z-10 w-full origin-top"
+                            x-show="open"
+                            x-cloak
+                            x-transition:enter="transition ease-out duration-150 transform"
+                            x-transition:enter-start="opacity-0 -translate-y-1 scale-95"
+                            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                            x-transition:leave="transition ease-in duration-100 transform"
+                            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                            x-transition:leave-end="opacity-0 -translate-y-1 scale-95"
+                        ></div>
+                    </div>
                 </div>
-                <div class="flex flex-col gap-0.75 mb-10">
-                    <label for="player-diff">Player difficulty</label>
-                    <input
-                        type="text"
-                        id="player-diff"
-                        name="player-diff"
-                        class="inp"
-                        required
-                    />
+
+                <!-- Difficulty Target Area (Starts Empty or Hidden) -->
+                <div
+                    id="player-diff-container"
+                    class="flex flex-col gap-0.75 mb-8"
+                >
+                    <!-- Dynamic content (Badge or Select options) lands here -->
                 </div>
 
                 <div class="flex flex-row gap-4 justify-center">
-                <button class="rounded-md bg-[#ff383c] text-[18px] text-white px-9 py-2 cursor-pointer w-fit" href="#">Add Player</button>
-
+                    <button
+                        type="submit"
+                        class="rounded-md bg-[#ff383c] text-[18px] text-white px-9 py-2 cursor-pointer w-fit"
+                    >
+                        Add Player
+                    </button>
                 </div>
             </form>
         </div>
 
-        <table id="admin-tbl-view" class="w-full border-collapse table-fixed" class="admin-tbl">
+        <table
+            id="admin-tbl-view"
+            class="w-full border-collapse table-fixed"
+            class="admin-tbl"
+        >
             <thead>
                 <tr>
                     <th class="text-center pb-5 font-thin w-10">Name</th>
@@ -83,8 +125,8 @@
             </thead>
 
             <tbody id="player-rows-container">
-                {% set players = tournament.player_associations %}
-                {% include "partials/player_rows.html" %}
+                {% set players = tournament.player_associations %} {% include
+                "partials/player_rows.html" %}
             </tbody>
         </table>
     </div>

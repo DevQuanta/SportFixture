@@ -28,7 +28,7 @@ def get_step_3_context(tournament):
     }
 
 
-def get_live_context(tournament_id, target_round):
+def get_live_context(tournament_id, target_round, scope="round"):
     tournament = db.session.get(Tournament, tournament_id)
     stmt = (
         select(Match)
@@ -52,6 +52,7 @@ def get_live_context(tournament_id, target_round):
     ):
         round_matches = list(round_matches_iter)
         groups = []
+
 
         for group_id, group_matches_iter in groupby(
             round_matches, key=lambda m: m.group_id
@@ -96,7 +97,9 @@ def get_live_context(tournament_id, target_round):
 
     players_list = [tp.player for tp in tournament.player_associations]  # type: ignore
 
-    standings = calculate_standings(tournament_id, players_list, target_round)
+    round_for_standings = target_round if scope == "round" else None
+    standings = calculate_standings(tournament_id, players_list, round_for_standings)
+
 
     summary = [
         {
@@ -112,8 +115,11 @@ def get_live_context(tournament_id, target_round):
     ]
 
     context = {
-        "tournament_data": rounds[target_round - 1],
+        "active_round": rounds[target_round - 1] if rounds else None,
+        "current_round": target_round,           # The round being viewed
+        "max_round": tournament.round_number,    # Highest round reached so far
+        "all_rounds": [r["number"] for r in rounds], # e.g. [1, 2, 3]
         "standings": summary,
+        "current_scope": scope,
     }
-
     return context

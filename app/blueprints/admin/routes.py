@@ -86,11 +86,8 @@ def publish_tournament(tournament_id):
     return render_admin_step(tournament_id)
 
 # return view_live_tournament(tournament_id, current_round)
-@admin.route("/tournament/<int:tournament_id>/round/advance")
+@admin.route("/tournament/<int:tournament_id>/round/advance", methods=["POST"])
 def next_round(tournament_id):
-    status = get_next_round(tournament_id)
-
-    if not status:
-        abort(500, "Failed to advance round")
+    get_next_round(tournament_id)
 
     return render_admin_step(tournament_id)

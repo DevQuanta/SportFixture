@@ -5,6 +5,7 @@ from sqlalchemy import select
 from flask import session
 
 from app.services.workflow_service import TournamentStatus
+from app.exceptions import InvalidMatchScoreError, MatchNotFoundError
 
 
 def get_ratio(won, lost):
@@ -31,7 +32,7 @@ def calculate_standings(tournament_id, players_list, round_id=None):
     stmt = select(Match).where(Match.tournament_id == tournament_id)
 
     if round_id:
-        stmt = stmt.where(Match.round_number <= round_id)
+        stmt = stmt.where(Match.round_number == round_id)
 
     matches = db.session.execute(stmt).scalars()
 
@@ -107,18 +108,23 @@ def get_or_create_tournament(tournament_input: str) -> Tournament:
 def save_match_details(match_id, payload):
     match = db.session.get(Match, match_id)
     if not match:
-        raise ValueError(f"Match {match_id} not found")
+        raise MatchNotFoundError("Match not found")
 
     for game in match.games:
         p1_key = f"game_{game.id}_p1"
         p2_key = f"game_{game.id}_p2"
+        p1_score = int(payload[p1_key])
+        p2_score = int(payload[p2_key])
+
+
+        if not validate_scores(p1_score, p2_score):
+            raise InvalidMatchScoreError("Invalid match score entered")
 
         if p1_key in payload:
-            val = payload[p1_key]
-            game.p1_score = int(val) if val != "" else None
+            game.p1_score = int(p1_score) if val != "" else None
         if p2_key in payload:
             val = payload[p2_key]
-            game.p2_score = int(val) if val != "" else None
+            game.p2_score = int(p2_score) if val != "" else None
 
     if match.is_completed:
         match.status = MatchStatus.COMPLETE
@@ -139,3 +145,6 @@ def get_current_or_latest_event():
         raise ValueError("No active tournaments")
 
     return tournament
+
+def validate_scores(p1: int, p2: int) -> bool:
+    return (p1 == p2 + 2 and p1 >= 11) or (p2 == p1 + 2 and p2 >= 11)

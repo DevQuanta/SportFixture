@@ -1,0 +1,16 @@
+<label>Player difficulty</label>
+<div class="mt-1">
+    <span
+        class="px-4 py-1.5 rounded-full font-medium inline-block capitalize"
+        style="
+        color: {{ player.colour }};
+          background-color: {{ player.colour }}15;
+          border-color: {{ player.colour }}30;
+          "
+    >
+        {{ player.difficulty }}
+    </span>
+
+    <input type="hidden" name="player-diff" value="{{ player.difficulty }}" />
+    <input type="hidden" name="player_id" value="{{ player.id }}" />
+</div>

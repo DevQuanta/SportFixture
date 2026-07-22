@@ -3,6 +3,7 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <link
             rel="stylesheet"
             href="{{ url_for('static', filename='css/style.css')}}"
@@ -10,10 +11,28 @@
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
         <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
 
+        <style>[x-cloak] { display: none !important; }</style>
+
         {% block head %}{% endblock %}
     </head>
 
     <body class="bg-[#0b0f19] m-0 text-[#f8fafc] font-display" id="{% block body_id %}default-page{% endblock %}">
+        <div
+          x-data="{ show: false, message: '', type: 'error' }"
+          x-on:toast.window="
+            message = $event.detail.message;
+            type = $event.detail.type || 'error';
+            show = true;
+            setTimeout(() => show = false, 4000);
+          "
+          x-show="show"
+          x-transition
+          @click="show = false"
+            class="fixed top-4 right-4 z-[999] cursor-pointer select-none rounded-lg bg-red-600/80 opacity-90 backdrop-blur-sm text-white px-4 py-3 shadow-2xl font-medium"
+        >
+          <span x-text="message"></span>
+        </div>
+
         <header class="flex flex-row px-10 items-center justify-between h-22.5 bg-transparent border-b border-b-[#959595]">
             <img class="h-10 w-auto" src="{{ url_for('static', filename='images/logo.svg')}}" />
 
@@ -43,6 +62,19 @@
             {% endif %}
         </header>
 
-        <main>{% block content %} {% endblock %}</main>
+        <main>
+
+            {% block content %} {% endblock %}</main>
     </body>
 </html>
+
+<!-- HTMX Global Event Bridge -->
+<script>
+  // Listens for HX-Trigger events from Flask and dispatches them to Alpine
+  document.body.addEventListener('htmx:afterRequest', function(evt) {
+    if (evt.detail.xhr.status === 422) {
+      // Prevent HTMX from attempting to swap content on business logic failure
+      evt.detail.shouldSwap = false;
+    }
+  });
+</script>
