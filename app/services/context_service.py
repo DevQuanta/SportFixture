@@ -1,4 +1,5 @@
 from flask import session
+from app.exceptions import MatchNotFoundError
 from app.services.draft_service import generate_round
 
 from app.database import db
@@ -123,3 +124,36 @@ def get_live_context(tournament_id, target_round, scope="round"):
         "current_scope": scope,
     }
     return context
+
+def get_match(match_id):
+    match = db.session.get(Match, match_id)
+
+    if not match:
+        return MatchNotFoundError("Match not found")
+
+    match_dict = {
+        "id": match.id,
+        "player_1": {
+            "id": match.id,
+            "name": match.player_1.name,
+        }
+        if match.player_1
+        else None,
+        "player_2": {
+            "id": match.player_2.id,
+            "name": match.player_2.name,
+        }
+        if match.player_2
+        else None,
+        "games": [
+            {
+                "id": g.id,
+                "game_number": g.game_number,
+                "p1_score": g.p1_score,
+                "p2_score": g.p2_score,
+            }
+            for g in match.games
+        ],
+    }
+
+    return match_dict

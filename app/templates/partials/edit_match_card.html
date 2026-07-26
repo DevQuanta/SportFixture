@@ -3,6 +3,11 @@
 <div
     id="match-card-{{ match.id }}"
     class="flex flex-row w-100 cursor-pointer "
+    @click.outside="$dispatch('leave_match')"
+    hx-get="/match/view/{{match.id}}"
+    hx-target="#match-card-{{ match.id }}"
+    hx-swap="outerHTML"
+    hx-trigger="leave_match"
 >
     <div class="bg-green-400 w-3 rounded-l-md"></div>
     <form

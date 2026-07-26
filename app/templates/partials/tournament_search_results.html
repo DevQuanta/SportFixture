@@ -5,7 +5,7 @@
       hx-get="/select-tournament?tournament={{ tournament.id }}"
       hx-swap="innerHTML"
       hx-target="#tournament-editor"
-      hx-on::after-request="open = false"
+      @click="open = false, query = '{{ tournament.name }}'"
     >
       <span>{{ tournament.name }}</span>
     </div>

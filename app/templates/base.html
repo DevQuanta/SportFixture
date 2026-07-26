@@ -1,9 +1,15 @@
 <!doctype html>
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='dist/output.css') }}"
+        />
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+        ></script>
         <link
             rel="stylesheet"
             href="{{ url_for('static', filename='css/style.css')}}"
@@ -11,33 +17,109 @@
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
         <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
 
-        <style>[x-cloak] { display: none !important; }</style>
+        <style>
+            [x-cloak] {
+                display: none !important;
+            }
+        </style>
 
         {% block head %}{% endblock %}
     </head>
 
-    <body class="bg-[#0b0f19] m-0 text-[#f8fafc] font-display" id="{% block body_id %}default-page{% endblock %}">
+    <body
+        class="bg-[#0b0f19] m-0 text-[#f8fafc] font-display"
+        id="{% block body_id %}default-page{% endblock %}"
+    >
         <div
-          x-data="{ show: false, message: '', type: 'error' }"
-          x-on:toast.window="
+            x-data="{ show: false, message: '', type: 'error' }"
+            x-on:toast.window="
             message = $event.detail.message;
             type = $event.detail.type || 'error';
             show = true;
             setTimeout(() => show = false, 4000);
           "
-          x-show="show"
-          x-transition
-          @click="show = false"
-            class="fixed top-4 right-4 z-[999] cursor-pointer select-none rounded-lg bg-red-600/80 opacity-90 backdrop-blur-sm text-white px-4 py-3 shadow-2xl font-medium"
+            x-show="show"
+            x-transition
+            @click="show = false"
+            class="fixed top-4 right-4 mt-4 z-[999] cursor-pointer select-none rounded-lg bg-red-600/80 opacity-90 backdrop-blur-sm text-white px-4 py-3 shadow-2xl font-medium"
         >
-          <span x-text="message"></span>
+            <span x-text="message"></span>
         </div>
 
-        <header class="flex flex-row px-10 items-center justify-between h-22.5 bg-transparent border-b border-b-[#959595]">
-            <img class="h-10 w-auto" src="{{ url_for('static', filename='images/logo.svg')}}" />
+        <header
+            class="flex flex-row px-5 md:px-10 items-center justify-between h-22.5 bg-transparent border-b border-b-[#959595]"
+        >
+            <img
+                class="h-10 w-auto"
+                src="{{ url_for('static', filename='images/logo.svg')}}"
+            />
 
-            <div class="flex flex-row gap-10 [&_a]:text-[18px] [&_a]:font-normal [&_a]:text-[#f8fafc] [&_a]:no-underline">
-                <a href="/" class="relative pb-1 text-[18px] text-white/60 hover:text-white transition-col nav-results">Results</a>
+            <div class="md:hidden mr-3" x-data="{open: false}">
+                <img
+                    @click="open = true"
+                    class="md:h-10 md:w-auto h-8 w-auto"
+                    src="{{ url_for('static', filename='images/menu.svg')}}"
+                />
+
+                <div id="menu-bar" x-show="open">
+                    <div
+                        class="fixed right-0 top-0 w-full z-10 bg-black/60 h-full"
+                    ></div>
+                    <div
+                        class="fixed right-0 top-0 w-2/3 z-999 bg-[#080808] h-full"
+                        @click.outside="open = false"
+                    >
+                        <div class="flex flex-col h-full items-center">
+                            <div class="flex flex-col gap-4 mb-50 mt-40">
+                                <a
+                                    href="/"
+                                    class="relative text-left text-medium text-[20px] nav-results"
+                                    >Results</a
+                                >
+                                <a
+                                    href="knockouts"
+                                    class="text-medium text-left text-[20px] nav-knockouts"
+                                    >Knockouts</a
+                                >
+
+                                {% if current_user.is_authenticated %}
+                                <a
+                                    href="admin"
+                                    class="text-medium text-left text-[20px] nav-admin"
+                                    >Admin</a
+                                >
+
+                                {% endif %}
+                            </div>
+
+                            {% if current_user.is_authenticated %}
+                            <a
+                                href="{{ url_for('auth.logout') }}"
+                                class="text-[24px] font-medium bg-transparent border rounded-md md:flex flex-row gap-2 items-center px-4.5 py-2"
+                            >
+                                Logout
+                            </a>
+                            {% else %}
+                            <a
+                                href="{{ url_for('auth.login') }}"
+                                class="text-[24px] font-medium bg-transparent border rounded-md md:flex flex-row gap-2 items-center px-4.5 py-2"
+                            >
+                                Login
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="hidden md:flex md:flex-row md:gap-10 md:[&_a]:text-[18px] md:[&_a]:font-normal [&_a]:text-[#f8fafc] [&_a]:no-underline"
+            >
+                <a
+                    href="/"
+                    class="relative pb-1 text-[18px] text-white/60 hover:text-white transition-col nav-results"
+                    >Results</a
+                >
                 <a href="knockouts" class="nav-knockouts">Knockouts</a>
 
                 {% if current_user.is_authenticated %}
@@ -46,15 +128,24 @@
             </div>
 
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('auth.logout') }}" class="text-[16px] font-medium bg-transparent border rounded-md flex flex-row gap-2 items-center px-4.5 py-2">
-                <img class="h-4 w-4"
+            <a
+                href="{{ url_for('auth.logout') }}"
+                class="hidden text-[16px] font-medium bg-transparent border rounded-md md:flex flex-row gap-2 items-center px-4.5 py-2"
+            >
+                <img
+                    class="h-4 w-4"
                     src="{{ url_for('static', filename='images/lock.svg')}}"
                 />
                 Logout
             </a>
             {% else %}
-            <a href="{{ url_for('auth.login') }}" class="text-[16px] font-medium bg-transparent border rounded-md flex flex-row gap-2 items-center px-4.5 py-2">
-                <img h-4 w-4
+            <a
+                href="{{ url_for('auth.login') }}"
+                class="hidden text-[16px] font-medium bg-transparent border rounded-md md:flex flex-row gap-2 items-center px-4.5 py-2"
+            >
+                <img
+                    h-4
+                    w-4
                     src="{{ url_for('static', filename='images/lock.svg')}}"
                 />
                 Login
@@ -62,19 +153,17 @@
             {% endif %}
         </header>
 
-        <main>
-
-            {% block content %} {% endblock %}</main>
+        <main>{% block content %} {% endblock %}</main>
     </body>
 </html>
 
 <!-- HTMX Global Event Bridge -->
 <script>
-  // Listens for HX-Trigger events from Flask and dispatches them to Alpine
-  document.body.addEventListener('htmx:afterRequest', function(evt) {
-    if (evt.detail.xhr.status === 422) {
-      // Prevent HTMX from attempting to swap content on business logic failure
-      evt.detail.shouldSwap = false;
-    }
-  });
+    // Listens for HX-Trigger events from Flask and dispatches them to Alpine
+    document.body.addEventListener("htmx:afterRequest", function (evt) {
+        if (evt.detail.xhr.status === 422) {
+            // Prevent HTMX from attempting to swap content on business logic failure
+            evt.detail.shouldSwap = false;
+        }
+    });
 </script>

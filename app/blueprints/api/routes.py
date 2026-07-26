@@ -1,14 +1,24 @@
-from flask import request, Blueprint, make_response, render_template, abort
+from flask import Blueprint, abort, current_app, make_response, render_template, request
+from sqlalchemy import select
+from sqlalchemy.sql.operators import ilike_op
 
 from app.blueprints.admin.renderer import render_admin_step
 from app.database import db
-from app.models import Player, Match, Tournament
-
-from sqlalchemy import select
-
-from app.services.player_service import register_player_to_tournament, assign_player_to_group, save_player_details, delete_player_tournament
-from app.services.tournament_service import get_or_create_tournament, save_match_details, calculate_standings
-from app.services.context_service import get_live_context
+from app.exceptions import MatchNotFoundError, TournamentNotFoundError
+from app.models import Match, Player, Tournament, TournamentPlayer
+from app.services.context_service import get_live_context, get_match
+from app.services.player_service import (
+    assign_player_to_group,
+    delete_player_tournament,
+    register_player_to_tournament,
+    save_player_details,
+)
+from app.services.tournament_service import (
+    calculate_standings,
+    get_or_create_tournament,
+    get_standings,
+    save_match_details,
+)
 
 api = Blueprint("api", __name__)
 
@@ -59,13 +69,16 @@ def delete_player(player_id, tournament_id):
 
     return "", 200
 
+
 @api.route("/matches/<int:match_id>/save", methods=["POST"])
 def save_match(match_id):
     payload = request.get_json()
 
     match = save_match_details(match_id, payload)
     players_list = [tp.player for tp in match.tournament.player_associations]
-    standings = calculate_standings(match.tournament_id, players_list, match.round_number)
+    standings = calculate_standings(
+        match.tournament_id, players_list, match.round_number
+    )
 
     summary = [
         {
@@ -89,6 +102,7 @@ def save_match(match_id):
 
     return match_card + leaderboard_card
 
+
 @api.route("/<int:tournament_id>/players/<int:player_id>/assign", methods=["POST"])  # type:ignore
 def assign_player(tournament_id, player_id):
     updated_group_id = request.form.get("group_id")
@@ -108,6 +122,7 @@ def register_player():
         "partials/player_rows.html", players=tournament.player_associations
     )
 
+
 @api.route("/search-players", methods=["GET"])
 def search_players():
     query = request.args.get("player-name", "").strip()
@@ -122,9 +137,7 @@ def search_players():
         matching_players = db.session.scalars(stmt).all()
 
     return render_template(
-        "partials/search_results.html",
-        players=matching_players,
-        query=query
+        "partials/search_results.html", players=matching_players, query=query
     )
 
 
@@ -141,10 +154,12 @@ def select_player():
 
     if new_name:
         ratings = ["beginner", "intermediate", "advanced"]
-        return render_template("partials/new_difficulty.html", new_name=new_name, ratings=ratings)
-
+        return render_template(
+            "partials/new_difficulty.html", new_name=new_name, ratings=ratings
+        )
 
     return "", 400
+
 
 @api.route("/search-tournament", methods=["GET"])
 def search_tournament():
@@ -159,9 +174,10 @@ def search_tournament():
 
     return render_template(
         "partials/tournament_search_results.html",
-        matching_tournaments = matching_tournaments,
-        query = query
+        matching_tournaments=matching_tournaments,
+        query=query,
     )
+
 
 @api.route("/new-player-rating", methods=["GET"])
 def new_player_rating():
@@ -170,44 +186,27 @@ def new_player_rating():
     ratings = ["beginner", "intermediate", "advanced"]
 
     return render_template(
-        "partials/new_difficulty.html",
-        player_name=name,
-        ratings=ratings
+        "partials/new_difficulty.html", player_name=name, ratings=ratings
     )
+
 
 @api.route("/tournament/<int:tournament_id>/round/<int:round_num>", methods=["GET"])
 def view_round(tournament_id, round_num):
     context = get_live_context(tournament_id, round_num)
-    return render_template("partials/knockouts_live.html", tournament_id=tournament_id, **context)
+    return render_template(
+        "partials/knockouts_live.html", tournament_id=tournament_id, **context
+    )
+
 
 @api.route("/tournament/<int:tournament_id>/standings/<string:scope>", methods=["GET"])
-def view_standings(tournament_id, scope):
-    # Optional round_num passed via query string if scope is 'round'
+def view_standings(tournament_id, scope, player_name=""):
     round_num = request.args.get("round", type=int)
-
-    # Calculate standings specifically for this view
     tournament = db.session.get(Tournament, tournament_id)
+
     if not tournament:
-        abort(404, "Tournament not found")
+        raise TournamentNotFoundError("Tournament not found")
 
-    players_list = [tp.player for tp in tournament.player_associations]
-
-    # If scope is 'round', filter by round_num; otherwise pass None for overall
-    target_round = round_num if scope == "round" else None
-    raw_standings = calculate_standings(tournament_id, players_list, target_round)
-
-    summary = [
-            {
-                "name": s["player_name"],
-                "matches_won": s["matches_won"],
-                "matches_lost": s["matches_lost"],
-                "games_won": s["games_won"],
-                "games_lost": s["games_lost"],
-                "points_won": s["points_won"],
-                "points_lost": s["points_lost"],
-            }
-            for _, s in raw_standings
-        ]
+    summary = get_standings(tournament_id, scope, player_name, round_num)
 
     return render_template(
         "partials/leaderboard.html",
@@ -215,4 +214,33 @@ def view_standings(tournament_id, scope):
         current_scope=scope,
         current_round=round_num or tournament.round_number,
         tournament_id=tournament_id,
+    )
+
+
+@api.route("/match/view/<int:match_id>", methods=["GET"])
+def view_match(match_id):
+    match = db.session.get(Match, match_id)
+    if not match:
+        raise MatchNotFoundError("Match not found")
+
+    match = get_match(match_id)
+    return render_template("partials/match_card.html", match=match)
+
+
+@api.route("/leaderboard/filter", methods=["GET"])
+def filter_leaderboard():
+    tournament_id = request.args.get("tournament_id")
+    player_name = request.args.get("player_name", "")
+
+    # returning standings
+    #
+    standings =  get_standings(tournament_id, "overall", player_name)
+    current_app.logger.info(standings)
+    current_app.logger.info(tournament_id, player_name)
+
+    return render_template(
+        "partials/_leaderboard_main.html",
+        tournament_id=tournament_id,
+        player_name=player_name,
+        standings=standings,
     )

@@ -1,45 +1,73 @@
 <div id="live-stage-container">
     <div
-        class="flex flex-row w-full gap-10 justify-between items-center mt-5 mb-5"
+        class="flex flex-row w-full h-full gap-10 justify-between items-center mt-5 mb-5"
     >
+        <div class="flex flex-row">
         <!-- Round Tabs Navigation -->
-        <div class="flex flex-row gap-2 items-center">
+        <div class="flex flex-row bg-slate-800 p-1 rounded-md text-xs"">
             {% for r_num in all_rounds %}
             <button
                 hx-get="/tournament/{{ tournament_id }}/round/{{ r_num }}"
                 hx-target="#live-stage-container"
                 hx-swap="outerHTML"
-                class="px-3 py-2 rounded-md transition-colors hover:cursor-pointer {% if r_num == current_round %}bg-[#FF2D55] text-white font-bold{% else %}bg-slate-800 text-gray-300 hover:bg-slate-700{% endif %}"
+                class="w-fit px-3 py-2 rounded-md transition-colors hover:cursor-pointer {% if r_num == current_round %}bg-[#FF2D55] text-white font-bold{% else %}bg-slate-800 text-gray-300 hover:bg-slate-700{% endif %}"
             >
                 Round {{ r_num }}
             </button>
 
             {% endfor %}
-            <!-- Advance Tournament Button (Only show if viewing active max round) -->
+        </div>
+
+
+            <!-- Advance Tournament Button (Only show if viewing active max round)
             {% if current_round == max_round %}
             <button
                 hx-post="/tournament/{{ tournament_id }}/round/advance"
                 hx-target="#live-stage-container"
                 hx-swap="outerHTML"
-                class="ml-8 text-cyan-400 font-medium hover:cursor-pointer bg-transparent hover:underline"
+                class="hidden ml-8 text-cyan-400 font-medium hover:cursor-pointer bg-transparent hover:underline"
             >
                 Proceed to Round {{ current_round + 1 }} →
             </button>
-            {% endif %}
+            {% endif %}-->
         </div>
 
-        <button
+        <div x-data="{open: false}">
+             <button class="px-3 py-1.5 rounded-md bg-blue-700"
+                 @click="open = true">
+                 > Next
+             </button>
+
+
+             <div x-show="open"  class="fixed z-10 right-0 top-0 w-full h-full bg-black/60">
+                 <div @click.outside="open = false" class="fixed top-1/2 left-1/2 -translate-1/2 w-2/3 h-1/2 bg-slate-800 rounded-md">
+                <div class="flex flex-col gap-4 justify-center h-full">
+                 {% if current_round == max_round %}
+                 <button
+                     hx-post="/tournament/{{ tournament_id }}/round/advance"
+                     hx-target="#live-stage-container"
+                     hx-swap="outerHTML"
+                     class="ml-8 mt-4 font-medium hover:cursor-pointer bg-transparent hover:underline"
+                 >
+                     Proceed to Round {{ current_round + 1 }} →
+                 </button>
+                 {% endif %}
+                </div>
+                 </div>
+             </div>
+        </div>
+        <!-- <button
           hx-post="/tournament/{{ tournament_id }}/end"
           hx-confirm="Are you sure you want to end this tournament?"
-          class="border border-red-500 text-white hover:bg-red-600 hover:text-white hover:border-red-600 px-3 py-2 rounded-md font-medium transition-colors hover:cursor-pointer duration-150"
+          class="hidden border border-red-500 text-white hover:bg-red-600 hover:text-white hover:border-red-600 px-3 py-2 rounded-md font-medium transition-colors hover:cursor-pointer duration-150"
         >
           End tournament
-        </button>
+          </button> -->
     </div>
 
     {% include "partials/leaderboard.html"%}
 
-    <div id="match-groups" class="flex flex-row gap-20">
+    <div id="match-groups" class="flex md:flex-row flex-col gap-20">
         {% for group in active_round.groups %}
         <div class="flex flex-col gap-4 mt-5">
             <div class="font-medium text-[#E7E7E7] text-[20px]">

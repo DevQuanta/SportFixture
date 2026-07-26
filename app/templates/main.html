@@ -30,26 +30,23 @@ content %}
         <div class="flex flex-row w-full gap-3 p-4 items-center">
             <input
                 class="px-1.5 py-1 bg-[#121620] border border-slate-500 w-full h-full rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
+                class="inp"
+                autocomplete="off"
+                hx-get="/leaderboard/filter?tournament_id={{tournament_id}}"
+                name="player_name"
+                hx-trigger="focus,input changed delay:300ms"
+                hx-target="#search-results"
             ></input>
 
-                <select class="border border-white/60 bg-transparent h-full rounded-md px-1.5 py-1"
-                    hx-get="/filter-tournament"
-                    <option value="1">January</option>
-                    <option value="2"> February</option>
-                    <option value="3">March</option>
-                    <option value="4">April</option>
-                    <option value="5">May</option>
-                    <option value="6">June</option>
-                    <option value="7">July</option>
-                    <option value="8">August</option>
-                    <option value="9">September</option>
-                    <option value="10">October</option>
-                    <option value="11">November</option>
-                    <option value="12">December</option>
+                <select class="border border-white/60 bg-transparent h-full rounded-md px-1.5 py-1">
+                    {% for tournament in tournaments %}
+                        <option hx-get="/leaderboard/filter?player_name={{player_name}}" hx-target="#search-results" name="tournament_id" value="{{tournament.id}}" >{{tournament.name}}</option>
+                    {% endfor %}
                 </select>
 
     </div>
 
+    <div id="search-results">
         <table class="w-full border-collapse">
             <thead>
                 <tr>
@@ -76,6 +73,7 @@ content %}
 
             </tbody>
         </table>
+    </div>
     </div>
     <div
         class="flex flex-col bg-[#121A2E] w-70 h-100% rounded-md items-center gap-5"

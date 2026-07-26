@@ -1,12 +1,18 @@
 from flask import Blueprint, abort, render_template, current_app
-from app.services.tournament_service import get_current_or_latest_event
+from app.services.tournament_service import get_current_or_latest_event, get_tournaments, get_standings
 from app.services.context_service import get_live_context
 
 main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/")
 def home_page():
-    return render_template("main.html")
+    tournaments = get_tournaments()
+    latest_tournament = get_current_or_latest_event()
+    latest_tournament_id = latest_tournament.id
+
+    standings = get_standings(latest_tournament_id, "overall")
+
+    return render_template("main.html", tournaments = tournaments, tournament_id = latest_tournament_id, player_name = '', standings = standings)
 
 
 @main_bp.route("/knockouts")

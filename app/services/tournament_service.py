@@ -1,11 +1,10 @@
+from flask import session, current_app
+from sqlalchemy import Sequence, select
+
 from app.database import db
-from app.models import Match, Tournament, MatchStatus
-
-from sqlalchemy import select
-from flask import session
-
+from app.exceptions import InvalidMatchScoreError, MatchNotFoundError, TournamentNotFoundError
+from app.models import Match, MatchStatus, Tournament
 from app.services.workflow_service import TournamentStatus
-from app.exceptions import InvalidMatchScoreError, MatchNotFoundError
 
 
 def get_ratio(won, lost):
@@ -69,13 +68,17 @@ def calculate_standings(tournament_id, players_list, round_id=None):
             stats[match.player_2_id]["matches_won"] += 1
             stats[match.player_1_id]["matches_lost"] += 1
 
+    for s in stats.values():
+        s["match_points"] = s["matches_won"] * 3
+
     sorted_stats = sorted(
         stats.values(),
         key=lambda item: (
-            get_ratio(item["matches_won"], item["matches_lost"]),
-            get_ratio(item["games_won"], item["games_lost"]),
-            get_ratio(item["points_won"], item["points_lost"]),
-            item["player_name"],
+            item["match_points"],  # 1. Total Points (3 per win)
+            item["games_won"] - item["games_lost"],  # 2. Game Differential
+            get_ratio(item["games_won"], item["games_lost"]),  # 3. Game Ratio
+            item["points_won"] - item["points_lost"],  # 4. Point Differential
+            get_ratio(item["points_won"], item["points_lost"]),  # 5. Point Ratio
         ),
         reverse=True,
     )
@@ -87,8 +90,8 @@ def calculate_standings(tournament_id, players_list, round_id=None):
 
 def get_or_create_tournament(tournament_input: str) -> Tournament:
     if tournament_input.isdigit():
-            stmt = select(Tournament).where(Tournament.id == int(tournament_input))
-            tournament = db.session.execute(stmt).scalar_one_or_none()
+        stmt = select(Tournament).where(Tournament.id == int(tournament_input))
+        tournament = db.session.execute(stmt).scalar_one_or_none()
     else:
         stmt = select(Tournament).where(Tournament.name == tournament_input)
         tournament = db.session.execute(stmt).scalar_one_or_none()
@@ -105,6 +108,7 @@ def get_or_create_tournament(tournament_input: str) -> Tournament:
 
     return tournament
 
+
 def save_match_details(match_id, payload):
     match = db.session.get(Match, match_id)
     if not match:
@@ -113,18 +117,24 @@ def save_match_details(match_id, payload):
     for game in match.games:
         p1_key = f"game_{game.id}_p1"
         p2_key = f"game_{game.id}_p2"
+        if not (payload[p1_key] or payload[p2_key]):
+            continue
+        elif not (payload[p1_key] and payload[p2_key]) and (payload[p1_key] or payload[p2_key]):
+            raise InvalidMatchScoreError("Invalid match score entered")
+
         p1_score = int(payload[p1_key])
         p2_score = int(payload[p2_key])
+        current_app.logger.info(f"p1_score: {p1_score}")
+        current_app.logger.info(f"p2_score: {p2_score}")
 
 
         if not validate_scores(p1_score, p2_score):
             raise InvalidMatchScoreError("Invalid match score entered")
 
         if p1_key in payload:
-            game.p1_score = int(p1_score) if val != "" else None
+            game.p1_score = int(p1_score) if p1_score != "" else None
         if p2_key in payload:
-            val = payload[p2_key]
-            game.p2_score = int(p2_score) if val != "" else None
+            game.p2_score = int(p2_score) if p2_score != "" else None
 
     if match.is_completed:
         match.status = MatchStatus.COMPLETE
@@ -132,6 +142,7 @@ def save_match_details(match_id, payload):
     db.session.commit()
 
     return match
+
 
 def get_round_view_context(tournament_id, round_number=None):
     pass
@@ -146,5 +157,50 @@ def get_current_or_latest_event():
 
     return tournament
 
+
+def get_tournaments():
+    stmt = select(Tournament)
+    tournaments = db.session.execute(stmt).scalars().all()
+
+    tournaments = [
+        {
+            "id": tournament.id,
+            "name": tournament.name,
+        }
+        for tournament in tournaments
+    ]
+
+    return tournaments
+
+
 def validate_scores(p1: int, p2: int) -> bool:
-    return (p1 == p2 + 2 and p1 >= 11) or (p2 == p1 + 2 and p2 >= 11)
+    return (p1 >= p2 + 2 and p1 >= 11) or (p2 >= p1 + 2 and p2 >= 11)
+
+
+def get_standings(tournament_id, scope, player_name = '', round_num = None):
+    # Calculate standings specifically for this view
+    tournament = db.session.get(Tournament, tournament_id)
+    if not tournament:
+        raise TournamentNotFoundError("Tournament Not found")
+
+    players_list = [tp.player for tp in tournament.player_associations]
+
+    # If scope is 'round', filter by round_num; otherwise pass None for overall
+    target_round = round_num if scope == "round" else None
+    raw_standings = calculate_standings(tournament_id, players_list, target_round)
+
+    summary = [
+        {
+            "name": s["player_name"],
+            "pts": s["match_points"],
+            "matches_won": s["matches_won"],
+            "matches_lost": s["matches_lost"],
+            "games_won": s["games_won"],
+            "games_lost": s["games_lost"],
+            "points_won": s["points_won"],
+            "points_lost": s["points_lost"],
+        }
+        for _, s in raw_standings if player_name in s["player_name"]
+    ]
+
+    return summary
