@@ -1,10 +1,10 @@
 from flask import Blueprint, abort, current_app, make_response, render_template, request
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.sql.operators import ilike_op
 
 from app.blueprints.admin.renderer import render_admin_step
 from app.database import db
-from app.exceptions import MatchNotFoundError, TournamentNotFoundError
+from app.exceptions import MatchNotFoundError, RoundNotReadyError, TournamentNotFoundError, GroupNotEmptyError
 from app.models import Match, Player, Tournament, TournamentPlayer
 from app.services.context_service import get_live_context, get_match
 from app.services.player_service import (
@@ -17,8 +17,12 @@ from app.services.tournament_service import (
     calculate_standings,
     get_or_create_tournament,
     get_standings,
+    get_win_rate,
+    is_round_completed,
     save_match_details,
+    is_round_completed
 )
+from app.services.workflow_service import advance_tournament_status
 
 api = Blueprint("api", __name__)
 
@@ -155,7 +159,7 @@ def select_player():
     if new_name:
         ratings = ["beginner", "intermediate", "advanced"]
         return render_template(
-            "partials/new_difficulty.html", new_name=new_name, ratings=ratings
+            "partials/new_difficulty.html", ratings=ratings
         )
 
     return "", 400
@@ -244,3 +248,74 @@ def filter_leaderboard():
         player_name=player_name,
         standings=standings,
     )
+
+@api.route("/tournament/<int:tournament_id>/end", methods=["POST"])
+def end_tournament(tournament_id: int):
+    # completed_round = is_round_completed(tournament_id)
+
+    # if not completed_round:
+    #     raise RoundNotReadyError("Current round has incomplete matches")
+
+    current_app.logger.info("ending tournament")
+    standings =  get_standings(tournament_id, "overall")
+
+
+    winners = [{
+        "name": standings[n]['name'],
+        "win_rate": get_win_rate(standings[n]['matches_won'], standings[n]['matches_lost'])
+    } for n in range(3)]
+
+    current_app.logger.info("standings calculated")
+    current_app.logger.info(f"winners: {winners}")
+
+    advance_tournament_status(tournament_id)
+
+    return render_template("partials/summary.html", winners = winners, standings = standings)
+
+
+@api.route("/tournament/<int:tournament_id>/setup", methods = ["POST"])
+def setup_tournament(tournament_id):
+    tournament_name = request.form.get("tournament-name", "")
+    max_groups = request.form.get("group-number", "")
+    max_rounds = request.form.get("round-number", "")
+
+    current_app.logger.info(tournament_name, max_groups, max_rounds)
+
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        raise TournamentNotFoundError("Tournament not found")
+
+
+    if tournament_name:
+        tournament.name = tournament_name
+    if max_groups:
+        tournament.max_groups = int(max_groups)
+    if max_rounds:
+        tournament.max_rounds = int(max_rounds)
+
+    db.session.commit()
+
+    advance_tournament_status(tournament_id)
+    return render_admin_step(tournament_id)
+
+@api.route("/tournament/<int:tournament_id>/group/<int:group_number>/remove", methods=["POST"])
+def remove_group(tournament_id, group_number):
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        return TournamentNotFoundError("Tournament not found")
+
+    has_players = db.session.scalar(
+    select(
+        select(TournamentPlayer).where(and_(TournamentPlayer.tournament_id == tournament_id, TournamentPlayer.group_id == group_number)).exists()
+    ))
+
+
+    if has_players:
+        raise GroupNotEmptyError("Group has existing players, please move them")
+
+    tournament.max_groups -= 1
+    db.session.commit()
+
+    return render_admin_step(tournament_id)

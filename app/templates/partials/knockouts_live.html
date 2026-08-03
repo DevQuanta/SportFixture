@@ -32,38 +32,61 @@
             {% endif %}-->
         </div>
 
-        <div x-data="{open: false}">
-             <button class="px-3 py-1.5 rounded-md bg-blue-700"
-                 @click="open = true">
-                 > Next
+        <div class="relative" x-data="{open: false}">
+            <div>
+             <button class="px-3 py-1.5 rounded-md bg-[#242A32] hover:cursor-pointer flex flex-row items-center hover:text-white focus:outline-none focus:ring-2 focus:ring-slate-500/50 transition-colors hover:bg-slate-700/80 duration-150 gap-1.5"
+                 @click="open = true"
+                 @keydown.escape="open = false">
+                     <span>More</span>
+                     <svg
+                           class="h-4 w-4 text-slate-400 transition-transform duration-200 ease-out"
+                           :class="open ? '-rotate-90' : 'rotate-0'"
+                           xmlns="http://www.w3.org/2000/svg"
+                           fill="none"
+                           viewBox="0 0 24 24"
+                           stroke-width="2"
+                           stroke="currentColor"
+                         >
+                           <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                         </svg>
              </button>
 
+            </div>
 
-             <div x-show="open"  class="fixed z-10 right-0 top-0 w-full h-full bg-black/60">
-                 <div @click.outside="open = false" class="fixed top-1/2 left-1/2 -translate-1/2 w-2/3 h-1/2 bg-slate-800 rounded-md">
-                <div class="flex flex-col gap-4 justify-center h-full">
+
+             <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-75"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 @click.outside="open = false" class="absolute z-10 right-0 top-[110%] w-60 h-full min-h-20 bg-[#161F30  ] border border-[#2A384C] rounded-md py-16">
+
+                <div class="flex flex-col gap-4 items-center justify-center h-full w-full">
                  {% if current_round == max_round %}
                  <button
                      hx-post="/tournament/{{ tournament_id }}/round/advance"
                      hx-target="#live-stage-container"
                      hx-swap="outerHTML"
-                     class="ml-8 mt-4 font-medium hover:cursor-pointer bg-transparent hover:underline"
+                     class="font-medium hover:cursor-pointer bg-transparent hover:underline"
                  >
                      Proceed to Round {{ current_round + 1 }} →
                  </button>
+                 <button
+                   hx-post="/tournament/{{ tournament_id }}/end"
+                   hx-target="#live-stage-container"
+                   hx-swap="innerHTML"
+                   hx-confirm="Are you sure you want to end this tournament?"
+                   class=" text-[#F87171] hover:text-white px-3 py-2 rounded-md font-medium transition-colors hover:cursor-pointer duration-150"
+                 >
+                   End tournament
+                   </button>
                  {% endif %}
                 </div>
                  </div>
              </div>
         </div>
-        <!-- <button
-          hx-post="/tournament/{{ tournament_id }}/end"
-          hx-confirm="Are you sure you want to end this tournament?"
-          class="hidden border border-red-500 text-white hover:bg-red-600 hover:text-white hover:border-red-600 px-3 py-2 rounded-md font-medium transition-colors hover:cursor-pointer duration-150"
-        >
-          End tournament
-          </button> -->
-    </div>
+
 
     {% include "partials/leaderboard.html"%}
 

@@ -5,7 +5,7 @@ from app.models import Match, Tournament, GameScore
 from sqlalchemy import select, and_
 from flask import current_app
 
-from app.services.tournament_service import calculate_standings
+from app.services.tournament_service import calculate_standings, is_round_completed
 
 
 
@@ -187,31 +187,17 @@ def fetch_grouped_players(tournament):
 
 
 def get_next_round(tournament_id):
+    has_incomplete = is_round_completed(tournament_id)
+
+    if has_incomplete:
+        raise RoundNotReadyError("Current round has incomplete matches")
+
     tournament = db.session.get(Tournament, tournament_id)
 
     if not tournament:
         raise TournamentNotFoundError("Tournament not found")
 
-    current_round = tournament.round_number
-
-    has_incomplete = db.session.scalar(
-        select(
-            select(Match)
-            .where(
-                and_(
-                    Match.tournament_id == tournament_id,
-                    Match.round_number == current_round,
-                    ~Match.is_completed,
-                )
-            )
-            .exists()
-        )
-    )
-
-    if has_incomplete:
-        raise RoundNotReadyError("Current round has incomplete matches")
-
-    matches_draft = generate_round(tournament_id, current_round + 1)
+    matches_draft = generate_round(tournament_id, tournament.round_number + 1)
     commit_matches_for_group(matches_draft, tournament_id)
 
     tournament.round_number += 1

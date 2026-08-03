@@ -1,0 +1,116 @@
+<div id="step-editor-container">
+    <div class="flex flex-col gap-4 mb-10">
+        <div class="flex flex-row mt-12.5 justify-between">
+            <div class="flex flex-row gap-3 items-center">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#ff2d55] text-[16px]"
+                >
+                    1
+                </div>
+                <div class="text-[18px]">Tournament Details</div>
+            </div>
+            <div class="flex flex-row gap-3 items-center opacity-60">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#8d8d8d] text-[16px]"
+                >
+                    2
+                </div>
+                <div class="text-[18px]">Register Player</div>
+            </div>
+            <div class="flex flex-row gap-3 items-center opacity-60">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center bg-[#8d8d8d] w-6 h-6 text-[16px]"
+                >
+                    3
+                </div>
+                <div class="text-[18px]">Seed Draws</div>
+            </div>
+            <div class="flex flex-row gap-3 items-center opacity-60">
+                <div
+                    class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#8d8d8d] text-[16px]"
+                >
+                    4
+                </div>
+                <div class="text[18px]">Preview & Publish</div>
+            </div>
+        </div>
+        <div class="flex flex-row justify-end">
+            <a
+                class="text-cyan-500 px-2 py-2 cursor-pointer"
+                hx-post="/admin/{{tournament.id}}/advance/"
+                hx-swap="outerHTML"
+                hx-target="#step-editor-container"
+                >Next Step →</a
+            >
+        </div>
+    </div>
+
+    <div class="flex flex-row justify-center">
+        <div class="w-100 border border-white/20 px-15 py-10 rounded-md bg-[#121A2E]">
+            <form
+                hx-post="/tournament/{{ tournament.id }}/setup"
+                hx-swap="outerHTML"
+                hx-target="#step-editor-container"
+                method="post"
+            >
+                <div class="flex flex-col gap-4">
+                <input
+                    type="hidden"
+                    name="tournament_id"
+                    value="{{tournament.id}}"
+                />
+                <div class="font-semibold text-[30px]">Settings</div>
+
+                <div class="flex flex-col">
+                        <label for="tournament-name">Name</label>
+                        <input
+                            type="text"
+                            id="tournament-name"
+                            name="tournament-name"
+                            class="inp"
+                            autocomplete="off"
+                            placeholder="{{ tournament.name }}"
+                        />
+
+                </div>
+
+                <div class="flex flex-col">
+                        <label for="round-number">Number of rounds</label>
+                        <input
+                            type="number"
+                            id="round-number"
+                            name="round-number"
+                            class="inp"
+                            autocomplete="off"
+                            placeholder="{{ tournament.max_rounds }}"
+                        />
+                </div>
+
+                <div class="flex flex-col">
+                        <label for="group-number">Number of groups</label>
+                        <input
+                            type="number"
+                            id="group-number"
+                            name="group-number"
+                            class="inp"
+                            autocomplete="off"
+                            placeholder="{{ tournament.max_groups }}"
+                        />
+
+                </div>
+
+                <div class="flex flex-row gap-4 justify-center">
+                    <button
+                        type="submit"
+                        class="rounded-md bg-[#ff383c] text-[18px] text-white px-9 py-2 cursor-pointer w-fit"
+                    >
+                        Continue
+                    </button>
+                </div>
+
+                </div>
+            </form>
+        </div>
+
+
+    </div>

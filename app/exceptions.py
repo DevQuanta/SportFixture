@@ -16,3 +16,6 @@ class MatchNotFoundError(DomainError):
 
 class TournamentNotFoundError(DomainError):
     pass
+
+class GroupNotEmptyError(DomainError):
+    pass

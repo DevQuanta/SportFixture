@@ -1,6 +1,14 @@
 <div id="step-group-container">
     <div class="flex flex-col gap-4 mb-10">
     <div class="flex flex-row mt-12.5 justify-between">
+        <div class="flex flex-row gap-3 items-center">
+            <div
+                class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-green-500 text-[16px] opacity-90"
+            >
+                1
+            </div>
+            <div class="text-[18px] text-green-500">Tournament details</div>
+        </div>
             <div class="flex flex-row gap-3 items-center">
                 <div
                     class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-green-500 text-[16px] opacity-90"
@@ -45,18 +53,36 @@
 
     {% for n in grouped_players.keys()|sort %}
 
-        <div class="flex flex-col w-20% pr-5 h-100 text-white/70 font-light">
+
+        <div class="flex flex-col w-full pr-5 h-100 text-white/70 font-light">
+            <div class="flex flex-row gap-3 items-center w-full">
+
             {% if n == 0 %}
+            <div>
             Unassigned
+            </div>
             {% else %}
+            <div>
 
             Group {{ n }}
+            </div>
+
+            <button
+            hx-post="/tournament/{{ tournament.id }}/group/{{ n }}/remove"
+            hx-target="#step-group-container"
+            hx-swap="outerHTML"
+            class="hover:cursor-pointer"
+            ><img src="{{ url_for('static', filename='images/remove_grp.svg') }}" class="h-5 w-5">
+
+            </img></button>
 
             {% endif %}
 
+            </div>
+
             {% for player in grouped_players[n] %}
             <div
-                class="flex flex-row items-center justify-between gap-4 mt-2.5 bg-[#121A2E] px-3 py-2 rounded-md"
+                class="flex flex-row items-center justify-between gap-4 mt-2.5 bg-[#121A2E] px-5 py-3 rounded-md w-fit"
             >
 
                 <details class="group/player">

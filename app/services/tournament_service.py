@@ -1,8 +1,12 @@
-from flask import session, current_app
-from sqlalchemy import Sequence, select
+from flask import current_app, session
+from sqlalchemy import Sequence, and_, select
 
 from app.database import db
-from app.exceptions import InvalidMatchScoreError, MatchNotFoundError, TournamentNotFoundError
+from app.exceptions import (
+    InvalidMatchScoreError,
+    MatchNotFoundError,
+    TournamentNotFoundError,
+)
 from app.models import Match, MatchStatus, Tournament
 from app.services.workflow_service import TournamentStatus
 
@@ -12,6 +16,10 @@ def get_ratio(won, lost):
         return float("inf") if won > 0 else 0.0
     return won / lost
 
+def get_win_rate(won, lost):
+    if lost == 0:
+        return 100 if won > 0 else 0
+    return (won / (lost + won)) * 100
 
 def calculate_standings(tournament_id, players_list, round_id=None):
     stats = {
@@ -119,14 +127,15 @@ def save_match_details(match_id, payload):
         p2_key = f"game_{game.id}_p2"
         if not (payload[p1_key] or payload[p2_key]):
             continue
-        elif not (payload[p1_key] and payload[p2_key]) and (payload[p1_key] or payload[p2_key]):
+        elif not (payload[p1_key] and payload[p2_key]) and (
+            payload[p1_key] or payload[p2_key]
+        ):
             raise InvalidMatchScoreError("Invalid match score entered")
 
         p1_score = int(payload[p1_key])
         p2_score = int(payload[p2_key])
         current_app.logger.info(f"p1_score: {p1_score}")
         current_app.logger.info(f"p2_score: {p2_score}")
-
 
         if not validate_scores(p1_score, p2_score):
             raise InvalidMatchScoreError("Invalid match score entered")
@@ -177,7 +186,7 @@ def validate_scores(p1: int, p2: int) -> bool:
     return (p1 >= p2 + 2 and p1 >= 11) or (p2 >= p1 + 2 and p2 >= 11)
 
 
-def get_standings(tournament_id, scope, player_name = '', round_num = None):
+def get_standings(tournament_id, scope, player_name="", round_num=None):
     # Calculate standings specifically for this view
     tournament = db.session.get(Tournament, tournament_id)
     if not tournament:
@@ -200,7 +209,34 @@ def get_standings(tournament_id, scope, player_name = '', round_num = None):
             "points_won": s["points_won"],
             "points_lost": s["points_lost"],
         }
-        for _, s in raw_standings if player_name in s["player_name"]
+        for _, s in raw_standings
+        if player_name in s["player_name"]
     ]
 
     return summary
+
+
+def is_round_completed(tournament_id):
+
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        raise TournamentNotFoundError("Tournament not found")
+
+    current_round = tournament.round_number
+
+    has_incomplete = db.session.scalar(
+        select(
+            select(Match)
+            .where(
+                and_(
+                    Match.tournament_id == tournament_id,
+                    Match.round_number == current_round,
+                    ~Match.is_completed,
+                )
+            )
+            .exists()
+        )
+    )
+
+    return has_incomplete
