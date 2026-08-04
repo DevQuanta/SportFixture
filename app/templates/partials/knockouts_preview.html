@@ -6,7 +6,8 @@
             <div class="flex flex-row items-center justify-between">
                     Group {{ group_num }}
                 <div class="text-white/75 text-[12px] font-light">
-                    4 players
+                {% set match_count = group_matches | length %}
+                {{ match_count }} match{% if match_count > 1 %}es{% endif %}
                 </div>
             </div>
             {% for match in group_matches %}

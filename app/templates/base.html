@@ -6,16 +6,18 @@
             rel="stylesheet"
             href="{{ url_for('static', filename='dist/output.css') }}"
         />
-        <script
-            defer
-            src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-        ></script>
+
         <link
             rel="stylesheet"
             href="{{ url_for('static', filename='css/style.css')}}"
         />
-        <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-        <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+        <script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
+        <script defer  src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+        ></script>
 
         <style>
             [x-cloak] {
@@ -45,6 +47,8 @@
         >
             <span x-text="message"></span>
         </div>
+
+        {% include "partials/confirm_modal.html" %}
 
         <header
             class="flex flex-row px-5 md:px-10 items-center justify-between h-22.5 bg-transparent border-b border-b-[#959595]"
@@ -120,7 +124,11 @@
                     class="relative pb-1 text-[18px] text-white/60 hover:text-white transition-col nav-results"
                     >Results</a
                 >
-                <a href="knockouts" class="nav-knockouts">Knockouts</a>
+                <a
+                    href="knockouts"
+                    class="text-medium text-left text-[20px] nav-knockouts"
+                    >Knockouts</a
+                >
 
                 {% if current_user.is_authenticated %}
                 <a href="admin" class="nav-admin">Admin</a>

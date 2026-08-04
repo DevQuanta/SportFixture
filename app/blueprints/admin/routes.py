@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, render_template, request, session
+from flask import Blueprint, abort, render_template, request, session, current_app
 from flask_login import login_required
 from sqlalchemy import select
 
@@ -66,7 +66,7 @@ def admin_page():
     )
 
 
-@admin.route("/admin/<int:tournament_id>/publish", methods=["POST"])
+@admin.route("/admin/<int:tournament_id>/publish/", methods=["POST"])
 def publish_tournament(tournament_id):
     tournament = db.session.get(Tournament, tournament_id)
 
@@ -88,6 +88,8 @@ def publish_tournament(tournament_id):
 # return view_live_tournament(tournament_id, current_round)
 @admin.route("/tournament/<int:tournament_id>/round/advance", methods=["POST"])
 def next_round(tournament_id):
-    get_next_round(tournament_id)
+    is_placement_round = request.args.get("placement_round", False)
+
+    get_next_round(tournament_id, bool(is_placement_round))
 
     return render_admin_step(tournament_id)

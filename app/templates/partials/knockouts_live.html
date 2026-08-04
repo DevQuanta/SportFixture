@@ -19,17 +19,6 @@
         </div>
 
 
-            <!-- Advance Tournament Button (Only show if viewing active max round)
-            {% if current_round == max_round %}
-            <button
-                hx-post="/tournament/{{ tournament_id }}/round/advance"
-                hx-target="#live-stage-container"
-                hx-swap="outerHTML"
-                class="hidden ml-8 text-cyan-400 font-medium hover:cursor-pointer bg-transparent hover:underline"
-            >
-                Proceed to Round {{ current_round + 1 }} →
-            </button>
-            {% endif %}-->
         </div>
 
         <div class="relative" x-data="{open: false}">
@@ -40,7 +29,7 @@
                      <span>More</span>
                      <svg
                            class="h-4 w-4 text-slate-400 transition-transform duration-200 ease-out"
-                           :class="open ? '-rotate-90' : 'rotate-0'"
+                           :class="open ? 'rotate-0' : '-rotate-90'"
                            xmlns="http://www.w3.org/2000/svg"
                            fill="none"
                            viewBox="0 0 24 24"
@@ -55,14 +44,15 @@
 
 
              <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                 x-cloak
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
                  x-transition:leave="transition ease-in duration-75"
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
-                 @click.outside="open = false" class="absolute z-10 right-0 top-[110%] w-60 h-full min-h-20 bg-[#161F30  ] border border-[#2A384C] rounded-md py-16">
+                 @click.outside="open = false" class="absolute z-10 right-0 top-full w-60 bg-[#161F30] border border-[#2A384C] rounded-md py-5 px-3">
 
-                <div class="flex flex-col gap-4 items-center justify-center h-full w-full">
+                <div class="flex flex-col gap-4 items-baseline">
                  {% if current_round == max_round %}
                  <button
                      hx-post="/tournament/{{ tournament_id }}/round/advance"
@@ -70,14 +60,26 @@
                      hx-swap="outerHTML"
                      class="font-medium hover:cursor-pointer bg-transparent hover:underline"
                  >
-                     Proceed to Round {{ current_round + 1 }} →
+                     Proceed to Round {{ current_round + 1 }}
                  </button>
                  <button
-                   hx-post="/tournament/{{ tournament_id }}/end"
-                   hx-target="#live-stage-container"
-                   hx-swap="innerHTML"
-                   hx-confirm="Are you sure you want to end this tournament?"
-                   class=" text-[#F87171] hover:text-white px-3 py-2 rounded-md font-medium transition-colors hover:cursor-pointer duration-150"
+                     hx-post="/tournament/{{ tournament_id }}/round/advance?placement=True"
+                     hx-target="#live-stage-container"
+                     hx-swap="outerHTML"
+                     class="font-medium hover:cursor-pointer bg-transparent"
+                 >
+                     Create placement round
+
+                 </button>
+                 <button
+                     @click="$dispatch('open-confirm-modal', {
+                         title: 'Are you sure you want to end tournament?',
+                         method: 'POST',
+                         actionUrl: '/tournament/{{ tournament_id }}/end }}',
+                         targetId: '#live-stage-container',
+                         swap: 'innerHTML'
+                     })"
+                   class=" text-[#F87171] hover:text-white rounded-md font-medium transition-colors hover:cursor-pointer duration-150"
                  >
                    End tournament
                    </button>

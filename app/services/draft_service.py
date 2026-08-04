@@ -10,7 +10,7 @@ from app.services.tournament_service import calculate_standings, is_round_comple
 
 
 def commit_matches_for_group(
-    matches_draft, tournament_id, games_per_match=5, is_placement=False
+    matches_draft, tournament_id, games_per_match=5
 ):
     tournament = db.session.get(Tournament, tournament_id)
 
@@ -42,18 +42,32 @@ def commit_matches_for_group(
 
 
 def draft_matches_for_group(
-    player_ids, group_id, tournament_id, round_number, is_placement=False
+    player_ids, group_id, tournament_id, round_number, is_placement
 ):
     matches = []
     players = list(player_ids)
-
-    if is_placement:
-        pass
 
     if len(players) % 2 != 0:
         players.append(None)
 
     N = len(players)
+
+    if is_placement:
+        for idx in range(0, N - 2):
+            pair = (players[idx], players[idx + 1])
+            match = {
+                "player_1_id": pair[0].id,
+                "player_2_id": pair[1].id,
+                "group_id": group_id,
+                "round_number": round_number,
+                "tournament_id": tournament_id,
+            }
+
+            matches.append(match)
+
+        return matches
+
+
 
     for _ in range(0, N - 1):
         H = N // 2
@@ -81,7 +95,7 @@ def draft_matches_for_group(
     return matches
 
 
-def generate_round(tournament_id, round_id, preview=True):
+def generate_round(tournament_id, round_id, preview=True, is_placement = False):
     tournament = db.session.get(Tournament, tournament_id)  # type: ignore
 
     num_groups = tournament.max_groups  # type: ignore
@@ -110,11 +124,11 @@ def generate_round(tournament_id, round_id, preview=True):
     else:
         for i, group_players in enumerate(groups, start=1):
             group_matches = draft_matches_for_group(
-                group_players, i, tournament_id, round_id
+                group_players, i, tournament_id, round_id, is_placement
             )
             matches_data.extend(group_matches)  # type: ignore
 
-    current_app.logger.info(matches_data)
+    #current_app.logger.info(matches_data)
     return matches_data
 
 
@@ -179,6 +193,7 @@ def fetch_grouped_players(tournament):
             "id": player_row.id,
             "name": player_row.name,
             "difficulty": player_row.difficulty,
+            "colour": player_row.colour,
         }
 
         grouped_players[target_group].append(player_card)
@@ -186,7 +201,7 @@ def fetch_grouped_players(tournament):
     return grouped_players
 
 
-def get_next_round(tournament_id):
+def get_next_round(tournament_id, is_placement_round):
     has_incomplete = is_round_completed(tournament_id)
 
     if has_incomplete:
@@ -197,8 +212,12 @@ def get_next_round(tournament_id):
     if not tournament:
         raise TournamentNotFoundError("Tournament not found")
 
-    matches_draft = generate_round(tournament_id, tournament.round_number + 1)
-    commit_matches_for_group(matches_draft, tournament_id)
+    if is_placement_round:
+        matches_draft = generate_round(tournament_id, tournament.round_number + 1, is_placement=True)
+        commit_matches_for_group(matches_draft, tournament_id)
+    else:
+        matches_draft = generate_round(tournament_id, tournament.round_number + 1)
+        commit_matches_for_group(matches_draft, tournament_id)
 
     tournament.round_number += 1
     db.session.commit()

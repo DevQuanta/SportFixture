@@ -29,8 +29,11 @@ def knockouts_page():
 
     current_round = tournament.round_number
     context = get_live_context(tournament.id, current_round)
+    #current_app.logger.info(f"context = {context}")
+    current_round = tournament.round_number
 
-    return render_template("knockouts.html", **context)
+    return render_template("knockouts   .html", tournament_id = tournament.id, **context)
+
 
 
     # return view_live_tournament(tournament_id, current_round)

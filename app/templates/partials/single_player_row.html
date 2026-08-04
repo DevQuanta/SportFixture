@@ -19,9 +19,13 @@
                 />
             </button>
             <button
-                hx-delete="/delete-player/{{ player.id }}"
-                hx-target="#player-row-{{ player.id }}"
-                hx-confirm="Are you sure you want to remove {{ player.name }}"
+                @click="$dispatch('open-confirm-modal', {
+                    title: 'Are you sure you want to remove {{ player.name }}?',
+                    method: 'DELETE',
+                    actionUrl: '/delete-player/{{ player.id }}',
+                    targetId: '#player-row-{{ player.id }}',
+                    swap: 'outerHTML'
+                })"
                 class="hover:cursor-pointer"
             >
                 <img

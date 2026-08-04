@@ -1,28 +1,26 @@
-<div id="search-results">
-    <table class="w-full border-collapse">
-        <thead>
-            <tr>
-                <th class="text-center pb-5 font-thin">Rank</th>
-                <th class="text-center pb-5 font-thin">Name</th>
-                <th class="text-center pb-5 font-thin">W-L (Matches)</th>
-                <th class="text-center pb-5 font-thin">GW-GL (Games)</th>
-                <th class="text-center pb-5 font-thin">PW-PL (Points)</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            {% for player in standings %}
-            <tr class="border-b border-b-[#f8fafc80]">
-                <td class="text-center py-3">#{{ loop.index }}</td>
-                <td class="text-center py-3">{{ player.name }}</td>
-                <td class="text-center py-3">{{ player.matches_won }}-{{ player.matches_lost }}</td>
-                <td class="text-center py-3">{{ player.games_won }}-{{ player.games_lost }}</td>
-                <td class="text-center py-3">{{ player.points_won }}-{{ player.points_lost }}</td>
-            </tr>
-            {% endfor %}
-
-        </tbody>
-    </table>
+<div id="search-results" class="overflow-x-auto">
+    <table class="mb-10 w-full border-collapse">
+            <thead>
+                <tr>
+                    <th class="text-center pb-5 font-thin px-5">Rank</th>
+                    <th class="text-center pb-5 font-thin px-5">Name</th>
+                    <th class="text-center pb-5 font-thin px-5">Pts</th>
+                    <th class="text-center pb-5 font-thin px-5">W-L (Matches)</th>
+                    <th class="text-center pb-5 font-thin px-5">GW-GL (Games)</th>
+                    <th class="text-center pb-5 font-thin px-5">PW-PL (Points)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in standings %}
+                <tr class="border-b border-b-[#f8fafc80]">
+                    <td class="text-center py-3">#{{ loop.index }}</td>
+                    <td class="text-center py-3">{{ player.name }}</td>
+                    <td class="text-center py-3">{{ player.pts | default('0', true) }}</td>
+                    <td class="text-center py-3">{{ player.matches_won }}-{{ player.matches_lost }}</td>
+                    <td class="text-center py-3">{{ player.games_won }}-{{ player.games_lost }}</td>
+                    <td class="text-center py-3">{{ player.points_won }}-{{ player.points_lost }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 </div>

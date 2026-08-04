@@ -20,9 +20,9 @@ def render_admin_step(tournament_id):
 
     match tournament_status:
         case TournamentStatus.SETUP:
-            return render_template("partials/admin_step_0.html", tournament=tournament)
+            return render_template("partials/admin_step_0.html", current_step = 1, tournament=tournament)
         case TournamentStatus.REGISTRATION:
-            return render_template("partials/admin_step_1.html", tournament = tournament)
+            return render_template("partials/admin_step_1.html", current_step = 2, tournament = tournament)
         case TournamentStatus.ASSIGNMENT:
             grouped_players = fetch_grouped_players(tournament)
 
@@ -30,16 +30,18 @@ def render_admin_step(tournament_id):
                 "partials/admin_step_2.html",
                 grouped_players=grouped_players,
                 tournament=tournament,
+                current_step = 3,
             )
 
         case TournamentStatus.PREVIEW:
             context = get_step_3_context(tournament)
-            current_app.logger.info(context)
-            return render_template("partials/admin_step_3.html", **context)
+            #current_app.logger.info(context)
+            return render_template("partials/admin_step_3.html", current_step = 4, **context)
 
         case TournamentStatus.LIVE:
             current_round = tournament.round_number
             context = get_live_context(tournament_id, current_round)
+            #current_app.logger.error(f"context = {context}")
             return render_template("partials/knockouts_live.html", tournament_id = tournament_id, **context)
 
         case TournamentStatus.COMPLETED:

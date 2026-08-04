@@ -1,0 +1,116 @@
+<div class="flex flex-col gap-4 mb-10">
+<div class="hidden md:flex md:flex-row mt-12.5 justify-between">
+     <div class="flex flex-row gap-3 items-center">
+         <div
+             class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 {% if current_step == 1 %} bg-[#ff2d55] {% else %} bg-green-500 {% endif %} text-[16px]"
+         >
+             1
+         </div>
+         <div class="text-[18px]">Tournament Details</div>
+     </div>
+     <div class="flex flex-row gap-3 items-center {% if current_step < 2 %} opacity-60 {% endif %}">
+         <div
+             class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 {% if current_step == 2 %} bg-[#ff2d55] {% elif current_step < 2 %} bg-[#8d8d8d] {% else %} bg-green-500 {% endif %} text-[16px]"
+         >
+             2
+         </div>
+         <div class="text-[18px]">Register Player</div>
+     </div>
+     <div class="flex flex-row gap-3 items-center {% if current_step < 3 %} opacity-60 {% endif %}">
+         <div
+             class="flex flex-col rounded-full items-center justify-center text-center {% if current_step == 3 %} bg-[#ff2d55] {% elif current_step < 3 %} bg-[#8d8d8d] {% else %} bg-green-500 {% endif %} w-6 h-6 text-[16px]"
+         >
+             3
+         </div>
+         <div class="text-[18px]">Seed Draws</div>
+     </div>
+     <div class="flex flex-row gap-3 items-center {% if current_step < 4 %} opacity-60 {% endif %}">
+         <div
+             class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 {% if current_step == 4 %} bg-[#ff2d55] {% elif current_step < 4 %} bg-[#8d8d8d] {% endif %} text-[16px]"
+         >
+             4
+         </div>
+         <div class="text[18px]">Preview & Publish</div>
+     </div>
+</div>
+
+<div class="flex flex-col gap-3">
+
+    <div class="md:hidden mt-4 w-full flex flex-row justify-center">
+        {% if current_step == 1 %}
+        <div class="flex flex-row gap-3 items-center">
+            <div
+                class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#ff2d55] text-[16px]"
+            >
+                1
+            </div>
+            <div class="text-[18px]">Tournament Details</div>
+        </div>
+        {% elif current_step == 2 %}
+        <div class="flex flex-row gap-3 items-center">
+            <div
+                class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#ff2d55] text-[16px]"
+            >
+                2
+            </div>
+            <div class="text-[18px]">Register Player</div>
+        </div>
+
+        {% elif current_step == 3 %}
+        <div class="flex flex-row gap-3 items-center">
+            <div
+                class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#ff2d55] text-[16px]"
+            >
+                3
+            </div>
+            <div class="text-[18px]">Seed Draws</div>
+        </div>
+        {% elif current_step == 4 %}
+        <div class="flex flex-row gap-3 items-center">
+            <div
+                class="flex flex-col rounded-full items-center justify-center text-center w-6 h-6 bg-[#ff2d55] text-[16px]"
+            >
+                4
+            </div>
+            <div class="text-[18px]">Preview & Publish</div>
+        </div>
+        {% endif %}
+    </div>
+
+
+ <div class="flex flex-row justify-between">
+     {% if current_step > 0 %}
+     <a
+         class="text-cyan-500 px-2 py-2 cursor-pointer"
+         hx-post="/admin/{{tournament.id}}/previous/"
+         hx-swap="outerHTML"
+         hx-target="#step-editor-container"
+         >← Previous Step</a
+     >
+     {% endif %}
+
+     {% if current_step < 4 %}
+     <a
+         class="text-cyan-500 px-2 py-2 cursor-pointer"
+         hx-post="/admin/{{tournament.id}}/advance/"
+         hx-swap="outerHTML"
+         hx-target="#step-editor-container"
+         >Next Step →</a>
+
+     {% else %}
+         <a
+             class="text-cyan-500 px-2 py-2 cursor-pointer"
+             hx-post="/admin/{{tournament.id}}/publish/"
+             hx-swap="outerHTML"
+             hx-target="#step-editor-container"
+             >Publish Event →</a>
+    {% endif %}
+
+
+ </div>
+
+
+</div>
+
+
+</div>

@@ -239,8 +239,8 @@ def filter_leaderboard():
     # returning standings
     #
     standings =  get_standings(tournament_id, "overall", player_name)
-    current_app.logger.info(standings)
-    current_app.logger.info(tournament_id, player_name)
+    #current_app.logger.info(standings)
+    #current_app.logger.info(tournament_id, player_name)
 
     return render_template(
         "partials/_leaderboard_main.html",
