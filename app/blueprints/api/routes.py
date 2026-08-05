@@ -52,9 +52,10 @@ def edit_match(match_id):
 
 @api.route("/edit-player/<int:player_id>")  # type: ignore
 def edit_player(player_id):
+    tournament_id = request.args.get("tournament_id", "")
+    tournament = db.session.get(Tournament, tournament_id)
     player = db.session.get(Player, player_id)
-
-    return render_template("partials/edit_player_row.html", player=player)
+    return render_template("partials/edit_player_row.html", player=player, tournament = tournament)
 
 
 @api.route("/save-player/<int:player_id>", methods=["POST"])  # type: ignore
@@ -62,14 +63,22 @@ def save_player(player_id):
     updated_name = request.form.get("player-name")
     updated_diff = request.form.get("player-diff")
 
+    tournament_id = request.args.get("tournament_id", "")
+    tournament = db.session.get(Tournament, tournament_id)
+
+
     player = save_player_details(player_id, updated_name, updated_diff)
-    return render_template("partials/single_player_row.html", player=player)
+    return render_template("partials/single_player_row.html", player=player, tournament = tournament)
+
 
 
 @api.route("/delete-player/<int:player_id>", methods=["DELETE"])
-def delete_player(player_id, tournament_id):
+def delete_player(player_id):
+    tournament_id = request.args.get("tournament_id", "")
 
-    delete_player_tournament(player_id, tournament_id)
+    if tournament_id:
+        current_app.logger.info("deleting")
+        delete_player_tournament(player_id, tournament_id)
 
     return "", 200
 
@@ -83,6 +92,16 @@ def save_match(match_id):
     standings = calculate_standings(
         match.tournament_id, players_list, match.round_number
     )
+
+    tournament = db.session.get(Tournament, match.tournament_id)
+
+    if not tournament:
+        raise TournamentNotFoundError("Tournament not found")
+
+    scope = request.args.get("current_scope", "round")
+    round_num = request.args.get("current_round")
+
+    current_app.logger.info(payload)
 
     summary = [
         {
@@ -102,7 +121,9 @@ def save_match(match_id):
     }
 
     match_card = render_template("partials/match_card.html", match=match)
-    leaderboard_card = render_template("partials/leaderboard.html", **context, oob=True)
+    leaderboard_card = render_template("partials/leaderboard.html",current_scope=scope,
+    current_round=round_num or tournament.round_number,
+    tournament_id=tournament.id, **context, oob=True)
 
     return match_card + leaderboard_card
 

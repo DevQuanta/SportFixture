@@ -5,17 +5,20 @@ content %}
     Internal Match Tracker
 </h1>
 
-<div id="main-content">
-
 <p id="intro" class="mt-1.25 text-[17px] font-thin tracking-[0.06em]">
     Stay up-to-date with the latest matches at our club.
 </p>
 
-<div class="mt-5 bg-[#D9D9D91A] rounded-md p-4 w-full flex flex-row justify-between items-center mb-10">
+
+<div class="mt-5 bg-[#D9D9D91A] rounded-md p-4 w-full flex flex-row justify-between items-center mb-5">
 
   <div class="flex flex-row gap-3 items-center text-[16px]">
-    <div class="w-2.5 h-2.5 bg-[#34c759] rounded-full"></div>
+    <div class="w-2.5 h-2.5 {% if tournament %} bg-[#34c759] {% else %} bg-amber-500 {% endif %} rounded-full"></div>
+    {% if tournament %}
     <span>Knockouts for <span class="text-[#00c0e8]">February</span> are now live.</span>
+    {% else %}
+    <span>Nothing is going on at the moment, check back later...</span>
+    {% endif %}
   </div>
 
   <a href="knockouts" class="bg-[#ff383c] text-white rounded-md py-1.5 px-5 text-[15px] cursor-pointer inline-block no-underline hover:bg-[#e02e32] transition-colors">
@@ -25,14 +28,30 @@ content %}
 </div>
 
 <h2 class="h2-b-l">
-    Results
+    Leaderboard
 </h2>
 
-<div class="flex flex-row gap-10 p-5 pl-0 w-full">
-    <div class="flex flex-col w-full h-full rounded-md gap-3.5">
-        <div class="flex flex-row w-full gap-3 p-4 items-center">
+<div class="flex flex-col md:flex-row h-full w-full mt-5">
+
+
+{% if tournament %}
+<div
+    class="flex flex-col bg-[#121A2E] justify-center w-full md:w-80 rounded-md items-center gap-2 px-5 py-5 mr-10"
+>
+    <div class="flex flex-row items-center gap-3 font-semibold text-[20px] w-full justify-center">
+        <img class="h-fit w-fit" src="{{ url_for('static', filename='images/trophy.svg') }}">Winner of<br>the month</div>
+
+    <div class="flex flex-col w-full items-center">
+    <h2 class="text-4xl font-medium bg-linear-to-r from-[#34C759] to-[#00C3D0] bg-clip-text text-transparent">{{ standings[0].name }}</h2>
+    {% set matches_won=standings[0].matches_won %}
+    <span class="italic">Won {{ matches_won }} match{% if matches_won > 1 %}es{% endif %}</span>
+    </div>
+</div>
+
+    <div class="flex flex-col w-full rounded-md gap-3.5">
+        <div class="flex flex-row gap-3 py-4 md:px-4 md:py-0 items-center">
             <input
-                class="px-1.5 py-1 bg-[#121620] border border-slate-500 w-full h-full rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
+                class="px-1.5 py-1 bg-[#121620] border border-slate-500 flex-1 rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
                 class="inp"
                 autocomplete="off"
                 hx-get="/leaderboard/filter?tournament_id={{tournament_id}}"
@@ -41,7 +60,7 @@ content %}
                 hx-target="#search-results"
             ></input>
 
-                <select class="border border-white/60 bg-transparent h-full rounded-md px-1.5 py-1">
+                <select class="border border-white/60 bg-transparent h-full rounded-md px-1.5 py-1 ">
                     {% for tournament in tournaments %}
                         <option hx-get="/leaderboard/filter?player_name={{player_name}}" hx-target="#search-results" name="tournament_id" value="{{tournament.id}}" >{{tournament.name}}</option>
                     {% endfor %}
@@ -49,15 +68,16 @@ content %}
 
     </div>
 
-    <div id="search-results">
+    <div id="search-results" class="overflow-x-auto">
         <table class="w-full border-collapse">
             <thead>
                 <tr>
-                    <th class="text-center pb-5 font-thin">Rank</th>
-                    <th class="text-center pb-5 font-thin">Name</th>
-                    <th class="text-center pb-5 font-thin">W-L (Matches)</th>
-                    <th class="text-center pb-5 font-thin">GW-GL (Games)</th>
-                    <th class="text-center pb-5 font-thin">PW-PL (Points)</th>
+                    <th class="text-center pb-5 font-thin px-5">Rank</th>
+                    <th class="text-center pb-5 font-thin px-5">Name</th>
+                    <th class="text-center pb-5 font-thin px-5">Pts</th>
+                    <th class="text-center pb-5 font-thin px-5">W-L (Matches)</th>
+                    <th class="text-center pb-5 font-thin px-5">GW-GL (Games)</th>
+                    <th class="text-center pb-5 font-thin px-5">PW-PL (Points)</th>
                 </tr>
 
             </thead>
@@ -68,6 +88,7 @@ content %}
                 <tr class="border-b border-b-[#f8fafc80]">
                     <td class="text-center py-3">#{{ loop.index }}</td>
                     <td class="text-center py-3">{{ player.name }}</td>
+                    <td class="text-center py-3">{{ player.pts | default('0', true) }}</td>
                     <td class="text-center py-3">{{ player.matches_won }}-{{ player.matches_lost }}</td>
                     <td class="text-center py-3">{{ player.games_won }}-{{ player.games_lost }}</td>
                     <td class="text-center py-3">{{ player.points_won }}-{{ player.points_lost }}</td>
@@ -78,21 +99,13 @@ content %}
         </table>
     </div>
     </div>
-    <div
-        class="flex flex-col bg-[#121A2E] w-70 h-100% rounded-md items-center gap-5"
-    >
-        <div class="flex flex-row items-center gap-3 justify-center mt-5 font-semibold text-[20px]">
-            <img src="{{ url_for('static', filename='images/trophy.svg') }}" height="100%" width="40px">Winner of<br>the month</div>
 
-        <div class="flex flex-col">
-        <h2 class="text-4xl font-medium bg-linear-to-r from-[#34C759] to-[#00C3D0] bg-clip-text text-transparent">Jake M. </h2>
-        <span class="italic">Won 15 matches</span>
-        </div>
-    </div>
 
 
 </div>
 
-</div>
+{% else %}
+<div>No active tournament</div>
 
+{% endif %}
 {% endblock %}

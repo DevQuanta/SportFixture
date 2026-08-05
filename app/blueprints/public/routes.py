@@ -8,6 +8,9 @@ main_bp = Blueprint("main", __name__)
 def home_page():
     tournaments = get_tournaments()
     latest_tournament = get_current_or_latest_event()
+    if not latest_tournament:
+        return render_template("main.html")
+
     latest_tournament_id = latest_tournament.id
 
     standings = get_standings(latest_tournament_id, "overall")
@@ -18,21 +21,21 @@ def home_page():
 @main_bp.route("/knockouts")
 def knockouts_page():
     tournament = get_current_or_latest_event()
+    if not tournament:
+        return render_template("knockouts.html")
 
     current_app.logger.info("ID--->")
     current_app.logger.info(tournament.id)
     current_app.logger.info("Status--->")
     current_app.logger.info(tournament.status)
 
-    if not tournament:
-        abort(404, "No active tournaments")
 
     current_round = tournament.round_number
     context = get_live_context(tournament.id, current_round)
     #current_app.logger.info(f"context = {context}")
     current_round = tournament.round_number
 
-    return render_template("knockouts   .html", tournament_id = tournament.id, **context)
+    return render_template("knockouts.html", tournament_id = tournament.id, **context)
 
 
 

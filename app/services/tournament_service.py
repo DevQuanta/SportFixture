@@ -162,7 +162,7 @@ def get_current_or_latest_event():
     tournament = db.session.execute(stmt).scalar_one_or_none()
 
     if not tournament:
-        raise ValueError("No active tournaments")
+        return False
 
     return tournament
 
@@ -183,7 +183,10 @@ def get_tournaments():
 
 
 def validate_scores(p1: int, p2: int) -> bool:
-    return (p1 >= p2 + 2 and p1 >= 11) or (p2 >= p1 + 2 and p2 >= 11)
+    normal_game = (p1 >= p2 + 2 and p1 == 11) or (p2 >= p1 + 2 and p2 == 11)
+    extended_game = (p1 == p2 + 2 and p1 > 11) or (p2 == p1 + 2 and p2 > 11)
+
+    return normal_game or extended_game
 
 
 def get_standings(tournament_id, scope, player_name="", round_num=None):

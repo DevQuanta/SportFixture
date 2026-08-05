@@ -3,6 +3,8 @@ from sqlalchemy import select
 
 from app.models import Player, Tournament, TournamentPlayer
 
+from app.exceptions import PlayerNotFoundError
+
 def register_player_to_tournament(tournament_id, name, difficulty) -> Tournament:
 
     tournament = db.session.get(Tournament, tournament_id)
@@ -34,7 +36,7 @@ def assign_player_to_group(tournament_id, player_id, group_id) -> bool:
 
     return True
 
-def save_player_details(player_id, name, difficulty):
+def save_player_details(player_id, name, difficulty, tournament_id=""):
     player = db.session.get(Player, player_id)
 
     if not player:
@@ -46,16 +48,19 @@ def save_player_details(player_id, name, difficulty):
 
     db.session.commit()
 
+    if tournament_id:
+        tp = db.session.get(TournamentPlayer, (player_id, tournament_id))
+
+        return tp
+
     return player
 
 def delete_player_tournament(player_id, tournament_id):
-    player = db.session.get(Player, player_id)
-    tournament = db.session.get(Tournament, tournament_id)
+    player = db.session.get(TournamentPlayer, (player_id, tournament_id))
 
     if not player:
-        raise ValueError(f"Player {player_id} not found")
-    if not tournament:
-        raise ValueError(f"Tournament {tournament_id} not found")
+        raise PlayerNotFoundError("Player not found")
+
 
     db.session.delete(player)
     db.session.commit()

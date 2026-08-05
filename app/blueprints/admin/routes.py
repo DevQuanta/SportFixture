@@ -88,7 +88,7 @@ def publish_tournament(tournament_id):
 # return view_live_tournament(tournament_id, current_round)
 @admin.route("/tournament/<int:tournament_id>/round/advance", methods=["POST"])
 def next_round(tournament_id):
-    is_placement_round = request.args.get("placement_round", False)
+    is_placement_round = request.args.get("placement", False)
 
     get_next_round(tournament_id, bool(is_placement_round))
 

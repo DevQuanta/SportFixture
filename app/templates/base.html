@@ -51,14 +51,9 @@
         {% include "partials/confirm_modal.html" %}
 
         <header
-            class="flex flex-row px-5 md:px-10 items-center justify-between h-22.5 bg-transparent border-b border-b-[#959595]"
+            class="flex flex-row px-5 md:px-10 items-center gap-4 md:justify-between md:gap-0 h-22.5 bg-transparent border-b border-b-[#959595]"
         >
-            <img
-                class="h-10 w-auto"
-                src="{{ url_for('static', filename='images/logo.svg')}}"
-            />
-
-            <div class="md:hidden mr-3" x-data="{open: false}">
+            <div class="md:hidden" x-data="{open: false}">
                 <img
                     @click="open = true"
                     class="md:h-10 md:w-auto h-8 w-auto"
@@ -67,13 +62,14 @@
 
                 <div id="menu-bar" x-show="open">
                     <div
-                        class="fixed right-0 top-0 w-full z-10 bg-black/60 h-full"
+                        class="fixed left-0 top-0 w-full z-10 bg-black/50 h-full"
                     ></div>
                     <div
-                        class="fixed right-0 top-0 w-2/3 z-999 bg-[#080808] h-full"
+                        class="fixed left-0 top-0 w-4/5 z-999 bg-[#080808] h-full"
                         @click.outside="open = false"
                     >
-                        <div class="flex flex-col h-full items-center">
+                        <div class="flex flex-col h-full items-left px-8 py-8 justify-between">
+                            <div>
                             <div class="flex flex-col gap-4 mb-50 mt-40">
                                 <a
                                     href="/"
@@ -95,26 +91,36 @@
 
                                 {% endif %}
                             </div>
+                            </div>
+                            <div>
+
 
                             {% if current_user.is_authenticated %}
                             <a
                                 href="{{ url_for('auth.logout') }}"
-                                class="text-[24px] font-medium bg-transparent border rounded-md md:flex flex-row gap-2 items-center px-4.5 py-2"
+                                class="text-[20px] font-medium"
                             >
                                 Logout
                             </a>
                             {% else %}
                             <a
                                 href="{{ url_for('auth.login') }}"
-                                class="text-[24px] font-medium bg-transparent border rounded-md md:flex flex-row gap-2 items-center px-4.5 py-2"
+                                class="text-[24px] font-medium"
                             >
                                 Login
                             </a>
                             {% endif %}
                         </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <img
+                class="h-10 w-auto"
+                src="{{ url_for('static', filename='images/logo.svg')}}"
+            />
+
+
 
             <div
                 class="hidden md:flex md:flex-row md:gap-10 md:[&_a]:text-[18px] md:[&_a]:font-normal [&_a]:text-[#f8fafc] [&_a]:no-underline"

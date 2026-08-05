@@ -10,7 +10,7 @@
         <td class="actions-col text-center py-3">
             <div class="flex flex-row justify-center gap-3">
                 <button
-                    hx-post="/save-player/{{ player.id }}"
+                    hx-post="/save-player/{{ player.id }}?tournament_id={{ tournament.id }}"
                     hx-target="#player-row-{{ player.id }}"
                     hx-include="closest tr"
                     hx-swap="outerHTML"

@@ -5,7 +5,7 @@ content %}
     Current Tournament
 </h1>
 
-
+{% if tournament %}
 <div id="live-stage-container">
     <div
         class="flex flex-row w-full h-full gap-10 justify-between items-center mt-5 mb-5"
@@ -58,4 +58,8 @@ content %}
     </div>
 </div>
 
+{% else %}
+<div class="mt-5">No active tournament</div>
+
+{% endif %}
 {% endblock %}
