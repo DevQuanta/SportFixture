@@ -48,14 +48,15 @@ def render_admin_step(tournament_id):
 
             current_app.logger.info("ending tournament")
             standings =  get_standings(tournament_id, "overall")
+            current_app.logger.info(standings, len(standings))
 
             winners = [{
                 "name": standings[n]['name'],
                 "win_rate": get_win_rate(standings[n]['matches_won'], standings[n]['matches_lost'])
-            } for n in range(3)]
+            } for n in range(min(3, len(standings)))]
 
             current_app.logger.info("standings calculated")
             current_app.logger.info(f"winners: {winners}")
 
 
-            return render_template("partials/summary.html", winners = winners, standings = standings)
+            return render_template("partials/summary.html", winners = winners, standings = standings, tournament = tournament)

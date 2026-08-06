@@ -1,26 +1,33 @@
 from flask import Blueprint, abort, render_template, current_app
-from app.services.tournament_service import get_current_or_latest_event, get_tournaments, get_standings
+from app.services.tournament_service import fetch_live_event, get_tournaments, get_standings
 from app.services.context_service import get_live_context
+from datetime import datetime,  timezone, timedelta
 
 main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/")
 def home_page():
     tournaments = get_tournaments()
-    latest_tournament = get_current_or_latest_event()
-    if not latest_tournament:
-        return render_template("main.html")
+    latest_tournament = fetch_live_event()
+
+    timezone_offset = 0 # Pacific Standard Time (UTC−08:00)
+    tzinfo = timezone(timedelta(hours=timezone_offset))
+    today = datetime.now(tzinfo).date()
+
+    if not tournaments:
+        return render_template("main.html", today = today)
 
     latest_tournament_id = latest_tournament.id
-
     standings = get_standings(latest_tournament_id, "overall")
 
-    return render_template("main.html", tournaments = tournaments, tournament_id = latest_tournament_id, player_name = '', standings = standings)
+    current_app.logger.info(latest_tournament.status)
+
+    return render_template("main.html", tournament = latest_tournament, tournaments = tournaments, tournament_id = latest_tournament_id, player_name = '', standings = standings, today = today)
 
 
 @main_bp.route("/knockouts")
 def knockouts_page():
-    tournament = get_current_or_latest_event()
+    tournament = fetch_live_event()
     if not tournament:
         return render_template("knockouts.html")
 

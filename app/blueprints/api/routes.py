@@ -14,6 +14,7 @@ from app.services.player_service import (
     save_player_details,
 )
 from app.services.tournament_service import (
+    get_tournaments,
     calculate_standings,
     get_or_create_tournament,
     get_standings,
@@ -23,6 +24,7 @@ from app.services.tournament_service import (
     is_round_completed
 )
 from app.services.workflow_service import advance_tournament_status
+from datetime import date
 
 api = Blueprint("api", __name__)
 
@@ -144,7 +146,7 @@ def register_player():
 
     tournament = register_player_to_tournament(tournament_id, name, difficulty)
     return render_template(
-        "partials/player_rows.html", players=tournament.player_associations
+        "partials/player_rows.html", players=tournament.player_associations, tournament = tournament
     )
 
 
@@ -256,18 +258,22 @@ def view_match(match_id):
 def filter_leaderboard():
     tournament_id = request.args.get("tournament_id")
     player_name = request.args.get("player_name", "")
+    tournaments = get_tournaments()
 
     # returning standings
     #
     standings =  get_standings(tournament_id, "overall", player_name)
-    #current_app.logger.info(standings)
+    tournament = db.session.get(Tournament, tournament_id)
+    current_app.logger.info(standings)
     #current_app.logger.info(tournament_id, player_name)
 
     return render_template(
         "partials/_leaderboard_main.html",
-        tournament_id=tournament_id,
+        tournament_id=int(tournament_id) if tournament_id else None,
+        tournament = tournament,
         player_name=player_name,
         standings=standings,
+        tournaments=tournaments,
     )
 
 @api.route("/tournament/<int:tournament_id>/end", methods=["POST"])
@@ -276,22 +282,9 @@ def end_tournament(tournament_id: int):
 
     # if not completed_round:
     #     raise RoundNotReadyError("Current round has incomplete matches")
-
-    current_app.logger.info("ending tournament")
-    standings =  get_standings(tournament_id, "overall")
-
-
-    winners = [{
-        "name": standings[n]['name'],
-        "win_rate": get_win_rate(standings[n]['matches_won'], standings[n]['matches_lost'])
-    } for n in range(3)]
-
-    current_app.logger.info("standings calculated")
-    current_app.logger.info(f"winners: {winners}")
-
     advance_tournament_status(tournament_id)
 
-    return render_template("partials/summary.html", winners = winners, standings = standings)
+    return render_admin_step(tournament_id)
 
 
 @api.route("/tournament/<int:tournament_id>/setup", methods = ["POST"])
@@ -299,6 +292,10 @@ def setup_tournament(tournament_id):
     tournament_name = request.form.get("tournament-name", "")
     max_groups = request.form.get("group-number", "")
     max_rounds = request.form.get("round-number", "")
+
+    date_str = request.form.get('date')
+
+
 
     current_app.logger.info(tournament_name, max_groups, max_rounds)
 
@@ -314,6 +311,11 @@ def setup_tournament(tournament_id):
         tournament.max_groups = int(max_groups)
     if max_rounds:
         tournament.max_rounds = int(max_rounds)
+    if date_str:
+        # Convert string to a Python date object
+        tournament_date = date.fromisoformat(date_str)
+        tournament.tournament_date = tournament_date
+
 
     db.session.commit()
 

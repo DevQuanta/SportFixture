@@ -1,5 +1,41 @@
-<div id="search-results" class="overflow-x-auto">
-    <table class="mb-10 w-full border-collapse">
+<div id="tournament-leaderboard-container" class="flex flex-col md:flex-row h-full w-full">
+
+    {% if tournament.status.value == 'completed' %}
+<div
+ class="flex flex-col bg-[#121A2E] justify-center w-full md:w-80 rounded-md items-center gap-2 px-5 py-5 mr-10"
+>
+    <div class="flex flex-row items-center gap-3 font-semibold text-[20px] w-full justify-center">
+        <img class="h-fit w-fit" src="{{ url_for('static', filename='images/trophy.svg') }}">Winner of<br>the month</div>
+
+    <div class="flex flex-col w-full items-center">
+    <h2 class="text-4xl font-medium bg-linear-to-r from-[#34C759] to-[#00C3D0] bg-clip-text text-transparent">{{ standings[0].name }}</h2>
+    {% set matches_won=standings[0].matches_won %}
+    <span class="italic">Won {{ matches_won }} match{% if matches_won > 1 %}es{% endif %}</span>
+    </div>
+</div>
+{% endif %}
+    <div class="flex flex-col w-full rounded-md gap-3.5">
+        <div class="flex flex-row gap-3 py-4 md:px-4 md:py-0 items-center">
+            <input
+                class="px-1.5 py-1 bg-[#121620] border border-slate-500 flex-1 rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
+                class="inp"
+                autocomplete="off"
+                hx-get="/leaderboard/filter?tournament_id={{tournament_id}}"
+                name="player_name"
+                hx-trigger="focus,input changed delay:300ms"
+                hx-target="#search-results"
+            ></input>
+
+                <select class="border border-white/60 bg-transparent h-full rounded-md px-1.5 py-1" hx-get="/leaderboard/filter?player_name={{player_name}}" hx-target="#tournament-leaderboard-container" hx-swap="outerHTML" hx-trigger="change"  name="tournament_id">
+                    {% for tournament in tournaments %}
+                        <option value="{{tournament.id}}" {% if tournament.id == tournament_id %}selected{% endif %}>{{tournament.name}}</option>
+                    {% endfor %}
+                </select>
+
+    </div>
+
+    <div id="search-results" class="overflow-x-auto">
+        <table class="w-full border-collapse">
             <thead>
                 <tr>
                     <th class="text-center pb-5 font-thin px-5">Rank</th>
@@ -9,8 +45,11 @@
                     <th class="text-center pb-5 font-thin px-5">GW-GL (Games)</th>
                     <th class="text-center pb-5 font-thin px-5">PW-PL (Points)</th>
                 </tr>
+
             </thead>
+
             <tbody>
+
                 {% for player in standings %}
                 <tr class="border-b border-b-[#f8fafc80]">
                     <td class="text-center py-3">#{{ loop.index }}</td>
@@ -21,6 +60,10 @@
                     <td class="text-center py-3">{{ player.points_won }}-{{ player.points_lost }}</td>
                 </tr>
                 {% endfor %}
+
             </tbody>
         </table>
+    </div>
+    </div>
+
 </div>

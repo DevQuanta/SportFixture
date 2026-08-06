@@ -1,5 +1,5 @@
 from flask import current_app, session
-from sqlalchemy import Sequence, and_, select
+from sqlalchemy import Sequence, and_, select, or_
 
 from app.database import db
 from app.exceptions import (
@@ -157,8 +157,8 @@ def get_round_view_context(tournament_id, round_number=None):
     pass
 
 
-def get_current_or_latest_event():
-    stmt = select(Tournament).where(Tournament.status == TournamentStatus.LIVE).limit(1)
+def fetch_live_event() -> Tournament | bool:
+    stmt = select(Tournament).where(or_(Tournament.status == TournamentStatus.LIVE, Tournament.status == TournamentStatus.COMPLETED)).order_by(Tournament.tournament_date).limit(1)
     tournament = db.session.execute(stmt).scalar_one_or_none()
 
     if not tournament:
@@ -168,7 +168,7 @@ def get_current_or_latest_event():
 
 
 def get_tournaments():
-    stmt = select(Tournament)
+    stmt = select(Tournament).where(or_(Tournament.status == TournamentStatus.LIVE, Tournament.status == TournamentStatus.COMPLETED)).order_by(Tournament.tournament_date.desc())
     tournaments = db.session.execute(stmt).scalars().all()
 
     tournaments = [

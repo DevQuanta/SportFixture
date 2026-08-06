@@ -75,7 +75,7 @@
                      @click="$dispatch('open-confirm-modal', {
                          title: 'Are you sure you want to end tournament?',
                          method: 'POST',
-                         actionUrl: '/tournament/{{ tournament_id }}/end }}',
+                         actionUrl: '/tournament/{{ tournament_id }}/end',
                          targetId: '#live-stage-container',
                          swap: 'innerHTML'
                      })"
