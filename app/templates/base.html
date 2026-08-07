@@ -41,6 +41,7 @@
             setTimeout(() => show = false, 4000);
           "
             x-show="show"
+            x-cloak
             x-transition
             @click="show = false"
             class="fixed top-4 right-4 mt-4 z-[999] cursor-pointer select-none rounded-lg bg-red-600/80 opacity-90 backdrop-blur-sm text-white px-4 py-3 shadow-2xl font-medium"
@@ -48,7 +49,7 @@
             <span x-text="message"></span>
         </div>
 
-        {% include "partials/confirm_modal.html" %}
+        {% include "partials/misc/confirm_modal.html" %}
 
         <header
             class="flex flex-row px-5 md:px-10 items-center gap-4 md:justify-between md:gap-0 h-22.5 bg-transparent border-b border-b-[#959595]"
@@ -60,7 +61,7 @@
                     src="{{ url_for('static', filename='images/menu.svg')}}"
                 />
 
-                <div id="menu-bar" x-show="open">
+                <div id="menu-bar" x-show="open" >
                     <div
                         class="fixed left-0 top-0 w-full z-10 bg-black/50 h-full"
                     ></div>

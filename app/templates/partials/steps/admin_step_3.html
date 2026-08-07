@@ -1,5 +1,5 @@
 <div id="step-editor-container">
-    {% include "partials/admin_navbar.html" %}
+    {% include "partials/misc/admin_navbar.html" %}
     <div class="flex flex-col md:flex-row justify-between items-start gap-10 md:gap-10 w-full">
 
 
@@ -57,7 +57,7 @@
                             <div class="mt-3 pt-2 border-t border-white/5 animate-fade-in">
                                 <select
                                     name="group_id"
-                                    hx-post="/{{tournament.id}}/players/{{player.id}}/assign"
+                                    hx-post="/player/{{ player.id }}/assign?tournament_id={{ tournament.id }}"
                                     hx-target="#step-editor-container"
                                     class="bg-[#0b1120] text-sm text-white rounded border border-slate-700 px-2 py-1 w-full focus:outline-none"
                                 >

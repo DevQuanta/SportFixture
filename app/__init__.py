@@ -1,24 +1,27 @@
 # app/__init__.py
-from flask import Flask, make_response
 import json
+
+from flask import Flask, make_response
+from flask_login import LoginManager
 from sqlalchemy import event, select
 from sqlalchemy.engine import Engine
-from .database import db, migrate
-from flask_login import LoginManager
-from .models import Admin
+
 from app.exceptions import DomainError
 
+from .database import db, migrate
+from .models import Admin
+
 login_manager = LoginManager()
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Prevents memory overhead
-    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.config['SECRET_KEY'] = "423065c1c9051794762810b2cf8ffec2"
-
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+    app.config["TEMPLATES_AUTO_RELOAD"] = True
+    app.config["SECRET_KEY"] = "423065c1c9051794762810b2cf8ffec2"
 
     # Connect DB to App
     db.init_app(app)
@@ -34,7 +37,7 @@ def create_app() -> Flask:
         cursor.execute("PRAGMA synchronous=NORMAL;")
         cursor.close()
 
-    login_manager.login_view = "auth.login" # type: ignore
+    login_manager.login_view = "auth.login"  # type: ignore
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -43,7 +46,7 @@ def create_app() -> Flask:
 
     from app.auth import auth_bp
     from app.blueprints.admin.routes import admin
-    from app.blueprints.api.routes import api
+    from app.blueprints.api import api
     from app.blueprints.public.routes import main_bp
 
     app.register_blueprint(auth_bp)
@@ -58,12 +61,9 @@ def create_app() -> Flask:
         """
         response = make_response(error.message, 422)
 
-        response.headers["HX-Trigger"] = json.dumps({
-            "toast": {
-                "message": error.message,
-                "type": "error"
-            }
-        })
+        response.headers["HX-Trigger"] = json.dumps(
+            {"toast": {"message": error.message, "type": "error"}}
+        )
         return response
 
     return app

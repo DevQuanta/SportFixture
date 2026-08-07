@@ -5,9 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.database import db
-from app.exceptions import MatchNotFoundError
-from app.models import Match, Tournament
-from app.services.draft_service import fetch_grouped_players
+from app.exceptions import MatchNotFoundError, TournamentNotFoundError
+from app.models import Match, Tournament, TournamentStatus
+from app.services.draft_service import fetch_grouped_players, generate_round
 from app.services.tournament_service import (
     calculate_standings,
     get_standings,
@@ -34,7 +34,7 @@ def get_step_2_context(tournament_id):
     if not tournament:
         raise ValueError(f"Tournament {tournament_id} not found")
 
-    return {"tournament": tournament, "current_step": 2}
+    return {"tournament": tournament, "tournament_id": tournament.id, "current_step": 2}
 
 
 def get_step_3_context(tournament_id):
@@ -61,9 +61,55 @@ def get_step_4_context(tournament_id):
     if not tournament:
         raise ValueError(f"Tournament {tournament_id} not found")
 
+    session_key = f"draft_{tournament.id}"
+
+    if not session.get(session_key):
+        matches_data = generate_round(tournament.id, 1)
+        session[session_key] = matches_data
+
+    players_map = {p.player.id: p.player.name for p in tournament.player_associations}
+
     return {
         "tournament": tournament,
+        "current_step": 4,
+        "matches_data": session[session_key],
+        "players_map": players_map,
     }
+
+
+def get_leaderboard_context(match: Match, scope, round_num):
+    players_list = [tp.player for tp in match.tournament.player_associations]
+    standings = calculate_standings(
+        match.tournament_id, players_list, match.round_number
+    )
+
+    tournament = db.session.get(Tournament, match.tournament_id)
+
+    if not tournament:
+        raise TournamentNotFoundError("Tournament not found")
+
+    summary = [
+        {
+            "name": s["player_name"],
+            "matches_won": s["matches_won"],
+            "matches_lost": s["matches_lost"],
+            "games_won": s["games_won"],
+            "games_lost": s["games_lost"],
+            "points_won": s["points_won"],
+            "points_lost": s["points_lost"],
+        }
+        for _, s in standings
+    ]
+
+    context = {
+        "standings": summary,
+        "tournament_id": tournament.id,
+        "current_scope": scope,
+        "current_round": round_num or tournament.round_number,
+        "tournament": tournament
+    }
+
+    return context
 
 
 def get_live_context(tournament_id, scope="round"):
@@ -162,16 +208,21 @@ def get_live_context(tournament_id, scope="round"):
         "all_rounds": [r["number"] for r in rounds],  # e.g. [1, 2, 3]
         "standings": summary,
         "current_scope": scope,
+        "tournament": tournament,
     }
     return context
 
 
 def get_completed_context(tournament_id):
     tournament = db.session.get(Tournament, tournament_id)
+
     if not tournament:
         raise ValueError(f"Tournament {tournament_id} not found")
 
     standings = get_standings(tournament_id, "overall")
+
+    stmt = select(Tournament).where(Tournament.status == TournamentStatus.COMPLETED)
+    tournaments = db.session.execute(stmt).scalars().all()
 
     winners = [
         {
@@ -183,10 +234,10 @@ def get_completed_context(tournament_id):
         for n in range(min(3, len(standings)))
     ]
 
-    return {"tournament": tournament, "standings": standings, "winners": winners}
+    return {"tournament": tournament, "tournaments": tournaments, "standings": standings, "winners": winners}
 
 
-def get_match(match_id):
+def get_match_context(match_id):
     match = db.session.get(Match, match_id)
 
     if not match:

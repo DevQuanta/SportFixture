@@ -61,3 +61,16 @@ def delete_player_tournament(player_id, tournament_id):
 
     db.session.delete(player)
     db.session.commit()
+
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament.player_associations: # type: ignore
+        return """
+        <tr id="no-players-row">
+            <td colspan="3" class="text-center py-3">
+                No players registered yet. Add one to get started!
+            </td>
+        </tr>
+        """, 200
+    else:
+        return "", 200

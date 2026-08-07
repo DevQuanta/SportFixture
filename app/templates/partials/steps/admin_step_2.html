@@ -1,5 +1,5 @@
 <div id="step-editor-container">
-    {% include "partials/admin_navbar.html" %}
+    {% include "partials/misc/admin_navbar.html" %}
     <div class="flex flex-col md:flex-row justify-between items-start gap-20">
         <div class="flex flex-col w-75 shrink-0">
             <form
@@ -94,7 +94,7 @@
             {% set players = tournament.player_associations %}
             <tbody id="player-rows-container">
                 {% if players %}
-                    {% include "partials/player_rows.html" %}
+                    {% include "partials/players/player_rows.html" %}
                 {% else %}
                     <tr id="no-players-row">
                         <td colspan="3" class="text-center py-3">

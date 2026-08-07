@@ -9,6 +9,7 @@ from app.exceptions import (
 )
 from app.models import Match, MatchStatus, Tournament
 from app.services.workflow_service import TournamentStatus
+from datetime import datetime, timedelta, timezone
 
 
 def get_ratio(won, lost):
@@ -154,17 +155,13 @@ def save_match_details(match_id, payload):
     return match
 
 
-def get_round_view_context(tournament_id, round_number=None):
-    pass
 
-
-def fetch_live_event() -> Tournament | bool:
+def fetch_live_event() -> Tournament | None:
     stmt = (
         select(Tournament)
         .where(
             or_(
                 Tournament.status == TournamentStatus.LIVE,
-                Tournament.status == TournamentStatus.COMPLETED,
             )
         )
         .order_by(Tournament.tournament_date)
@@ -172,18 +169,33 @@ def fetch_live_event() -> Tournament | bool:
     )
     tournament = db.session.execute(stmt).scalar_one_or_none()
 
-    if not tournament:
-        return False
-
-    return tournament
+    if tournament:
+        return tournament
 
 
-def get_tournaments():
+def get_tournament_status(tournament) -> str:
+    timezone_offset = 0  # Pacific Standard Time (UTC−08:00)
+    tzinfo = timezone(timedelta(hours=timezone_offset))
+    today = datetime.now(tzinfo).date()
+
+    if tournament is None:
+        return ""
+
+
+    if tournament.tournament_date == today:
+        return "ongoing"
+    elif tournament.tournament_date < today:
+        return "upcoming"
+    else:
+        return "none"
+
+
+
+def fetch_completed_events():
     stmt = (
         select(Tournament)
         .where(
             or_(
-                Tournament.status == TournamentStatus.LIVE,
                 Tournament.status == TournamentStatus.COMPLETED,
             )
         )

@@ -19,6 +19,34 @@
 
     <h1 class="mb-5 text-white text-3xl">Leaderboard</h1>
 
-    {% include "partials/_leaderboard_main.html" %}
+    <div id="tournament-leaderboard-container"
+         class="flex flex-col md:flex-row h-full w-full">
+
+        <div class="flex flex-col w-full rounded-md gap-3.5">
+
+        <div id="leaderboard-filters" class="flex flex-col w-full rounded-md gap-3.5">
+            <div class="flex flex-row gap-3 py-4 md:px-4 md:py-0 items-center">
+                <input
+                    class="px-1.5 py-1 bg-[#121620] border border-slate-500 flex-1 rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
+                    class="inp"
+                    autocomplete="off"
+                    hx-get="/leaderboard/filter?tournament_id={{tournament.id}}"
+                    name="player_name"
+                    hx-trigger="input changed delay:300ms"
+                    hx-target="#leaderboard-container"
+                    hx-swap="outerHTML"
+                ></input>
+
+        </div>
+
+
+        </div>
+
+        <div id="leaderboard-container">
+            {% include "partials/leaderboard_table.html" %}
+        </div>
+        </div>
+
+    </div>
 
 </div>

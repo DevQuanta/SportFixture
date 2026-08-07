@@ -5,7 +5,7 @@ content %}
     Recent Tournament
 </h1>
 
-{% if tournament_id %}
+{% if tournament %}
 <div id="live-stage-container">
     <div
         class="flex flex-row w-full h-full gap-10 justify-between items-center mt-5 mb-5"
@@ -25,24 +25,11 @@ content %}
 
             {% endfor %}
         </div>
-
-
-            <!-- Advance Tournament Button (Only show if viewing active max round)
-            {% if current_round == max_round %}
-            <button
-                hx-post="/tournament/{{ tournament_id }}/round/advance"
-                hx-target="#live-stage-container"
-                hx-swap="outerHTML"
-                class="hidden ml-8 text-cyan-400 font-medium hover:cursor-pointer bg-transparent hover:underline"
-            >
-                Proceed to Round {{ current_round + 1 }} →
-            </button>
-            {% endif %}-->
         </div>
         </div>
 
 
-    {% include "partials/leaderboard.html"%}
+    {% include "partials/leaderboard_public.html"%}
 
     <div id="match-groups" class="flex md:flex-row flex-col gap-20">
         {% for group in active_round.groups %}
@@ -52,7 +39,7 @@ content %}
             </div>
 
             {% for match in group.matches %} {% include
-            "partials/match_card_view.html"%} {% endfor %}
+            "partials/matches/match_card_view.html"%} {% endfor %}
         </div>
         {% endfor %}
     </div>

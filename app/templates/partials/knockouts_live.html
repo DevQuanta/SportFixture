@@ -75,7 +75,7 @@
                      @click="$dispatch('open-confirm-modal', {
                          title: 'Are you sure you want to end tournament?',
                          method: 'POST',
-                         actionUrl: '/tournament/{{ tournament_id }}/end',
+                         actionUrl: '/tournament/{{ tournament.id }}/end',
                          targetId: '#live-stage-container',
                          swap: 'innerHTML'
                      })"
@@ -88,9 +88,34 @@
                  </div>
              </div>
         </div>
+        <h2 class="mt-12 text-2xl mb-2">Leaderboard</h2>
+
+        <div class="flex flex-col gap-8">
+        <div class="flex flex-row w-fit bg-slate-800 p-1 rounded-md text-xs">
+            <!-- Overall Tab -->
+              <button
+                hx-get="/admin/tournament/{{ tournament.id }}/standings/overall"
+                hx-target="#live-stage-container"
+                hx-swap="outerHTML"
+                class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {% if current_scope == 'overall' %} bg-slate-200 text-slate-900 shadow-sm {% else %} text-slate-400 hover:text-slate-200 {% endif %}"
+              >
+                Overall
+              </button>
+
+              <!-- Round-Specific Tab -->
+              <button
+                hx-get="/admin/tournament/{{ tournament.id }}/standings/round?round={{ current_round }}"
+                hx-target="#live-stage-container"
+                hx-swap="outerHTML"
+                class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {% if current_scope == 'round' %} bg-slate-200 text-slate-900 shadow-sm {% else %} text-slate-400 hover:text-slate-200 {% endif %}"
+              >
+                Round {{ current_round }}
+              </button>
+        </div>
+                {% include "partials/leaderboard_table.html" %}
+            </div>
 
 
-    {% include "partials/leaderboard.html"%}
 
     <div id="match-groups" class="flex md:flex-row flex-col gap-20">
         {% for group in active_round.groups %}
@@ -100,7 +125,7 @@
             </div>
 
             {% for match in group.matches %} {% include
-            "partials/match_card.html"%} {% endfor %}
+            "partials/matches/match_card.html"%} {% endfor %}
         </div>
         {% endfor %}
     </div>

@@ -44,5 +44,6 @@ def get_admin_context(tournament_id) -> tuple[str, dict]:
         case TournamentStatus.COMPLETED:
             content_template = "partials/summary.html"
             context = get_completed_context(tournament_id)
+            current_app.logger.info(f"completed context: {context}")
 
     return (content_template, context)

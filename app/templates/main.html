@@ -9,18 +9,18 @@ content %}
     Stay up-to-date with the latest matches at our club.
 </p>
 
-{% if tournament %}
+
 <div class="mt-5 bg-[#D9D9D91A] rounded-md p-4 w-full flex flex-row justify-between items-center mb-5">
 
   <div class="flex flex-row gap-3 items-center text-[16px]">
-    {% if tournament.tournament_date == today and tournament.status.value == 'live' %}
-        <div class="w-2.5 h-2.5 bg-[#34c759] rounded-full"></div>
+    {% if status == "ongoing" %}
+        <div class="w-2.5 h-2.5 bg-[#34c759] rounded-full shrink-0"></div>
         <span>Knockouts for <span class="text-[#00c0e8]">{{ today.strftime('%B') }}</span> are now live.</span>
-    {% elif tournament.tournament_date < today and tournament.status.value == 'completed' %}
-        <div class="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>
+    {% elif status == "upcoming" %}
+        <div class="w-2.5 h-2.5 bg-amber-500 rounded-full shrink-0"></div>
         <span>Knockouts for <span class="text-[#00c0e8]">{{ today.month }}</span> will be live.</span>
     {% else %}
-    <div class="w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
+    <div class="w-2.5 h-2.5 bg-slate-300 rounded-full shrink-0"></div>
     <span>Nothing is live at the moment.</span>
     {% endif %}
   </div>
@@ -30,16 +30,57 @@ content %}
   </a>
 
 </div>
-{% endif %}
 
 <h2 class="h2-b-l mb-2">
     Leaderboard
 </h2>
 
 
-{% if tournaments %}
+{% if past_tournaments %}
 
-{% include "partials/_leaderboard_main.html" %}
+<div id="leaderboard-container"
+     class="flex flex-col md:flex-row h-full w-full mt-5">
+
+    {% include "partials/winner_card.html" %}
+
+    <div class="flex flex-col w-full rounded-md gap-3.5">
+
+    <div id="leaderboard-filters" class="flex flex-col w-full rounded-md gap-3.5">
+        <div class="flex flex-row gap-3 py-4 md:px-4 md:py-0 items-center">
+            <input
+                class="px-1.5 py-1 bg-[#121620] border border-slate-500 flex-1 rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
+                class="inp"
+                autocomplete="off"
+                hx-get="/leaderboard/filter?tournament_id={{past_tournaments[0].id}}"
+                name="player_name"
+                hx-include="#leaderboard-filters"
+                hx-trigger="focus,input changed delay:300ms"
+                hx-target="#leaderboard-container"
+                hx-swap="outerHTML"
+            ></input>
+
+                <select class="border border-white/60 bg-transparent h-full rounded-md px-1.5 py-1" hx-get="/leaderboard/filter?player_name={{player_name}}" hx-target="#leaderboard-container" hx-swap="outerHTML" hx-include="#leaderboard-filters" hx-trigger="change"  name="tournament_id">
+                    {% for item in past_tournaments %}
+                                        <option
+                                            value="{{ item.id }}"
+
+                                        >
+                                            {{ item.name }}
+                                        </option>
+                                    {% endfor %}
+                </select>
+
+    </div>
+
+
+    </div>
+
+    <div id="leaderboard-container">
+        {% include "partials/leaderboard_table.html" %}
+    </div>
+    </div>
+
+</div>
 
 {% else %}
 <div>No active tournament</div>

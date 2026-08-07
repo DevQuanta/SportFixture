@@ -9,7 +9,7 @@
     <td>
         <div class="flex flex-row justify-center gap-3">
             <button
-                hx-get="/edit-player/{{ player.id }}?tournament_id={{ tournament.id }}"
+                hx-get="/player/edit?id={{ player.id }}&tournament_id={{ tournament_id }}"
                 hx-target="#player-row-{{ player.id }}"
                 hx-swap="outerHTML"
                 class="hover:cursor-pointer"
@@ -24,7 +24,7 @@
                 @click="$dispatch('open-confirm-modal', {
                     title: 'Are you sure you want to remove {{ player.name }}?',
                     method: 'DELETE',
-                    actionUrl: '/delete-player/{{ player.id }}?tournament_id={{ tournament.id }}',
+                    actionUrl: '/player/delete?id={{ player.id }}&tournament_id={{ tournament_id }}',
                     targetId: '#player-row-{{ player.id }}',
                     swap: 'outerHTML'
                 })"
