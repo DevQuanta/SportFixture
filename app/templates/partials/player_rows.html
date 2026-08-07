@@ -1,10 +1,4 @@
-{% if players %} {% for tp in players %}
+{% for tp in players %}
 {% set player = tp.player %}
 {% include "partials/single_player_row.html" %}
-{% endfor %} {% else %}
-<tr class="border-b border-b-[#f8fafc80]" id="no-players-row">
-    <td colspan="3" class="text-center py-3">
-        No players registered yet. Add one to get started!
-    </td>
-</tr>
-{% endif %}
+{% endfor %}

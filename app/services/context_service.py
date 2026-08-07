@@ -1,36 +1,78 @@
-from flask import session
-from app.exceptions import MatchNotFoundError
-from app.services.draft_service import generate_round
-
-from app.database import db
-from app.models import Match, Tournament
-
-from sqlalchemy import select
-from sqlalchemy.orm import joinedload, selectinload
 from itertools import groupby
 
-from app.services.tournament_service import calculate_standings
+from flask import session
+from sqlalchemy import select
+from sqlalchemy.orm import joinedload, selectinload
+
+from app.database import db
+from app.exceptions import MatchNotFoundError
+from app.models import Match, Tournament
+from app.services.draft_service import fetch_grouped_players
+from app.services.tournament_service import (
+    calculate_standings,
+    get_standings,
+    get_win_rate,
+)
 
 
-def get_step_3_context(tournament):
+def get_step_1_context(tournament_id):
+    """Prepares template context for Step 1."""
+
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        raise ValueError(f"Tournament {tournament_id} not found")
+
+    return {"tournament": tournament, "current_step": 1}
+
+
+def get_step_2_context(tournament_id):
+    """Prepares template context for Step 2."""
+
+    tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        raise ValueError(f"Tournament {tournament_id} not found")
+
+    return {"tournament": tournament, "current_step": 2}
+
+
+def get_step_3_context(tournament_id):
     """Prepares template context for Step 3 (Draft Preview)."""
-    session_key = f"draft_{tournament.id}"
 
-    if not session.get(session_key):
-        matches_data = generate_round(tournament.id, 1)
-        session[session_key] = matches_data
+    tournament = db.session.get(Tournament, tournament_id)
 
-    players_map = {p.player.id: p.player.name for p in tournament.player_associations}
+    if not tournament:
+        raise ValueError(f"Tournament {tournament_id} not found")
+
+    grouped_players = fetch_grouped_players(tournament)
 
     return {
         "tournament": tournament,
-        "matches_data": session[session_key],
-        "players_map": players_map,
+        "grouped_players": grouped_players,
+        "current_step": 3,
     }
 
 
-def get_live_context(tournament_id, target_round, scope="round"):
+def get_step_4_context(tournament_id):
+    """Prepares template context for Step 4 (Draft Preview)."""
     tournament = db.session.get(Tournament, tournament_id)
+
+    if not tournament:
+        raise ValueError(f"Tournament {tournament_id} not found")
+
+    return {
+        "tournament": tournament,
+    }
+
+
+def get_live_context(tournament_id, scope="round"):
+    tournament = db.session.get(Tournament, tournament_id)
+    if not tournament:
+        raise ValueError(f"Tournament {tournament_id} not found")
+
+    target_round = tournament.round_number
+
     stmt = (
         select(Match)
         .where(
@@ -53,7 +95,6 @@ def get_live_context(tournament_id, target_round, scope="round"):
     ):
         round_matches = list(round_matches_iter)
         groups = []
-
 
         for group_id, group_matches_iter in groupby(
             round_matches, key=lambda m: m.group_id
@@ -101,7 +142,6 @@ def get_live_context(tournament_id, target_round, scope="round"):
     round_for_standings = target_round if scope == "round" else None
     standings = calculate_standings(tournament_id, players_list, round_for_standings)
 
-
     summary = [
         {
             "name": s["player_name"],
@@ -117,13 +157,34 @@ def get_live_context(tournament_id, target_round, scope="round"):
 
     context = {
         "active_round": rounds[target_round - 1] if rounds else None,
-        "current_round": target_round,           # The round being viewed
-        "max_round": tournament.round_number,    # Highest round reached so far
-        "all_rounds": [r["number"] for r in rounds], # e.g. [1, 2, 3]
+        "current_round": target_round,  # The round being viewed
+        "max_round": tournament.round_number,  # Highest round reached so far
+        "all_rounds": [r["number"] for r in rounds],  # e.g. [1, 2, 3]
         "standings": summary,
         "current_scope": scope,
     }
     return context
+
+
+def get_completed_context(tournament_id):
+    tournament = db.session.get(Tournament, tournament_id)
+    if not tournament:
+        raise ValueError(f"Tournament {tournament_id} not found")
+
+    standings = get_standings(tournament_id, "overall")
+
+    winners = [
+        {
+            "name": standings[n]["name"],
+            "win_rate": get_win_rate(
+                standings[n]["matches_won"], standings[n]["matches_lost"]
+            ),
+        }
+        for n in range(min(3, len(standings)))
+    ]
+
+    return {"tournament": tournament, "standings": standings, "winners": winners}
+
 
 def get_match(match_id):
     match = db.session.get(Match, match_id)

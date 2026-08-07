@@ -1,29 +1,23 @@
-{% extends "base.html" %} {% block head %}
-<link
-    href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css"
-    rel="stylesheet"
-/>
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-
-{% endblock %} {% block body_id %}admin-page{% endblock %} {% block content %}
+{% extends "base.html" %}
+{% block body_id %}admin-page{% endblock %} {% block content %}
 
 <h1 class="h1-b-l">Admin view</h1>
 
 <div id="search-tournaments" class="relative mt-5 mb-5"
-    x-data="{ open: false, query: '{{tournament.name  | default('', true) }}' }">
+    x-data="{ open: false, query: '' }">
     <input
             autocomplete="off"
             class="w-full border border-white/40 rounded-md px-3 py-2 bg-[#121A2E]"
             hx-trigger="focus, input changed delay:300ms"
             hx-target="#tournament-dropdown-results"
-            hx-get="/search-tournament"
+            hx-get="/admin"
             hx-swap="innerHTML"
             x-model="query"
             @input="open = true"
             @focus="open = true, query = ''"
             @click.outside="open = false"
             @keydown.escape="open = false"
-            name="q"
+            name="query"
             placeholder="Search for tournament or type to create">
     </input>
     <div id="tournament-dropdown-results" class="absolute left-0 top-full w-full z-10"
@@ -40,12 +34,8 @@
 
 
 <div id="tournament-editor">
-    {% if tournament %}
-    {{ step_html|safe }}
-
-
-    {% else %}
-    <p>Select a tournament or press ‘New’ to process</p>
+    {% if content_template %}
+    {% include content_template %}
     {% endif %}
 </div>
 

@@ -2,8 +2,9 @@
   {% for tournament in matching_tournaments %}
     <div
       class="px-3 py-2 hover:bg-slate-800 cursor-pointer flex justify-between items-center"
-      hx-get="/select-tournament?tournament={{ tournament.id }}"
+      hx-get="/admin?id={{ tournament.id }}"
       hx-swap="innerHTML"
+      hx-push-url="true"
       hx-target="#tournament-editor"
       @click="open = false, query = '{{ tournament.name }}'"
     >
@@ -11,15 +12,15 @@
     </div>
   {% endfor %}
 
-  {% if query %}
     <div
       class="px-3 py-2 hover:bg-slate-800 cursor-pointer text-[#ff383c]"
-      hx-get="/select-tournament?tournament={{ query }}"
+      hx-post="/admin"
       hx-target="#tournament-editor"
+      hx-include="#search-tournaments input[name='query']"
       hx-swap="innerHTML"
       hx-on::after-request="open = false"
+      x-show="query.length > 0"
     >
-      + New tournament "{{ query }}"
+      + New tournament "<span x-text="query"></span>"
     </div>
-  {% endif %}
 </div>

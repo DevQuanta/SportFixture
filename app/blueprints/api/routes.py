@@ -1,10 +1,15 @@
-from flask import Blueprint, abort, current_app, make_response, render_template, request
-from sqlalchemy import select, and_
-from sqlalchemy.sql.operators import ilike_op
+from datetime import date
 
-from app.blueprints.admin.renderer import render_admin_step
+from flask import Blueprint, current_app, make_response, render_template, request
+from sqlalchemy import and_, select
+
+from app.blueprints.admin.renderer import get_admin_context
 from app.database import db
-from app.exceptions import MatchNotFoundError, RoundNotReadyError, TournamentNotFoundError, GroupNotEmptyError
+from app.exceptions import (
+    GroupNotEmptyError,
+    MatchNotFoundError,
+    TournamentNotFoundError,
+)
 from app.models import Match, Player, Tournament, TournamentPlayer
 from app.services.context_service import get_live_context, get_match
 from app.services.player_service import (
@@ -14,35 +19,15 @@ from app.services.player_service import (
     save_player_details,
 )
 from app.services.tournament_service import (
-    get_tournaments,
     calculate_standings,
     get_or_create_tournament,
     get_standings,
-    get_win_rate,
-    is_round_completed,
+    get_tournaments,
     save_match_details,
-    is_round_completed
 )
 from app.services.workflow_service import advance_tournament_status
-from datetime import date
 
 api = Blueprint("api", __name__)
-
-
-@api.route("/select-tournament", methods=["GET"])  # type: ignore
-def select_tournament():
-    tournament_input = request.args.get("tournament")
-
-    if not tournament_input:
-        return "<p class='error-msg'>Please select or type a tournament name.</p>"
-
-    tournament = get_or_create_tournament(tournament_input)
-    response_html = render_admin_step(tournament.id)
-
-    response = make_response(response_html)
-    response.headers["HX-Push-Url"] = f"/admin?tournaments={tournament.id}"
-
-    return response
 
 
 @api.route("/matches/<int:match_id>/edit")
@@ -57,7 +42,9 @@ def edit_player(player_id):
     tournament_id = request.args.get("tournament_id", "")
     tournament = db.session.get(Tournament, tournament_id)
     player = db.session.get(Player, player_id)
-    return render_template("partials/edit_player_row.html", player=player, tournament = tournament)
+    return render_template(
+        "partials/edit_player_row.html", player=player, tournament=tournament
+    )
 
 
 @api.route("/save-player/<int:player_id>", methods=["POST"])  # type: ignore
@@ -68,10 +55,10 @@ def save_player(player_id):
     tournament_id = request.args.get("tournament_id", "")
     tournament = db.session.get(Tournament, tournament_id)
 
-
     player = save_player_details(player_id, updated_name, updated_diff)
-    return render_template("partials/single_player_row.html", player=player, tournament = tournament)
-
+    return render_template(
+        "partials/single_player_row.html", player=player, tournament=tournament
+    )
 
 
 @api.route("/delete-player/<int:player_id>", methods=["DELETE"])
@@ -123,9 +110,14 @@ def save_match(match_id):
     }
 
     match_card = render_template("partials/match_card.html", match=match)
-    leaderboard_card = render_template("partials/leaderboard.html",current_scope=scope,
-    current_round=round_num or tournament.round_number,
-    tournament_id=tournament.id, **context, oob=True)
+    leaderboard_card = render_template(
+        "partials/leaderboard.html",
+        current_scope=scope,
+        current_round=round_num or tournament.round_number,
+        tournament_id=tournament.id,
+        **context,
+        oob=True,
+    )
 
     return match_card + leaderboard_card
 
@@ -135,86 +127,72 @@ def assign_player(tournament_id, player_id):
     updated_group_id = request.form.get("group_id")
 
     assign_player_to_group(tournament_id, player_id, updated_group_id)
-    return render_admin_step(tournament_id)
+    (template, context) = get_admin_context(tournament_id)
+
+    return render_template(template, **context)
 
 
-@api.route("/register-player", methods=["POST"])  # type: ignore
 def register_player():
-    name = request.form.get("player-name")
     difficulty = request.form.get("player-diff")
-    tournament_id = request.form.get("tournament_id")
-
-    tournament = register_player_to_tournament(tournament_id, name, difficulty)
-    return render_template(
-        "partials/player_rows.html", players=tournament.player_associations, tournament = tournament
-    )
 
 
-@api.route("/search-players", methods=["GET"])
+
+
+@api.route("/players", methods=["GET", "POST"])
 def search_players():
-    query = request.args.get("player-name", "").strip()
 
-    if query:
-        stmt = select(Player).where(Player.name.ilike(f"%{query}%")).limit(5)
-        matching_players = db.session.scalars(stmt).all()
+    if request.method == "GET":
+        player_id = request.args.get("id", "")
+        if player_id:
+            player = db.session.get(Player, player_id)
+            if not player:
+                return "", 404
+            return render_template("partials/existing_difficulty.html", player=player)
 
-    else:
-        # Search existing global players
-        stmt = select(Player).order_by(Player.id.desc()).limit(5)
-        matching_players = db.session.scalars(stmt).all()
+        if "new-player" in request.args:
+            ratings = ["beginner", "intermediate", "advanced"]
+            return render_template("partials/new_difficulty.html", ratings=ratings)
 
-    return render_template(
-        "partials/search_results.html", players=matching_players, query=query
-    )
+        if "player-name" in request.args:
+            query = request.args.get("player-name", "")
+            stmt = select(Player).where(Player.name.ilike(f"%{query}%")).limit(5)
+            matching_players = db.session.scalars(stmt).all()
+
+            return render_template(
+                "partials/results/player_search_results.html", players=matching_players
+            )
+
+    elif request.method == "POST":
+        player_id = request.form.get("player-id", "")
+        player_name = request.form.get("player-name", "")
+        difficulty = request.form.get("player-diff", "")
+        tournament_id = request.form.get("tournament_id")
+
+        if player_name and not player_id:
+            player = Player(
+                name=player_name,
+                difficulty=difficulty,
+            )
 
 
-@api.route("/select-player", methods=["GET"])
-def select_player():
-    player_id = request.args.get("id")
-    new_name = request.args.get("name")
+            db.session.add(player)
+            db.session.flush()
 
-    if player_id:
+            player_id = player.id
+
+        register_player_to_tournament(tournament_id, player_id)
+
         player = db.session.get(Player, player_id)
-        if not player:
-            return "", 404
-        return render_template("partials/existing_difficulty.html", player=player)
+        tournament = db.session.get(Tournament, tournament_id)
+        db.session.commit()
 
-    if new_name:
-        ratings = ["beginner", "intermediate", "advanced"]
         return render_template(
-            "partials/new_difficulty.html", ratings=ratings
+            "partials/single_player_row.html",
+            player=player,
+            tournament=tournament,
         )
 
     return "", 400
-
-
-@api.route("/search-tournament", methods=["GET"])
-def search_tournament():
-    query = request.args.get("q")
-    if query:
-        stmt = select(Tournament).where(Tournament.name.ilike(f"%{query}%")).limit(5)
-        matching_tournaments = db.session.scalars(stmt).all()
-
-    else:
-        stmt = select(Tournament).order_by(Tournament.id.desc()).limit(5)
-        matching_tournaments = db.session.scalars(stmt).all()
-
-    return render_template(
-        "partials/tournament_search_results.html",
-        matching_tournaments=matching_tournaments,
-        query=query,
-    )
-
-
-@api.route("/new-player-rating", methods=["GET"])
-def new_player_rating():
-    name = request.args.get("name", "").strip()
-    # Pass options matching your Player.difficulty domain
-    ratings = ["beginner", "intermediate", "advanced"]
-
-    return render_template(
-        "partials/new_difficulty.html", player_name=name, ratings=ratings
-    )
 
 
 @api.route("/tournament/<int:tournament_id>/round/<int:round_num>", methods=["GET"])
@@ -262,40 +240,35 @@ def filter_leaderboard():
 
     # returning standings
     #
-    standings =  get_standings(tournament_id, "overall", player_name)
+    standings = get_standings(tournament_id, "overall", player_name)
     tournament = db.session.get(Tournament, tournament_id)
     current_app.logger.info(standings)
-    #current_app.logger.info(tournament_id, player_name)
+    # current_app.logger.info(tournament_id, player_name)
 
     return render_template(
         "partials/_leaderboard_main.html",
         tournament_id=int(tournament_id) if tournament_id else None,
-        tournament = tournament,
+        tournament=tournament,
         player_name=player_name,
         standings=standings,
         tournaments=tournaments,
     )
 
+
 @api.route("/tournament/<int:tournament_id>/end", methods=["POST"])
 def end_tournament(tournament_id: int):
-    # completed_round = is_round_completed(tournament_id)
-
-    # if not completed_round:
-    #     raise RoundNotReadyError("Current round has incomplete matches")
     advance_tournament_status(tournament_id)
 
-    return render_admin_step(tournament_id)
+    (template, context) = get_admin_context(tournament_id)
+    return render_template(template, **context)
 
-
-@api.route("/tournament/<int:tournament_id>/setup", methods = ["POST"])
+@api.route("/tournament/<int:tournament_id>/setup", methods=["POST"])
 def setup_tournament(tournament_id):
     tournament_name = request.form.get("tournament-name", "")
     max_groups = request.form.get("group-number", "")
     max_rounds = request.form.get("round-number", "")
 
-    date_str = request.form.get('date')
-
-
+    date_str = request.form.get("date")
 
     current_app.logger.info(tournament_name, max_groups, max_rounds)
 
@@ -303,7 +276,6 @@ def setup_tournament(tournament_id):
 
     if not tournament:
         raise TournamentNotFoundError("Tournament not found")
-
 
     if tournament_name:
         tournament.name = tournament_name
@@ -316,13 +288,17 @@ def setup_tournament(tournament_id):
         tournament_date = date.fromisoformat(date_str)
         tournament.tournament_date = tournament_date
 
-
     db.session.commit()
 
     advance_tournament_status(tournament_id)
-    return render_admin_step(tournament_id)
 
-@api.route("/tournament/<int:tournament_id>/group/<int:group_number>/remove", methods=["POST"])
+    (template, context) = get_admin_context(tournament_id)
+    return render_template(template, **context)
+
+
+@api.route(
+    "/tournament/<int:tournament_id>/group/<int:group_number>/remove", methods=["POST"]
+)
 def remove_group(tournament_id, group_number):
     tournament = db.session.get(Tournament, tournament_id)
 
@@ -330,10 +306,17 @@ def remove_group(tournament_id, group_number):
         return TournamentNotFoundError("Tournament not found")
 
     has_players = db.session.scalar(
-    select(
-        select(TournamentPlayer).where(and_(TournamentPlayer.tournament_id == tournament_id, TournamentPlayer.group_id == group_number)).exists()
-    ))
-
+        select(
+            select(TournamentPlayer)
+            .where(
+                and_(
+                    TournamentPlayer.tournament_id == tournament_id,
+                    TournamentPlayer.group_id == group_number,
+                )
+            )
+            .exists()
+        )
+    )
 
     if has_players:
         raise GroupNotEmptyError("Group has existing players, please move them")
@@ -341,4 +324,5 @@ def remove_group(tournament_id, group_number):
     tournament.max_groups -= 1
     db.session.commit()
 
-    return render_admin_step(tournament_id)
+    (template, context) = get_admin_context(tournament_id)
+    return render_template(template, **context)

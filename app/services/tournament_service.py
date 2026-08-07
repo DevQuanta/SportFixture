@@ -1,5 +1,5 @@
 from flask import current_app, session
-from sqlalchemy import Sequence, and_, select, or_
+from sqlalchemy import and_, or_, select
 
 from app.database import db
 from app.exceptions import (
@@ -16,10 +16,12 @@ def get_ratio(won, lost):
         return float("inf") if won > 0 else 0.0
     return won / lost
 
+
 def get_win_rate(won, lost):
     if lost == 0:
         return 100 if won > 0 else 0
     return (won / (lost + won)) * 100
+
 
 def calculate_standings(tournament_id, players_list, round_id=None):
     stats = {
@@ -112,7 +114,6 @@ def get_or_create_tournament(tournament_input: str) -> Tournament:
     if not tournament:
         raise ValueError(f"No tournament found for input: {tournament_input}")
 
-    session.pop(f"draft_{tournament.id}", None)
 
     return tournament
 
@@ -158,7 +159,17 @@ def get_round_view_context(tournament_id, round_number=None):
 
 
 def fetch_live_event() -> Tournament | bool:
-    stmt = select(Tournament).where(or_(Tournament.status == TournamentStatus.LIVE, Tournament.status == TournamentStatus.COMPLETED)).order_by(Tournament.tournament_date).limit(1)
+    stmt = (
+        select(Tournament)
+        .where(
+            or_(
+                Tournament.status == TournamentStatus.LIVE,
+                Tournament.status == TournamentStatus.COMPLETED,
+            )
+        )
+        .order_by(Tournament.tournament_date)
+        .limit(1)
+    )
     tournament = db.session.execute(stmt).scalar_one_or_none()
 
     if not tournament:
@@ -168,7 +179,16 @@ def fetch_live_event() -> Tournament | bool:
 
 
 def get_tournaments():
-    stmt = select(Tournament).where(or_(Tournament.status == TournamentStatus.LIVE, Tournament.status == TournamentStatus.COMPLETED)).order_by(Tournament.tournament_date.desc())
+    stmt = (
+        select(Tournament)
+        .where(
+            or_(
+                Tournament.status == TournamentStatus.LIVE,
+                Tournament.status == TournamentStatus.COMPLETED,
+            )
+        )
+        .order_by(Tournament.tournament_date.desc())
+    )
     tournaments = db.session.execute(stmt).scalars().all()
 
     tournaments = [
@@ -243,3 +263,26 @@ def is_round_completed(tournament_id):
     )
 
     return has_incomplete
+
+
+def search_tournaments(q: str) -> list[Tournament]:
+    if q:
+        stmt = select(Tournament).where(Tournament.name.ilike(f"%{q}%")).limit(5)
+    else:
+        stmt = select(Tournament).order_by(Tournament.id.desc()).limit(5)
+
+    matching_tournaments = list(db.session.scalars(stmt).all())
+
+    return matching_tournaments
+
+def create_tournament(tournament_name):
+    stmt = select(Tournament).where(Tournament.name == tournament_name)
+    tournament = db.session.execute(stmt).scalar_one_or_none()
+
+    if not tournament:
+        tournament = Tournament(name=tournament_name)  # type: ignore
+        db.session.add(tournament)
+        db.session.commit()
+
+    session.pop(f"draft_{tournament.id}", None)
+    return tournament.id

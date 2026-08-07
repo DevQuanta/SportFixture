@@ -4,19 +4,17 @@ from sqlalchemy import select
 from app.models import Player, Tournament, TournamentPlayer
 
 from app.exceptions import PlayerNotFoundError
+from flask import current_app;
 
-def register_player_to_tournament(tournament_id, name, difficulty) -> Tournament:
+
+def register_player_to_tournament(tournament_id, player_id):
 
     tournament = db.session.get(Tournament, tournament_id)
+    player= db.session.get(Player, player_id)
+
     if not tournament:
         raise ValueError(f"Tournament {tournament_id} not found")
 
-    stmt = select(Player).where(Player.name == name)
-    player = db.session.execute(stmt).scalar_one_or_none()
-
-    if not player:
-        player = Player(name=name, difficulty=difficulty)  # type: ignore
-        db.session.add(player)
 
     tournament_player = TournamentPlayer(
         player=player,  # type: ignore
@@ -27,7 +25,6 @@ def register_player_to_tournament(tournament_id, name, difficulty) -> Tournament
     db.session.add(tournament_player)  # type: ignore
     db.session.commit()
 
-    return tournament
 
 def assign_player_to_group(tournament_id, player_id, group_id) -> bool:
     tournament_player = db.session.get(TournamentPlayer, (player_id, tournament_id))

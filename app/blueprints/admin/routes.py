@@ -1,15 +1,27 @@
-from flask import Blueprint, abort, render_template, request, session, current_app
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    make_response,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_login import login_required
-from sqlalchemy import select
 
-from app.blueprints.admin.renderer import render_admin_step
+from app.blueprints.admin.renderer import (
+    get_admin_context,
+)
 from app.database import db
+from app.exceptions import TournamentNotFoundError
 from app.models import Tournament
 from app.services.draft_service import (
     commit_matches_for_group,
     generate_round,
     get_next_round,
 )
+from app.services.tournament_service import create_tournament, search_tournaments
 from app.services.workflow_service import (
     advance_tournament_status,
     regress_tournament_status,
@@ -23,10 +35,12 @@ def advance_tournament(tournament_id):
     tournament = db.session.get(Tournament, tournament_id)
 
     if not tournament:
-        abort(404, description="Tournament not found")
+        raise TournamentNotFoundError("Tournament not found")
 
     advance_tournament_status(tournament_id)
-    return render_admin_step(tournament_id)
+    (template, context) = get_admin_context(tournament_id)
+
+    return render_template(template, **context)
 
 
 @admin.route("/admin/<int:tournament_id>/previous/", methods=["POST"])
@@ -34,36 +48,58 @@ def previous_tournament(tournament_id):
     tournament = db.session.get(Tournament, tournament_id)
 
     if not tournament:
-        abort(404, description="Tournament not found")
+        raise TournamentNotFoundError("Tournament not found")
 
     regress_tournament_status(tournament_id)
-    return render_admin_step(tournament_id)
+    (template, context) = get_admin_context(tournament_id)
+
+    return render_template(template, **context)
 
 
-@admin.route("/admin")
+@admin.route("/admin", methods=["GET", "POST"])
 @login_required
 def admin_page():
+    is_htmx = request.headers.get("HX-Request") == "true"
 
-    stmt = select(Tournament)
-    tournaments = db.session.execute(stmt).scalars().all()
+    if request.method == "GET":
+        tournament_id = request.args.get("id", "")
 
-    selected_id = request.args.get("tournaments")
+        if is_htmx and tournament_id:
+            (template, step_context) = get_admin_context(tournament_id)
+            return render_template(template, **step_context)
 
-    step_html = None
-    selected_tournament = db.session.get(Tournament, selected_id)
-    if selected_tournament:
-        # Fetch the actual tournament object from the DB
-        step_html = render_admin_step(selected_id)
+        elif is_htmx and "query" in request.args:
+            current_app.logger.info("query and htmx")
+            query = request.args.get("query", "")
+            matching_tournaments = search_tournaments(query)
+            return render_template(
+                "partials/results/tournament_search_results.html",
+                matching_tournaments=matching_tournaments,
+            )
 
-    return render_template(
-        "admin.html",
-        tournaments=tournaments,
-        tournament=selected_tournament,
-        step_html=step_html,
-        selected_tournament_id=int(selected_id)
-        if selected_id and selected_id.isdigit()
-        else None,
-    )
+        if tournament_id:
+            (template, step_context) = get_admin_context(tournament_id)
+            return render_template(
+                "admin.html", content_template=template, **step_context
+            )
+
+    elif request.method == "POST":
+        if is_htmx and "query" in request.form:
+            name = request.form.get("query", "")
+            tournament_id = create_tournament(name)
+
+            (template, step_context) = get_admin_context(tournament_id)
+
+            response = make_response(render_template(template, **step_context))
+
+            response.headers["HX-Push-Url"] = url_for(
+                "admin.admin_page",
+                id=tournament_id,
+            )
+
+            return response
+
+    return render_template("admin.html")
 
 
 @admin.route("/admin/<int:tournament_id>/publish/", methods=["POST"])
@@ -83,7 +119,10 @@ def publish_tournament(tournament_id):
         session.pop(f"draft_{tournament.id}", None)
 
     advance_tournament_status(tournament_id)
-    return render_admin_step(tournament_id)
+    (template, context) = get_admin_context(tournament_id)
+
+    return render_template(template, **context)
+
 
 # return view_live_tournament(tournament_id, current_round)
 @admin.route("/tournament/<int:tournament_id>/round/advance", methods=["POST"])
@@ -92,4 +131,5 @@ def next_round(tournament_id):
 
     get_next_round(tournament_id, bool(is_placement_round))
 
-    return render_admin_step(tournament_id)
+    (template, context) = get_admin_context(tournament_id)
+    return render_template(template, **context)

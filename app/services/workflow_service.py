@@ -1,5 +1,5 @@
-from app.models import TournamentStatus, Tournament
 from app.database import db
+from app.models import Tournament, TournamentStatus
 
 TOURNAMENT_STEPS = [
     TournamentStatus.SETUP,
@@ -9,6 +9,7 @@ TOURNAMENT_STEPS = [
     TournamentStatus.LIVE,
     TournamentStatus.COMPLETED,
 ]
+
 
 def regress_tournament_status(tournament_id) -> bool:
     tournament = db.session.get(Tournament, tournament_id)
@@ -23,6 +24,7 @@ def regress_tournament_status(tournament_id) -> bool:
         return True
 
     return False
+
 
 def advance_tournament_status(tournament_id) -> bool:
     tournament = db.session.get(Tournament, tournament_id)

@@ -1,8 +1,10 @@
 <div id="step-editor-container">
-       {% include "partials/admin_navbar.html" %}
+    {% include "partials/admin_navbar.html" %}
 
     <div class="flex flex-row justify-center">
-        <div class="w-100 md:border md:border-white/20 md:px-15 md:py-10 rounded-md md:bg-[#121A2E]">
+        <div
+            class="w-100 md:border md:border-white/20 md:px-15 md:py-10 rounded-md md:bg-[#121A2E]"
+        >
             <form
                 hx-post="/tournament/{{ tournament.id }}/setup"
                 hx-swap="outerHTML"
@@ -75,6 +77,5 @@
                 </div>
             </form>
         </div>
-
-
     </div>
+</div>

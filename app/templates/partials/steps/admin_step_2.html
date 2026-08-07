@@ -1,10 +1,10 @@
 <div id="step-editor-container">
     {% include "partials/admin_navbar.html" %}
-    <div class="flex flex-col md:flex-row justify-between items-center gap-20">
+    <div class="flex flex-col md:flex-row justify-between items-start gap-20">
         <div class="flex flex-col w-75 shrink-0">
             <form
-                hx-post="/register-player"
-                hx-swap="innerHTML"
+                hx-post="/players"
+                hx-swap="beforeend"
                 hx-target="#player-rows-container"
                 method="post"
                 x-data="{ open: false, query: '' }"
@@ -35,9 +35,10 @@
                             class="inp"
                             autocomplete="off"
                             required
-                            hx-get="/search-players"
+                            hx-get="/players"
                             hx-trigger="focus,input changed delay:300ms"
                             hx-target="#search-results"
+                            hx-swap="innerHTML"
                         />
 
                         <!-- Dropdown container floats directly over the form -->
@@ -52,7 +53,10 @@
                             x-transition:leave="transition ease-in duration-100 transform"
                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                             x-transition:leave-end="opacity-0 -translate-y-1 scale-95"
-                        ></div>
+                        >
+
+
+                        </div>
                     </div>
                 </div>
 
@@ -78,8 +82,7 @@
         <div class="overflow-x-auto w-full" x-data>
         <table
             id="admin-tbl-view"
-            class="border-collapse w-full md:table-fixed"
-            class="admin-tbl"
+            class="border-collapse w-full md:table-fixed admin-tbl"
         >
             <thead>
                 <tr>
@@ -88,10 +91,17 @@
                     <th class="actions-col pb-5 font-thin px-5">Actions</th>
                 </tr>
             </thead>
-
+            {% set players = tournament.player_associations %}
             <tbody id="player-rows-container">
-                {% set players = tournament.player_associations %} {% include
-                "partials/player_rows.html" %}
+                {% if players %}
+                    {% include "partials/player_rows.html" %}
+                {% else %}
+                    <tr id="no-players-row">
+                        <td colspan="3" class="text-center py-3">
+                            No players registered yet. Add one to get started!
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
         </div>
