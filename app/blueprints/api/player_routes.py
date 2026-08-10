@@ -34,7 +34,7 @@ def edit_player():
     return render_template(
         "partials/players/edit_player_row.html",
         player=player,
-        tournament=tournament_id,
+        tournament_id=tournament_id,
     )
 
 
@@ -42,16 +42,22 @@ def edit_player():
 def save_player():
     updated_name = request.form.get("player-name")
     updated_diff = request.form.get("player-diff")
-    tournament_id = request.form.get("tournament_id")
+    tournament_id = request.args.get("tournament_id", "")
+
+    tournament = db.session.get(Tournament, tournament_id)
 
     player_id = request.args.get("id", "")
 
-    player = save_player_details(player_id, updated_name, updated_diff)
+
+    player = save_player_details(player_id, updated_name, updated_diff, tournament_id)
+
+    current_app.logger.info(f"{player}")
 
     return render_template(
         "partials/players/single_player_row.html",
         player=player,
         tournament_id=tournament_id,
+        tournament= tournament,
     )
 
 
@@ -95,11 +101,11 @@ def search_players():
             if not tournament:
                 raise ValueError("Something went wrong.")
 
-            stmt = select(Player).where(and_(Player.name.ilike(f"%{query}%"), ~Player.tournament_associations.any(TournamentPlayer.tournament_id == int(tournament_id) if tournament_id else None))).limit(5)
+            stmt = select(Player).where(and_(Player.name.ilike(f"%{query}%"), ~Player.tournament_associations.any(TournamentPlayer.tournament_id == tournament_id))).limit(5)
             matching_players = db.session.scalars(stmt).all()
 
             return render_template(
-                "partials/results/player_search_results.html", players=matching_players
+                "partials/results/player_search_results.html", players=matching_players, query = query
             )
 
     elif request.method == "POST":
@@ -129,6 +135,7 @@ def search_players():
             "partials/players/single_player_row.html",
             player=player,
             tournament=tournament,
+            tournament_id = tournament_id
         )
 
     return "", 400

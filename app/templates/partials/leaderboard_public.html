@@ -4,8 +4,8 @@
     <div class="flex flex-row w-fit bg-slate-800 p-1 rounded-md text-xs">
         <!-- Overall Tab -->
           <button
-            hx-get="/tournament/{{ tournament.id }}/standings/overall"
-            hx-target="#leaderboard-container"
+            hx-get="/tournament/{{ tournament.id }}/standings/overall?round={{ current_round }}"
+            hx-target="#live-stage-container"
             hx-swap="outerHTML"
             class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {% if current_scope == 'overall' %} bg-slate-200 text-slate-900 shadow-sm {% else %} text-slate-400 hover:text-slate-200 {% endif %}"
           >
@@ -15,7 +15,7 @@
           <!-- Round-Specific Tab -->
           <button
             hx-get="/tournament/{{ tournament.id }}/standings/round?round={{ current_round }}"
-            hx-target="#leaderboard-container"
+            hx-target="#live-stage-container"
             hx-swap="outerHTML"
             class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {% if current_scope == 'round' %} bg-slate-200 text-slate-900 shadow-sm {% else %} text-slate-400 hover:text-slate-200 {% endif %}"
           >

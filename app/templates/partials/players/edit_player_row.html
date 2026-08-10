@@ -12,6 +12,7 @@
                 <button
                     hx-post="/player/save?id={{ player.id }}&tournament_id={{ tournament_id }}"
                     hx-target="#player-row-{{ player.id }}"
+                    hx-include="#player-row-{{ player.id }}"
                     hx-swap="outerHTML"
                     class="hover:cursor-pointer"
                 >

@@ -24,7 +24,7 @@
 
         <div class="truncate">{{match.player_1.name}}</div>
         {% for game in match.games %}
-                        <div class="text-center text-white">{{ game.p1_score | default('-', true)  }}</div>
+                        <div class="text-center text-white">{{ game.p1_score if game.p2_score is not none else '-' }}</div>
         {% endfor %}
 
 
@@ -34,7 +34,7 @@
         <!-- Row 2: Player 2 (Naturally fills the next 4 columns) -->
         <div>{{match.player_2.name}}</div>
         {% for game in match.games %}
-                        <div class="text-center text-white">{{ game.p2_score | default('-', true) }}</div>
+                        <div class="text-center text-white">{{ game.p2_score if game.p2_score is not none else '-' }}</div>
         {% endfor %}
     </div>
 </div>

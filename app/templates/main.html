@@ -13,12 +13,14 @@ content %}
 <div class="mt-5 bg-[#D9D9D91A] rounded-md p-4 w-full flex flex-col md:flex-row justify-between items-center mb-5 gap-2">
 
   <div class="flex flex-row gap-3 items-center text-[16px] w-full md:w-fit">
-    {% if status == "ongoing" %}
+    {% if latest_tournament %}
+    {% if latest_tournament.status == "ongoing" %}
         <div class="w-2.5 h-2.5 bg-[#34c759] rounded-full shrink-0"></div>
         <span>Knockouts for <span class="text-[#00c0e8]">{{ today.strftime('%B') }}</span> are now live.</span>
-    {% elif status == "upcoming" %}
+    {% elif latest_tournament.status == "upcoming" %}
         <div class="w-2.5 h-2.5 bg-amber-500 rounded-full shrink-0"></div>
         <span>Knockouts for <span class="text-[#00c0e8]">{{ today.month }}</span> will be live.</span>
+    {% endif %}
     {% else %}
     <div class="w-2.5 h-2.5 bg-slate-300 rounded-full shrink-0"></div>
     <span>Nothing is live at the moment.</span>
@@ -70,6 +72,7 @@ content %}
 
     </div>
 
+        {% set standings=past_tournaments[0].standings %}
         {% include "partials/leaderboard_table.html" %}
     </div>
 
@@ -77,7 +80,7 @@ content %}
 </div>
 
 {% else %}
-<div>No active tournament</div>
+<div>No completed tournament</div>
 
 {% endif %}
 {% endblock %}

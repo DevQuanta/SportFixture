@@ -1,3 +1,6 @@
+{% set has_tournaments = matching_tournaments | length > 0 %}
+
+<div x-show="{{ (has_tournaments or query | length > 0) | tojson }}">
 <div class="bg-[#0e131f] border border-slate-700 rounded-md rounded-t-none py-1 mt-1">
   {% for tournament in matching_tournaments %}
     <div
@@ -24,4 +27,5 @@
     >
       + New tournament "<span x-text="query"></span>"
     </div>
+</div>
 </div>

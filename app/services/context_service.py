@@ -1,11 +1,16 @@
+from datetime import datetime, timedelta, timezone
 from itertools import groupby
 
 from flask import session
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.database import db
-from app.exceptions import MatchNotFoundError, TournamentNotFoundError, InsufficientPlayersError
+from app.exceptions import (
+    InsufficientPlayersError,
+    MatchNotFoundError,
+    TournamentNotFoundError,
+)
 from app.models import Match, Tournament, TournamentStatus
 from app.services.draft_service import fetch_grouped_players, generate_round
 from app.services.tournament_service import (
@@ -96,6 +101,8 @@ def get_leaderboard_context(match: Match, scope, round_num):
     summary = [
         {
             "name": s["player_name"],
+            "rank": s["rank"],
+            "pts": s["match_points"],
             "matches_won": s["matches_won"],
             "matches_lost": s["matches_lost"],
             "games_won": s["games_won"],
@@ -103,7 +110,7 @@ def get_leaderboard_context(match: Match, scope, round_num):
             "points_won": s["points_won"],
             "points_lost": s["points_lost"],
         }
-        for _, s in standings
+        for _, _, s in standings
     ]
 
     context = {
@@ -111,13 +118,13 @@ def get_leaderboard_context(match: Match, scope, round_num):
         "tournament_id": tournament.id,
         "current_scope": scope,
         "current_round": round_num or tournament.round_number,
-        "tournament": tournament
+        "tournament": tournament,
     }
 
     return context
 
 
-def get_live_context(tournament_id, scope="round", round_num = None):
+def get_live_context(tournament_id, scope="round", round_num=None):
     tournament = db.session.get(Tournament, tournament_id)
     if not tournament:
         raise TournamentNotFoundError(f"Tournament {tournament_id} not found")
@@ -197,6 +204,7 @@ def get_live_context(tournament_id, scope="round", round_num = None):
         {
             "name": s["player_name"],
             "rank": s["rank"],
+            "pts": s["match_points"],
             "matches_won": s["matches_won"],
             "matches_lost": s["matches_lost"],
             "games_won": s["games_won"],
@@ -204,11 +212,13 @@ def get_live_context(tournament_id, scope="round", round_num = None):
             "points_won": s["points_won"],
             "points_lost": s["points_lost"],
         }
-        for _, s in standings
+        for _, _, s in standings
     ]
 
     context = {
-        "active_round": rounds[target_round - 1] if rounds and scope != "overall" else None,
+        "active_round": rounds[target_round - 1]
+        if rounds and scope != "overall"
+        else None,
         "current_round": target_round,  # The round being viewed
         "max_round": tournament.round_number,  # Highest round reached so far
         "all_rounds": [r["number"] for r in rounds],  # e.g. [1, 2, 3]
@@ -240,7 +250,12 @@ def get_completed_context(tournament_id):
         for n in range(min(3, len(standings)))
     ]
 
-    return {"tournament": tournament, "tournaments": tournaments, "standings": standings, "winners": winners}
+    return {
+        "tournament": tournament,
+        "tournaments": tournaments,
+        "standings": standings,
+        "winners": winners,
+    }
 
 
 def get_match_context(match_id):
@@ -275,3 +290,53 @@ def get_match_context(match_id):
     }
 
     return match_dict
+
+
+def get_tournament_status(tournament) -> str:
+    today = get_today()
+
+    if tournament is None:
+        return ""
+
+    if tournament.tournament_date == today:
+        return "ongoing"
+    elif tournament.tournament_date < today:
+        return "upcoming"
+    else:
+        return "none"
+
+
+def get_today():
+    timezone_offset = 0  # Pacific Standard Time (UTC−08:00)
+    tzinfo = timezone(timedelta(hours=timezone_offset))
+    today = datetime.now(tzinfo).date()
+
+    return today
+
+
+def fetch_latest_event(with_context=False) -> dict:
+    stmt = (
+        select(Tournament)
+        .where(
+            or_(
+                Tournament.status == TournamentStatus.LIVE,
+            )
+        )
+        .order_by(Tournament.tournament_date)
+        .limit(1)
+    )
+    tournament = db.session.execute(stmt).scalar_one_or_none()
+
+    if not tournament:
+        return {}
+
+    latest_tournament_id = tournament.id
+
+    if with_context:
+        context = get_live_context(latest_tournament_id, "overall")
+        return context
+
+    standings = get_standings(latest_tournament_id, "overall")
+    status = get_tournament_status(tournament)
+
+    return {"id": latest_tournament_id, "standings": standings, "status": status}

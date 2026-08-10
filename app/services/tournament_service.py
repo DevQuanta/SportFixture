@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from flask import current_app, session
 from sqlalchemy import and_, or_, select
 
@@ -9,7 +11,6 @@ from app.exceptions import (
 )
 from app.models import Match, MatchStatus, Tournament
 from app.services.workflow_service import TournamentStatus
-from datetime import datetime, timedelta, timezone
 
 
 def get_ratio(won, lost):
@@ -28,7 +29,6 @@ def calculate_standings(tournament_id, players_list, round_id=None):
     stats = {
         player.id: {
             "player": player,
-            "rank": rank + 1,
             "player_name": player.name,
             "matches_won": 0,
             "matches_lost": 0,
@@ -37,7 +37,7 @@ def calculate_standings(tournament_id, players_list, round_id=None):
             "points_won": 0,
             "points_lost": 0,
         }
-        for rank, player in enumerate(players_list)
+        for player in players_list
     }
 
     stmt = select(Match).where(Match.tournament_id == tournament_id)
@@ -95,7 +95,11 @@ def calculate_standings(tournament_id, players_list, round_id=None):
         reverse=True,
     )
 
-    standings = [(s["player"], s) for s in sorted_stats]
+
+    for rank, s in enumerate(sorted_stats, start=1):
+        s["rank"] = rank
+
+    standings = [(s["rank"], s["player"], s) for s in sorted_stats]
 
     return standings
 
@@ -116,7 +120,6 @@ def get_or_create_tournament(tournament_input: str) -> Tournament:
     if not tournament:
         raise ValueError(f"No tournament found for input: {tournament_input}")
 
-
     return tournament
 
 
@@ -129,10 +132,12 @@ def save_match_details(match_id, payload):
     for game in match.games:
         p1_key = f"game_{game.id}_p1"
         p2_key = f"game_{game.id}_p2"
-        if not (payload[p1_key] or payload[p2_key]):
+        if payload[p1_key] == '' and payload[p2_key] == '':
+            game.p1_score = None
+            game.p2_score = None
             continue
-        elif not (payload[p1_key] and payload[p2_key]) and (
-            payload[p1_key] or payload[p2_key]
+        elif (payload[p1_key] == '' and payload[p2_key] != '') or (
+            payload[p1_key] != '' and payload[p2_key] == ''
         ):
             raise InvalidMatchScoreError("Invalid match score entered")
 
@@ -158,41 +163,6 @@ def save_match_details(match_id, payload):
 
 
 
-def fetch_live_event() -> Tournament | None:
-    stmt = (
-        select(Tournament)
-        .where(
-            or_(
-                Tournament.status == TournamentStatus.LIVE,
-            )
-        )
-        .order_by(Tournament.tournament_date)
-        .limit(1)
-    )
-    tournament = db.session.execute(stmt).scalar_one_or_none()
-
-    if tournament:
-        return tournament
-
-
-def get_tournament_status(tournament) -> str:
-    timezone_offset = 0  # Pacific Standard Time (UTC−08:00)
-    tzinfo = timezone(timedelta(hours=timezone_offset))
-    today = datetime.now(tzinfo).date()
-
-    if tournament is None:
-        return ""
-
-
-    if tournament.tournament_date == today:
-        return "ongoing"
-    elif tournament.tournament_date < today:
-        return "upcoming"
-    else:
-        return "none"
-
-
-
 def fetch_completed_events():
     stmt = (
         select(Tournament)
@@ -209,6 +179,7 @@ def fetch_completed_events():
         {
             "id": tournament.id,
             "name": tournament.name,
+            "standings": get_standings(tournament.id, "overall")
         }
         for tournament in tournaments
     ]
@@ -247,7 +218,7 @@ def get_standings(tournament_id, scope, player_name="", round_num=None):
             "points_won": s["points_won"],
             "points_lost": s["points_lost"],
         }
-        for _, s in raw_standings
+        for _, _, s in raw_standings
         if player_name in s["player_name"]
     ]
 
@@ -289,6 +260,7 @@ def search_tournaments(q: str) -> list[Tournament]:
     matching_tournaments = list(db.session.scalars(stmt).all())
 
     return matching_tournaments
+
 
 def create_tournament(tournament_name):
     stmt = select(Tournament).where(Tournament.name == tournament_name)

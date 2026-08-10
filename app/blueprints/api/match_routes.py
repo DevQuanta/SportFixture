@@ -19,6 +19,7 @@ def edit_match(match_id):
 @api.route("/matches/<int:match_id>/save", methods=["POST"])
 def save_match(match_id):
     payload = request.get_json()
+    current_app.logger.info(payload)
 
     match = save_match_details(match_id, payload)
 

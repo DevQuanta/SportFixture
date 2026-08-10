@@ -51,11 +51,6 @@ def save_player_details(player_id, name, difficulty, tournament_id=""):
 
     db.session.commit()
 
-    if tournament_id:
-        tp = db.session.get(TournamentPlayer, (player_id, tournament_id))
-
-        return tp
-
     return player
 
 

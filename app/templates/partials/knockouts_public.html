@@ -1,53 +1,39 @@
 
-<div id="leaderboard-container" {% if oob %}hx-swap-oob="true"{% endif %}>
-    <h2 class="mt-12 text-2xl mb-2">Leaderboard</h2>
-    <div class="flex flex-col gap-8">
-    <div class="flex flex-row w-fit bg-slate-800 p-1 rounded-md text-xs">
-        <!-- Overall Tab -->
-          <button
-            hx-get="/tournament/{{ tournament.id }}/standings/overall"
-            hx-target="#leaderboard-container"
-            hx-swap="outerHTML"
-            class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {% if current_scope == 'overall' %} bg-slate-200 text-slate-900 shadow-sm {% else %} text-slate-400 hover:text-slate-200 {% endif %}"
-          >
-            Overall
-          </button>
+<div id="live-stage-container">
+    <div
+        class="flex flex-row w-full h-full gap-10 justify-between items-center mt-5 mb-5"
+    >
+        <div class="flex flex-row">
+        <!-- Round Tabs Navigation -->
+        <div class="flex flex-row bg-slate-800 p-1 rounded-md text-xs"">
+            {% for r_num in all_rounds %}
+            <button
+                hx-get="/tournament/{{ tournament.id }}/round/{{ r_num }}"
+                hx-target="#live-stage-container"
+                hx-swap="outerHTML"
+                class="w-fit px-3 py-2 rounded-md transition-colors hover:cursor-pointer {% if r_num == current_round %}bg-[#FF2D55] text-white font-bold{% else %}bg-slate-800 text-gray-300 hover:bg-slate-700{% endif %}"
+            >
+                Round {{ r_num }}
+            </button>
 
-          <!-- Round-Specific Tab -->
-          <button
-            hx-get="/tournament/{{ tournament.id }}/standings/round?round={{ current_round }}"
-            hx-target="#leaderboard-container"
-            hx-swap="outerHTML"
-            class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {% if current_scope == 'round' %} bg-slate-200 text-slate-900 shadow-sm {% else %} text-slate-400 hover:text-slate-200 {% endif %}"
-          >
-            Round {{ current_round }}
-          </button>
-    </div>
-    <div class="overflow-x-auto">
-    <table class="mb-10 w-full border-collapse">
-        <thead>
-            <tr>
-                <th class="text-center pb-5 font-thin px-5">Rank</th>
-                <th class="text-center pb-5 font-thin px-5">Name</th>
-                <th class="text-center pb-5 font-thin px-5">Pts</th>
-                <th class="text-center pb-5 font-thin px-5">W-L (Matches)</th>
-                <th class="text-center pb-5 font-thin px-5">GW-GL (Games)</th>
-                <th class="text-center pb-5 font-thin px-5">PW-PL (Points)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for player in standings %}
-            <tr class="border-b border-b-[#f8fafc80]">
-                <td class="text-center py-3">#{{ loop.index }}</td>
-                <td class="text-center py-3">{{ player.name }}</td>
-                <td class="text-center py-3">{{ player.pts | default('0', true) }}</td>
-                <td class="text-center py-3">{{ player.matches_won }}-{{ player.matches_lost }}</td>
-                <td class="text-center py-3">{{ player.games_won }}-{{ player.games_lost }}</td>
-                <td class="text-center py-3">{{ player.points_won }}-{{ player.points_lost }}</td>
-            </tr>
             {% endfor %}
-        </tbody>
-    </table>
-    </div>
+        </div>
+        </div>
+        </div>
+
+
+    {% include "partials/leaderboard_public.html"%}
+
+    <div id="match-groups" class="flex md:flex-row flex-col gap-20">
+        {% for group in active_round.groups %}
+        <div class="flex flex-col gap-4 mt-5">
+            <div class="font-medium text-[#E7E7E7] text-[20px]">
+                Group {{group.id}}
+            </div>
+
+            {% for match in group.matches %} {% include
+            "partials/matches/match_card_view.html"%} {% endfor %}
+        </div>
+        {% endfor %}
     </div>
 </div>

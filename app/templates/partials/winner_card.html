@@ -6,8 +6,8 @@
         <img class="h-fit w-fit" src="{{ url_for('static', filename='images/trophy.svg') }}">Winner of<br>the month</div>
 
     <div class="flex flex-col w-full items-center">
-    <h2 class="text-4xl font-medium bg-linear-to-r from-[#34C759] to-[#00C3D0] bg-clip-text text-transparent">{{ standings[0].name }}</h2>
-    {% set matches_won=standings[0].matches_won %}
+    <h2 class="text-4xl font-medium bg-linear-to-r from-[#34C759] to-[#00C3D0] bg-clip-text text-transparent">{{ past_tournaments[0].standings[0].name }}</h2>
+    {% set matches_won=past_tournaments[0].standings[0].matches_won %}
     <span class="italic">Won {{ matches_won }} match{% if matches_won > 1 %}es{% endif %}</span>
     </div>
 </div>

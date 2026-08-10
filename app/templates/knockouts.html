@@ -6,45 +6,7 @@ content %}
 </h1>
 
 {% if tournament %}
-<div id="live-stage-container">
-    <div
-        class="flex flex-row w-full h-full gap-10 justify-between items-center mt-5 mb-5"
-    >
-        <div class="flex flex-row">
-        <!-- Round Tabs Navigation -->
-        <div class="flex flex-row bg-slate-800 p-1 rounded-md text-xs"">
-            {% for r_num in all_rounds %}
-            <button
-                hx-get="/tournament/{{ tournament_id }}/round/{{ r_num }}"
-                hx-target="#live-stage-container"
-                hx-swap="outerHTML"
-                class="w-fit px-3 py-2 rounded-md transition-colors hover:cursor-pointer {% if r_num == current_round %}bg-[#FF2D55] text-white font-bold{% else %}bg-slate-800 text-gray-300 hover:bg-slate-700{% endif %}"
-            >
-                Round {{ r_num }}
-            </button>
-
-            {% endfor %}
-        </div>
-        </div>
-        </div>
-
-
-    {% include "partials/leaderboard_public.html"%}
-
-    <div id="match-groups" class="flex md:flex-row flex-col gap-20">
-        {% for group in active_round.groups %}
-        <div class="flex flex-col gap-4 mt-5">
-            <div class="font-medium text-[#E7E7E7] text-[20px]">
-                Group {{group.id}}
-            </div>
-
-            {% for match in group.matches %} {% include
-            "partials/matches/match_card_view.html"%} {% endfor %}
-        </div>
-        {% endfor %}
-    </div>
-</div>
-
+{% include "partials/knockouts_public.html" %}
 {% else %}
 <div class="mt-5">No active tournament</div>
 

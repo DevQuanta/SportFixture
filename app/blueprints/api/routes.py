@@ -26,6 +26,7 @@ from . import api
     "/admin/tournament/<int:tournament_id>/round/<int:round_num>", methods=["GET"]
 )
 def view_round(tournament_id, round_num):
+    current_app.logger.info(round_num)
     context = get_live_context(tournament_id, round_num=round_num)
     return render_template("partials/knockouts_live.html", **context)
 
@@ -42,9 +43,8 @@ def view_standings(tournament_id, scope):
     return render_template("partials/knockouts_live.html", **context)
 
 
-@api.route("/tournament/<int:tournament_id>/round", methods=["GET"])
-def view_public_round(tournament_id):
-    round_num = request.args.get("round", None)
+@api.route("/tournament/<int:tournament_id>/round/<int:round_num>", methods=["GET"])
+def view_public_round(tournament_id, round_num):
     context = get_live_context(
         tournament_id, round_num=int(round_num) if round_num else None
     )
@@ -53,7 +53,11 @@ def view_public_round(tournament_id):
 
 @api.route("/tournament/<int:tournament_id>/standings/<string:scope>", methods=["GET"])
 def view_public_standings(tournament_id, scope):
-    context = get_live_context(tournament_id, scope)
+    round_num = request.args.get("round", None)
+    current_app.logger.info(round_num)
+    context = get_live_context(
+        tournament_id, scope, round_num=int(round_num) if round_num else None
+    )
     return render_template("partials/knockouts_public.html", **context)
 
 

@@ -60,11 +60,12 @@ def previous_tournament(tournament_id):
 @login_required
 def admin_page():
     is_htmx = request.headers.get("HX-Request") == "true"
+    tournament_id = request.args.get("id", "")
 
     if request.method == "GET":
-        tournament_id = request.args.get("id", "")
 
         if is_htmx and tournament_id:
+            current_app.logger.info("htmx and tournament id")
             (template, step_context) = get_admin_context(tournament_id)
             return render_template(template, **step_context)
 
@@ -72,13 +73,18 @@ def admin_page():
             current_app.logger.info("query and htmx")
             query = request.args.get("query", "")
             matching_tournaments = search_tournaments(query)
+            current_app.logger.info(matching_tournaments)
+
             return render_template(
                 "partials/results/tournament_search_results.html",
                 matching_tournaments=matching_tournaments,
+                query = query
             )
 
         if tournament_id:
+            current_app.logger.info("only tournament id")
             (template, step_context) = get_admin_context(tournament_id)
+            current_app.logger.info(step_context)
             return render_template(
                 "admin.html", content_template=template, **step_context
             )
