@@ -1,9 +1,9 @@
 from flask import current_app, render_template, request
-from sqlalchemy import select
+from sqlalchemy import select, and_
 
 from app.blueprints.admin.renderer import get_admin_context
 from app.database import db
-from app.models import Player, Tournament
+from app.models import Player, Tournament, TournamentPlayer
 from app.services.player_service import (
     assign_player_to_group,
     delete_player_tournament,
@@ -88,7 +88,14 @@ def search_players():
 
         if "player-name" in request.args:
             query = request.args.get("player-name", "")
-            stmt = select(Player).where(Player.name.ilike(f"%{query}%")).limit(5)
+            tournament_id = request.args.get("tournament_id", None)
+
+            tournament = db.session.get(Tournament, tournament_id)
+
+            if not tournament:
+                raise ValueError("Something went wrong.")
+
+            stmt = select(Player).where(and_(Player.name.ilike(f"%{query}%"), ~Player.tournament_associations.any(TournamentPlayer.tournament_id == int(tournament_id) if tournament_id else None))).limit(5)
             matching_players = db.session.scalars(stmt).all()
 
             return render_template(

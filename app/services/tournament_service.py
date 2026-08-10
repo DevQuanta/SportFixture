@@ -122,6 +122,7 @@ def get_or_create_tournament(tournament_input: str) -> Tournament:
 
 def save_match_details(match_id, payload):
     match = db.session.get(Match, match_id)
+
     if not match:
         raise MatchNotFoundError("Match not found")
 

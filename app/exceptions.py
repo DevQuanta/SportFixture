@@ -22,3 +22,12 @@ class GroupNotEmptyError(DomainError):
 
 class PlayerNotFoundError(DomainError):
     pass
+
+class UnassignedPlayersError(DomainError):
+    pass
+
+class InsufficientPlayersError(DomainError):
+    pass
+
+class ExistingTournamentPlayerError(DomainError):
+    pass

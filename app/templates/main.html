@@ -46,8 +46,8 @@ content %}
     <div id="leaderboard-filters" class="flex flex-col w-full">
         <div class="flex flex-row gap-3 py-4 md:pb-4 md:pt-0 items-center">
             <input
-                class="px-1.5 py-1 bg-[#121620] border border-slate-500 w-full rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
-                class="inp"
+                placeholder="Search for a player"
+                class="inp w-full"
                 autocomplete="off"
                 hx-get="/leaderboard/filter"
                 name="player_name"
@@ -57,7 +57,7 @@ content %}
                 hx-swap="outerHTML"
             ></input>
 
-                <select class="border border-slate-500 text-[14px] text-white/95 bg-transparent w-fit h-full rounded-md px-1.5 py-1" hx-get="/leaderboard/filter?change=true" hx-target="#leaderboard-container" hx-swap="outerHTML" hx-include="#leaderboard-filters" hx-trigger="change"  name="tournament_id">
+                <select class="inp" hx-get="/leaderboard/filter?change=true" hx-target="#leaderboard-container" hx-swap="outerHTML" hx-include="#leaderboard-filters" hx-trigger="change"  name="tournament_id">
                     {% for item in past_tournaments %}
                                         <option
                                             value="{{ item.id }}"

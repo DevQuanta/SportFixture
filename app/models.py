@@ -160,7 +160,7 @@ class Match(Base):
         p1_wins = sum(1 for g in self.games if g.winner == "p1")
         p2_wins = sum(1 for g in self.games if g.winner == "p2")
 
-        return p1_wins >= 2 or p2_wins >= 2
+        return p1_wins == 3 or p2_wins == 3
 
     @is_completed.inplace.expression
     @classmethod

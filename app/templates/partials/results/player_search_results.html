@@ -6,7 +6,7 @@
       hx-get="/players?id={{ player.id }}"
       hx-target="#player-diff-container"
       hx-swap="innerHTML"
-      @click="open = false, query = '{{ player.name }}'"
+      @click="open = false, query = '{{ player.name }}', diff = true"
     >
       <span>{{ player.name }}</span>
       <span class="w-3 h-3 rounded-full" style="background-color: {{ player.colour }};"></span>

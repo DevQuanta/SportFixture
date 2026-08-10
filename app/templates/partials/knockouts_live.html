@@ -7,7 +7,7 @@
         <div class="flex flex-row bg-slate-800 p-1 rounded-md text-xs"">
             {% for r_num in all_rounds %}
             <button
-                hx-get="/tournament/{{ tournament_id }}/round/{{ r_num }}"
+                hx-get="/admin/tournament/{{ tournament.id }}/round/{{ r_num }}"
                 hx-target="#live-stage-container"
                 hx-swap="outerHTML"
                 class="w-fit px-3 py-2 rounded-md transition-colors hover:cursor-pointer {% if r_num == current_round %}bg-[#FF2D55] text-white font-bold{% else %}bg-slate-800 text-gray-300 hover:bg-slate-700{% endif %}"
@@ -21,9 +21,10 @@
 
         </div>
 
+        {% if current_round == max_round %}
         <div class="relative" x-data="{open: false}">
             <div>
-             <button class="px-3 py-1.5 font-medium text-[14px] rounded-md bg-slate-800 text-gray-300 hover:bg-slate-700 hover:cursor-pointer flex flex-row items-center hover:text-white focus:outline-none focus:ring-none focus:ring-slate-500/50 transition-colors duration-150 gap-1.5"
+             <button class="px-3 py-1.5 text-[14px] rounded-md bg-slate-800 hover:bg-slate-700 hover:cursor-pointer flex flex-row items-center focus:outline-none focus:ring-none focus:ring-slate-500/50 transition-colors duration-150 gap-1.5"
                  @click="open = true"
                  @keydown.escape="open = false">
                      <span>More</span>
@@ -53,20 +54,19 @@
                  @click.outside="open = false" class="absolute z-10 right-0 top-full w-60 bg-[#161F30] border border-[#2A384C] rounded-md py-5 px-3">
 
                 <div class="flex flex-col gap-4 items-baseline">
-                 {% if current_round == max_round %}
                  <button
-                     hx-post="/tournament/{{ tournament_id }}/round/advance"
+                     hx-post="/tournament/{{ tournament.id }}/round/advance"
                      hx-target="#live-stage-container"
                      hx-swap="outerHTML"
-                     class="font-medium hover:cursor-pointer bg-transparent hover:underline"
+                     class="hover:cursor-pointer text-slate-300 bg-transparent hover:text-white duration-150"
                  >
                      Proceed to Round {{ current_round + 1 }}
                  </button>
                  <button
-                     hx-post="/tournament/{{ tournament_id }}/round/advance?placement=True"
+                     hx-post="/tournament/{{ tournament.id }}/round/advance?placement=True"
                      hx-target="#live-stage-container"
                      hx-swap="outerHTML"
-                     class="font-medium hover:cursor-pointer bg-transparent"
+                     class="hover:cursor-pointer text-slate-300 bg-transparent hover:text-white duration-150"
                  >
                      Create placement round
 
@@ -83,18 +83,20 @@
                  >
                    End tournament
                    </button>
-                 {% endif %}
                 </div>
                  </div>
              </div>
+             {% endif %}
+
         </div>
+
         <h2 class="mt-12 text-2xl mb-2">Leaderboard</h2>
 
         <div class="flex flex-col gap-8">
         <div class="flex flex-row w-fit bg-slate-800 p-1 rounded-md text-xs">
             <!-- Overall Tab -->
               <button
-                hx-get="/admin/tournament/{{ tournament.id }}/standings/overall"
+                hx-get="/admin/tournament/{{ tournament.id }}/standings/overall?round={{ current_round }}"
                 hx-target="#live-stage-container"
                 hx-swap="outerHTML"
                 class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {% if current_scope == 'overall' %} bg-slate-200 text-slate-900 shadow-sm {% else %} text-slate-400 hover:text-slate-200 {% endif %}"

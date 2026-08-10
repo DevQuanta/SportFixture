@@ -7,6 +7,7 @@ from app.blueprints.admin.renderer import get_admin_context
 from app.database import db
 from app.exceptions import (
     GroupNotEmptyError,
+    RoundNotReadyError,
     TournamentNotFoundError,
 )
 from app.models import Tournament, TournamentPlayer
@@ -14,6 +15,7 @@ from app.services.context_service import get_live_context
 from app.services.tournament_service import (
     fetch_completed_events,
     get_standings,
+    is_round_completed,
 )
 from app.services.workflow_service import advance_tournament_status
 
@@ -24,7 +26,7 @@ from . import api
     "/admin/tournament/<int:tournament_id>/round/<int:round_num>", methods=["GET"]
 )
 def view_round(tournament_id, round_num):
-    context = get_live_context(tournament_id, round_num)
+    context = get_live_context(tournament_id, round_num=round_num)
     return render_template("partials/knockouts_live.html", **context)
 
 
@@ -32,13 +34,20 @@ def view_round(tournament_id, round_num):
     "/admin/tournament/<int:tournament_id>/standings/<string:scope>", methods=["GET"]
 )
 def view_standings(tournament_id, scope):
-    context = get_live_context(tournament_id, scope)
+    round_num = request.args.get("round", None)
+    current_app.logger.info(round_num)
+    context = get_live_context(
+        tournament_id, scope, round_num=int(round_num) if round_num else None
+    )
     return render_template("partials/knockouts_live.html", **context)
 
 
-@api.route("/tournament/<int:tournament_id>/round/<int:round_num>", methods=["GET"])
-def view_public_round(tournament_id, round_num):
-    context = get_live_context(tournament_id, round_num)
+@api.route("/tournament/<int:tournament_id>/round", methods=["GET"])
+def view_public_round(tournament_id):
+    round_num = request.args.get("round", None)
+    context = get_live_context(
+        tournament_id, round_num=int(round_num) if round_num else None
+    )
     return render_template("partials/knockouts_public.html", **context)
 
 
@@ -71,12 +80,17 @@ def filter_leaderboard():
         results=results,
         standings=standings,
         tournaments=tournaments,
-        oob = oob
+        oob=oob,
     )
 
 
 @api.route("/tournament/<int:tournament_id>/end", methods=["POST"])
 def end_tournament(tournament_id: int):
+    has_incomplete = is_round_completed(tournament_id)
+
+    if has_incomplete:
+        raise RoundNotReadyError("Current round has incomplete matches")
+
     advance_tournament_status(tournament_id)
 
     (template, context) = get_admin_context(tournament_id)

@@ -1,17 +1,18 @@
-from app.database import db
-from app.exceptions import RoundNotReadyError, TournamentNotFoundError
-from app.models import Match, Tournament, GameScore
-
-from sqlalchemy import select, and_
 from flask import current_app
+from sqlalchemy import and_, select
 
+from app.database import db
+from app.exceptions import (
+    RoundNotReadyError,
+    TournamentNotFoundError,
+    UnassignedPlayersError,
+)
+from app.models import GameScore, Match, Tournament
 from app.services.tournament_service import calculate_standings, is_round_completed
+from app.services.workflow_service import regress_tournament_status
 
 
-
-def commit_matches_for_group(
-    matches_draft, tournament_id, games_per_match=5
-):
+def commit_matches_for_group(matches_draft, tournament_id, games_per_match=5):
     tournament = db.session.get(Tournament, tournament_id)
 
     if not tournament:
@@ -67,8 +68,6 @@ def draft_matches_for_group(
 
         return matches
 
-
-
     for _ in range(0, N - 1):
         H = N // 2
 
@@ -95,10 +94,7 @@ def draft_matches_for_group(
     return matches
 
 
-def generate_round(tournament_id, round_id, preview=True, is_placement = False):
-    tournament = db.session.get(Tournament, tournament_id)  # type: ignore
-
-    num_groups = tournament.max_groups  # type: ignore
+def generate_round(tournament_id, round_id, preview=True, is_placement=False):
 
     groups = group_pairings(tournament_id, round_id)
     matches_data = []
@@ -119,16 +115,13 @@ def generate_round(tournament_id, round_id, preview=True, is_placement = False):
             for match in existing_matches
         ]
 
-
-
     else:
         for i, group_players in enumerate(groups, start=1):
             group_matches = draft_matches_for_group(
                 group_players, i, tournament_id, round_id, is_placement
             )
-            matches_data.extend(group_matches)  # type: ignore
+            matches_data.extend(group_matches)
 
-    #current_app.logger.info(matches_data)
     return matches_data
 
 
@@ -138,7 +131,9 @@ def group_pairings(tournament_id, round_id):
     if not tournament:
         raise ValueError(f"Tournament {tournament_id} not found")
 
-    active_groups = {tp.group_id for tp in tournament.player_associations if tp.group_id}
+    active_groups = {
+        tp.group_id for tp in tournament.player_associations if tp.group_id
+    }
 
     num_groups = max(active_groups) if active_groups else tournament.max_groups
 
@@ -147,6 +142,9 @@ def group_pairings(tournament_id, round_id):
 
     if round_id == 1:
         for tp in tournament_players:
+            if tp.group_id == 0:
+                regress_tournament_status(tournament_id)
+                raise UnassignedPlayersError("Tournament has unassigned players")
             if tp.group_id is not None and tp.group_id > 0:
                 groups[tp.group_id - 1].append(tp.player)
 
@@ -174,6 +172,7 @@ def group_pairings(tournament_id, round_id):
 
     return groups
 
+
 def fetch_grouped_players(tournament):
     tournament_players = tournament.player_associations
     grouped_players = {0: []}
@@ -183,10 +182,9 @@ def fetch_grouped_players(tournament):
 
     for ticket in tournament_players:
         target_group = ticket.group_id
-
         player_row = ticket.player
 
-        if target_group is None:
+        if target_group == 0:
             target_group = 0
 
         player_card = {
@@ -213,7 +211,9 @@ def get_next_round(tournament_id, is_placement_round):
         raise TournamentNotFoundError("Tournament not found")
 
     if is_placement_round:
-        matches_draft = generate_round(tournament_id, tournament.round_number + 1, is_placement=True)
+        matches_draft = generate_round(
+            tournament_id, tournament.round_number + 1, is_placement=True
+        )
         commit_matches_for_group(matches_draft, tournament_id)
     else:
         matches_draft = generate_round(tournament_id, tournament.round_number + 1)

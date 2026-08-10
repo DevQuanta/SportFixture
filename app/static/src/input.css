@@ -10,7 +10,7 @@
 }
 
 @utility inp {
-    @apply border rounded-md bg-transparent text-[14px]  text-white/90 h-7 pl-3 focus:outline-none focus:border-blue-300/80;
+    @apply border rounded-md border-slate-500 bg-transparent text-[14px]  text-white/90 h-7 pl-3 focus:outline-none focus:border-blue-300/80;
 }
 
 @keyframes fadeToast {
