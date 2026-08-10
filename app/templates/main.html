@@ -10,9 +10,9 @@ content %}
 </p>
 
 
-<div class="mt-5 bg-[#D9D9D91A] rounded-md p-4 w-full flex flex-row justify-between items-center mb-5">
+<div class="mt-5 bg-[#D9D9D91A] rounded-md p-4 w-full flex flex-col md:flex-row justify-between items-center mb-5 gap-2">
 
-  <div class="flex flex-row gap-3 items-center text-[16px]">
+  <div class="flex flex-row gap-3 items-center text-[16px] w-full md:w-fit">
     {% if status == "ongoing" %}
         <div class="w-2.5 h-2.5 bg-[#34c759] rounded-full shrink-0"></div>
         <span>Knockouts for <span class="text-[#00c0e8]">{{ today.strftime('%B') }}</span> are now live.</span>
@@ -25,7 +25,7 @@ content %}
     {% endif %}
   </div>
 
-  <a href="knockouts" class="bg-[#ff383c] text-white rounded-md py-1.5 px-5 text-[15px] cursor-pointer inline-block no-underline hover:bg-[#e02e32] transition-colors">
+  <a href="knockouts" class="w-full md:w-fit bg-[#ff383c] text-white rounded-md py-1.5 px-5 text-[15px] cursor-pointer inline-block no-underline hover:bg-[#e02e32] transition-colors">
     Go to bracket
   </a>
 
@@ -38,20 +38,18 @@ content %}
 
 {% if past_tournaments %}
 
-<div id="leaderboard-container"
-     class="flex flex-col md:flex-row h-full w-full mt-5">
+<div id="tournament-leaderboard-container"
+     class="mt-5 flex flex-col md:flex-row">
 
     {% include "partials/winner_card.html" %}
 
-    <div class="flex flex-col w-full rounded-md gap-3.5">
-
-    <div id="leaderboard-filters" class="flex flex-col w-full rounded-md gap-3.5">
-        <div class="flex flex-row gap-3 py-4 md:px-4 md:py-0 items-center">
+    <div id="leaderboard-filters" class="flex flex-col w-full">
+        <div class="flex flex-row gap-3 py-4 md:pb-4 md:pt-0 items-center">
             <input
-                class="px-1.5 py-1 bg-[#121620] border border-slate-500 flex-1 rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
+                class="px-1.5 py-1 bg-[#121620] border border-slate-500 w-full rounded-md text-white placeholder-white/40 text-[15px]" placeholder="Search for a player"
                 class="inp"
                 autocomplete="off"
-                hx-get="/leaderboard/filter?tournament_id={{past_tournaments[0].id}}"
+                hx-get="/leaderboard/filter"
                 name="player_name"
                 hx-include="#leaderboard-filters"
                 hx-trigger="focus,input changed delay:300ms"
@@ -59,7 +57,7 @@ content %}
                 hx-swap="outerHTML"
             ></input>
 
-                <select class="border border-white/60 bg-transparent h-full rounded-md px-1.5 py-1" hx-get="/leaderboard/filter?player_name={{player_name}}" hx-target="#leaderboard-container" hx-swap="outerHTML" hx-include="#leaderboard-filters" hx-trigger="change"  name="tournament_id">
+                <select class="border border-slate-500 text-[14px] text-white/95 bg-transparent w-fit h-full rounded-md px-1.5 py-1" hx-get="/leaderboard/filter?change=true" hx-target="#leaderboard-container" hx-swap="outerHTML" hx-include="#leaderboard-filters" hx-trigger="change"  name="tournament_id">
                     {% for item in past_tournaments %}
                                         <option
                                             value="{{ item.id }}"
@@ -72,13 +70,9 @@ content %}
 
     </div>
 
-
-    </div>
-
-    <div id="leaderboard-container">
         {% include "partials/leaderboard_table.html" %}
     </div>
-    </div>
+
 
 </div>
 

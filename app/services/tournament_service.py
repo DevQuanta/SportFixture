@@ -28,6 +28,7 @@ def calculate_standings(tournament_id, players_list, round_id=None):
     stats = {
         player.id: {
             "player": player,
+            "rank": rank + 1,
             "player_name": player.name,
             "matches_won": 0,
             "matches_lost": 0,
@@ -36,7 +37,7 @@ def calculate_standings(tournament_id, players_list, round_id=None):
             "points_won": 0,
             "points_lost": 0,
         }
-        for player in players_list
+        for rank, player in enumerate(players_list)
     }
 
     stmt = select(Match).where(Match.tournament_id == tournament_id)
@@ -236,6 +237,7 @@ def get_standings(tournament_id, scope, player_name="", round_num=None):
     summary = [
         {
             "name": s["player_name"],
+            "rank": s["rank"],
             "pts": s["match_points"],
             "matches_won": s["matches_won"],
             "matches_lost": s["matches_lost"],

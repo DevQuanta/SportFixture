@@ -2,6 +2,6 @@
     {% include "partials/leaderboard_table.html" %}
 </div>
 
-<div id="winner-widget" hx-swap-oob="innerHTML">
-    {% include "partials/winner_card.html" %}
-</div>
+{% if oob %}
+{% include "partials/winner_card.html" %}
+{% endif %}

@@ -54,14 +54,14 @@ def filter_leaderboard():
     player_name = request.args.get("player_name", "")
     tournaments = fetch_completed_events()
 
-    # returning standings
-    #
     standings = get_standings(tournament_id, "overall", player_name)
     tournament = db.session.get(Tournament, tournament_id)
 
     results = get_standings(tournament_id, "overall")
+    oob = False
 
-    # current_app.logger.info(tournament_id, player_name)
+    if "change" in request.args:
+        oob = True
 
     return render_template(
         "partials/results/leaderboard_search_results.html",
@@ -71,6 +71,7 @@ def filter_leaderboard():
         results=results,
         standings=standings,
         tournaments=tournaments,
+        oob = oob
     )
 
 
