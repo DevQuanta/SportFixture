@@ -44,7 +44,7 @@
             x-cloak
             x-transition
             @click="show = false"
-            class="fixed top-4 right-4 mt-4 z-[999] cursor-pointer select-none rounded-lg bg-red-600/80 opacity-90 backdrop-blur-sm text-white px-4 py-3 shadow-2xl font-medium"
+            class="fixed top-4 right-4 mt-4 z-999 cursor-pointer select-none rounded-lg bg-red-600/80 opacity-90 backdrop-blur-sm text-white px-4 py-3 shadow-2xl font-medium"
         >
             <span x-text="message"></span>
         </div>
@@ -54,73 +54,112 @@
         <header
             class="flex flex-row px-5 md:px-10 items-center gap-4 md:justify-between md:gap-0 h-22.5 bg-transparent border-b border-b-[#959595]"
         >
-            <div class="md:hidden" x-data="{open: false}">
+            <div class="md:hidden" x-data="{ open: false }">
+                <!-- Trigger Icon -->
                 <img
                     @click="open = true"
-                    class="md:h-10 md:w-auto h-8 w-auto"
-                    src="{{ url_for('static', filename='images/menu.svg')}}"
+                    class="h-8 w-auto cursor-pointer opacity-90 transition-opacity hover:opacity-100"
+                    src="{{ url_for('static', filename='images/menu.svg') }}"
+                    alt="Open menu"
                 />
 
-                <div id="menu-bar" x-show="open" >
+                <!-- Mobile Drawer Container -->
+                <div id="menu-bar" x-show="open" x-cloak>
+                    <!-- Backdrop with Fade -->
                     <div
-                        class="fixed left-0 top-0 w-full z-10 bg-black/50 h-full"
+                        x-show="open"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        class="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs"
+                        @click="open = false"
                     ></div>
+
+                    <!-- Sidebar Drawer with Slide Animation -->
                     <div
-                        class="fixed left-0 top-0 w-4/5 z-999 bg-[#080808] h-full"
+                        x-show="open"
+                        x-transition:enter="transition ease-out duration-300 transform"
+                        x-transition:enter-start="-translate-x-full"
+                        x-transition:enter-end="translate-x-0"
+                        x-transition:leave="transition ease-in duration-200 transform"
+                        x-transition:leave-start="translate-x-0"
+                        x-transition:leave-end="-translate-x-full"
+                        class="fixed left-0 top-0 z-50 h-full w-3/5 max-w-xs border-r border-white/10 bg-[#0c0c0c] text-white shadow-2xl"
                         @click.outside="open = false"
                     >
-                        <div class="flex flex-col h-full items-left px-8 py-8 justify-between">
+                        <div class="flex h-full flex-col justify-between px-7 py-8">
+                            <!-- Top Section -->
                             <div>
-                            <div class="flex flex-col gap-4 mb-50 mt-40">
-                                <a
-                                    href="/"
-                                    class="relative text-left text-medium text-[20px] nav-results"
-                                    >Results</a
-                                >
-                                <a
-                                    href="knockouts"
-                                    class="text-medium text-left text-[20px] nav-knockouts"
-                                    >Knockouts</a
-                                >
+                                <!-- Header / Close Button -->
+                                <div class="flex items-center justify-end pb-8">
+                                    <button
+                                        @click="open = false"
+                                        class="text-white/60 hover:text-white p-1 transition-colors"
+                                        aria-label="Close menu"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <!-- Main Navigation Links -->
+                                <nav class="flex flex-col gap-5">
+                                    <a
+                                        href="/"
+                                        class="text-base text-white hover:text-white transition-colors nav-results"
+                                    >
+                                        Results
+                                    </a>
+                                    <a
+                                        href="/knockouts"
+                                        class="text-base text-white hover:text-white transition-colors nav-knockouts"
+                                    >
+                                        Knockouts
+                                    </a>
+
+                                    {% if current_user.is_authenticated %}
+                                    <a
+                                        href="/admin"
+                                        class="text-base text-white/60 hover:text-white transition-colors nav-admin"
+                                    >
+                                        Admin
+                                    </a>
+                                    {% endif %}
+                                </nav>
+                            </div>
+
+                            <!-- Bottom Section / Auth -->
+                            <div class="flex flex-col gap-4">
+                                <div class="w-10 border-t border-white/20"></div>
 
                                 {% if current_user.is_authenticated %}
                                 <a
-                                    href="admin"
-                                    class="text-medium text-left text-[20px] nav-admin"
-                                    >Admin</a
+                                    href="{{ url_for('auth.logout') }}"
+                                    class="text-base text-white/60 hover:text-red-400 transition-colors"
                                 >
-
+                                    Logout
+                                </a>
+                                {% else %}
+                                <a
+                                    href="{{ url_for('auth.login') }}"
+                                    class="text-base text-white/60 hover:text-white transition-colors"
+                                >
+                                    Login
+                                </a>
                                 {% endif %}
                             </div>
-                            </div>
-                            <div>
-
-
-                            {% if current_user.is_authenticated %}
-                            <a
-                                href="{{ url_for('auth.logout') }}"
-                                class="text-[20px] font-medium"
-                            >
-                                Logout
-                            </a>
-                            {% else %}
-                            <a
-                                href="{{ url_for('auth.login') }}"
-                                class="text-[24px] font-medium"
-                            >
-                                Login
-                            </a>
-                            {% endif %}
-                        </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <img
                 class="h-10 w-auto"
-                src="{{ url_for('static', filename='images/logo.svg')}}"
+                src="{{ url_for('static', filename='images/logo.svg') }}"
+                alt="Logo"
             />
-
 
 
             <div
